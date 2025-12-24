@@ -46,6 +46,17 @@
 
 # EPIC E0 — Foundations SaaS (MVP)
 
+## E0.0 Bootstrap Supabase
+**US-000** (P0, MVP) — Initialiser Supabase & connecter l'app
+- **Objectif** : l'app démarre, parle à Supabase, et je peux faire un `select 1` + login basique.
+- **Contenu** :
+  - Création projet Supabase + récupération `SUPABASE_URL` / `ANON_KEY`
+  - Ajout des variables d'env + initialisation du client Supabase dans l'app
+  - Migrations initiales (schéma minimal + tables "tenants/users" placeholder si besoin)
+  - Vérif connexion (healthcheck)
+
+---
+
 ## E0.1 Multi-tenant, Auth, RBAC
 **US-001** (P0, MVP, L) — Créer et gérer des **tenants** (entreprises/écoles)
 - AC1 Given super admin, When création tenant, Then tenant_id unique + paramètres init
