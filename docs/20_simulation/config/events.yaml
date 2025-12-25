@@ -1,0 +1,768 @@
+# events.yaml — Configuration du Catalogue d'Événements
+
+# Version: 1.0
+# Dernière MAJ: 2025-12-25
+# Auteur: Simulation Engineer
+#
+# Ce fichier définit tous les événements du moteur de simulation.
+# Les événements sont divisés en deux catégories:
+# - market: affectent tout le marché (systémiques)
+# - company: ciblent une compagnie spécifique (idiosyncratiques)
+
+---
+
+# =============================================================================
+# METADONNEES
+# =============================================================================
+
+metadata:
+  version: "1.0"
+  last_updated: "2025-12-25"
+  total_events: 10
+  market_events: 5
+  company_events: 5
+
+# =============================================================================
+# EVENEMENTS MARCHE (SYSTEMIQUES)
+# =============================================================================
+
+market_events:
+
+  # ---------------------------------------------------------------------------
+  # EVT-MKT-01: Épisode climatique majeur
+  # ---------------------------------------------------------------------------
+  - id: EVT-MKT-01
+    name: "Épisode climatique majeur"
+    type: market
+    category: CLIMAT
+    enabled: true
+    mvp: true
+    
+    probability:
+      base: 0.15
+      seasonality:
+        Q1: 0.8
+        Q2: 0.6
+        Q3: 0.5
+        Q4: 1.5
+    
+    intensity:
+      distribution: gaussian
+      min: 0.5
+      max: 2.0
+      mean: 1.0
+      std: 0.3
+    
+    effects:
+      - target: frequence_mrh
+        type: relative
+        base_value: 0.20
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: frequence_auto
+        type: relative
+        base_value: 0.05
+        intensity_multiplier: 0.5
+        delay: 0
+      
+      - target: severite_mrh
+        type: relative
+        base_value: 0.15
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: stock_sinistres
+        type: relative
+        base_value: 0.30
+        intensity_multiplier: 1.2
+        delay: 0
+    
+    duration: 2
+    cooldown: 2
+    
+    mitigation_factors:
+      - source: LEV-REA-01
+        option: strong
+        reduction: 0.30
+      - source: LEV-REA-01
+        option: maximum
+        reduction: 0.50
+      - source: LEV-PREV-01
+        per_level: 0.05
+        max_reduction: 0.15
+    
+    news_flash:
+      title: "🌊 Épisode climatique majeur"
+      icon: "storm"
+      severity_levels:
+        low: "Des intempéries localisées ont causé des dégâts modérés dans plusieurs départements."
+        medium: "Une série d'événements climatiques frappe plusieurs régions. Les assureurs mobilisés."
+        high: "Catastrophe naturelle majeure : le marché sous forte tension, les capacités de gestion saturées."
+
+  # ---------------------------------------------------------------------------
+  # EVT-MKT-02: Poussée inflationniste
+  # ---------------------------------------------------------------------------
+  - id: EVT-MKT-02
+    name: "Poussée inflationniste"
+    type: market
+    category: ECONOMIQUE
+    enabled: true
+    mvp: true
+    
+    probability:
+      base: 0.10
+    
+    intensity:
+      distribution: uniform
+      min: 0.5
+      max: 1.5
+    
+    effects:
+      - target: severite_auto
+        type: relative
+        base_value: 0.08
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: severite_mrh
+        type: relative
+        base_value: 0.06
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: frais_gestion
+        type: relative
+        base_value: 0.03
+        intensity_multiplier: 0.5
+        delay: 0
+      
+      - target: commissions
+        type: relative
+        base_value: 0.02
+        intensity_multiplier: 0.5
+        delay: 1
+    
+    duration: 3
+    cooldown: 2
+    
+    mitigation_factors:
+      - source: LEV-PRES-03
+        reduction: 0.20
+      - source: LEV-TAR-01
+        option: premium
+        reduction: 0.15
+    
+    news_flash:
+      title: "📈 Inflation : coûts en hausse"
+      icon: "trending_up"
+      severity_levels:
+        low: "Une légère hausse des prix des réparations est observée sur le marché."
+        medium: "L'inflation impacte significativement les coûts de sinistres. Les marges se contractent."
+        high: "Forte poussée inflationniste : les coûts de réparation explosent, rentabilité menacée."
+
+  # ---------------------------------------------------------------------------
+  # EVT-MKT-03: Choc réglementaire
+  # ---------------------------------------------------------------------------
+  - id: EVT-MKT-03
+    name: "Nouvelle contrainte réglementaire"
+    type: market
+    category: REGLEMENTAIRE
+    enabled: true
+    mvp: true
+    
+    probability:
+      base: 0.08
+    
+    intensity:
+      distribution: uniform
+      min: 0.7
+      max: 1.3
+    
+    effects:
+      - target: frais_conformite
+        type: absolute
+        base_value: 500000
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: capacite_sinistres
+        type: relative
+        base_value: -0.05
+        intensity_multiplier: 0.5
+        delay: 0
+      
+      - target: croissance_max
+        type: absolute
+        base_value: -0.03
+        intensity_multiplier: 1.0
+        delay: 0
+    
+    duration: 4
+    cooldown: 3
+    
+    mitigation_factors:
+      - source: LEV-CONF-01
+        option: reinforced
+        reduction: 0.40
+      - source: IS
+        condition: "> 60"
+        reduction: 0.20
+    
+    news_flash:
+      title: "⚖️ Nouvelle réglementation"
+      icon: "gavel"
+      severity_levels:
+        low: "De nouvelles obligations de reporting entrent en vigueur pour le secteur."
+        medium: "Le régulateur renforce les contraintes de croissance et les exigences de conformité."
+        high: "Directive majeure : restructuration obligatoire des pratiques, impact significatif attendu."
+
+  # ---------------------------------------------------------------------------
+  # EVT-MKT-04: Disrupteur digital
+  # ---------------------------------------------------------------------------
+  - id: EVT-MKT-04
+    name: "Arrivée d'un disrupteur"
+    type: market
+    category: TECHNOLOGIQUE
+    enabled: true
+    mvp: true
+    
+    probability:
+      base: 0.05
+    
+    intensity:
+      distribution: uniform
+      min: 0.8
+      max: 1.2
+    
+    effects:
+      - target: prix_marche
+        type: relative
+        base_value: -0.05
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: parts_marche
+        type: relative
+        base_value: -0.02
+        intensity_multiplier: 1.0
+        delay: 1
+        condition: "IAC < 60"
+      
+      - target: IAC
+        type: relative
+        base_value: -0.05
+        intensity_multiplier: 0.5
+        delay: 0
+    
+    duration: 4
+    cooldown: 4
+    
+    mitigation_factors:
+      - source: IMD
+        condition: "> 60"
+        reduction: 0.30
+      - source: LEV-DIS-01
+        option: digital_high
+        reduction: 0.25
+    
+    news_flash:
+      title: "🚀 Nouveau concurrent digital"
+      icon: "rocket"
+      severity_levels:
+        low: "Une nouvelle insurtech fait son entrée sur le marché français."
+        medium: "Un acteur digital agressif bouscule les prix et attire les clients digitaux."
+        high: "Révolution du marché : le nouvel entrant casse les codes avec une offre disruptive."
+
+  # ---------------------------------------------------------------------------
+  # EVT-MKT-05: Mutation parc auto
+  # ---------------------------------------------------------------------------
+  - id: EVT-MKT-05
+    name: "Accélération électrification"
+    type: market
+    category: TECHNOLOGIQUE
+    enabled: true
+    mvp: true
+    
+    probability:
+      base: 0.06
+    
+    intensity:
+      distribution: uniform
+      min: 0.7
+      max: 1.3
+    
+    effects:
+      - target: severite_auto
+        type: relative
+        base_value: 0.12
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: expertise_auto
+        type: relative
+        base_value: -0.10
+        intensity_multiplier: 0.8
+        delay: 0
+      
+      - target: IPQO
+        type: absolute
+        base_value: -5
+        intensity_multiplier: 0.5
+        delay: 1
+        condition: "expertise_auto < 50"
+    
+    duration: 3
+    cooldown: 3
+    
+    mitigation_factors:
+      - source: LEV-RH-04
+        reduction: 0.25
+      - source: LEV-PRES-03
+        reduction: 0.30
+    
+    news_flash:
+      title: "🔋 Électrification accélérée"
+      icon: "bolt"
+      severity_levels:
+        low: "La part de véhicules électriques augmente progressivement sur le marché."
+        medium: "Le parc automobile évolue rapidement : défis d'expertise et de pièces."
+        high: "Révolution du parc auto : adaptation urgente nécessaire pour les réparateurs."
+
+
+# =============================================================================
+# EVENEMENTS COMPAGNIE (IDIOSYNCRATIQUES)
+# =============================================================================
+
+company_events:
+
+  # ---------------------------------------------------------------------------
+  # EVT-CIE-01: Cyberattaque
+  # ---------------------------------------------------------------------------
+  - id: EVT-CIE-01
+    name: "Cyberattaque"
+    type: company
+    category: CYBER
+    enabled: true
+    mvp: true
+    
+    probability:
+      base: 0.03
+    
+    vulnerability_factors:
+      - source: IMD
+        threshold: 40
+        operator: "<"
+        probability_modifier: 2.0
+      
+      - source: LEV-IT-06
+        condition: inactive
+        probability_modifier: 1.5
+      
+      - source: dette_technique
+        threshold: 60
+        operator: ">"
+        probability_modifier: 1.3
+    
+    intensity:
+      distribution: gaussian
+      min: 0.5
+      max: 2.0
+      mean: 1.0
+      std: 0.4
+    
+    effects:
+      - target: IPQO
+        type: absolute
+        base_value: -20
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: capacite_sinistres
+        type: relative
+        base_value: -0.40
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: IAC
+        type: absolute
+        base_value: -10
+        intensity_multiplier: 0.5
+        delay: 0
+      
+      - target: frais_exceptionnels
+        type: absolute
+        base_value: 2000000
+        intensity_multiplier: 1.0
+        delay: 0
+    
+    duration: 2
+    recovery_rate: 0.50
+    cooldown: 4
+    
+    mitigation_factors:
+      - source: LEV-IT-06
+        condition: active
+        reduction: 0.40
+      - source: IMD
+        condition: "> 60"
+        reduction: 0.25
+    
+    news_flash:
+      title: "🔓 Cyberattaque détectée"
+      icon: "security"
+      severity_levels:
+        low: "Une tentative d'intrusion a été détectée et contenue par les équipes IT."
+        medium: "Incident cyber : plusieurs systèmes impactés, cellule de crise activée."
+        high: "Attaque majeure : systèmes critiques compromis, activité fortement perturbée."
+
+  # ---------------------------------------------------------------------------
+  # EVT-CIE-02: Panne SI majeure
+  # ---------------------------------------------------------------------------
+  - id: EVT-CIE-02
+    name: "Panne système majeure"
+    type: company
+    category: OPERATIONNEL
+    enabled: true
+    mvp: true
+    
+    probability:
+      base: 0.04
+    
+    vulnerability_factors:
+      - source: dette_technique
+        threshold: 50
+        operator: ">"
+        probability_modifier: 1.8
+      
+      - source: stabilite_si
+        threshold: 40
+        operator: "<"
+        probability_modifier: 2.0
+      
+      - source: LEV-IT-01
+        condition: inactive
+        probability_modifier: 1.4
+    
+    intensity:
+      distribution: uniform
+      min: 0.6
+      max: 1.4
+    
+    effects:
+      - target: IPQO
+        type: absolute
+        base_value: -15
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: capacite_sinistres
+        type: relative
+        base_value: -0.25
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: satisfaction
+        type: absolute
+        base_value: -8
+        intensity_multiplier: 0.8
+        delay: 0
+    
+    duration: 1
+    recovery_rate: 0.80
+    cooldown: 2
+    
+    mitigation_factors:
+      - source: LEV-IT-01
+        condition: active
+        reduction: 0.35
+      - source: IMD
+        condition: "> 50"
+        reduction: 0.20
+    
+    news_flash:
+      title: "⚠️ Panne système"
+      icon: "error"
+      severity_levels:
+        low: "Un incident technique perturbe temporairement les opérations ce matin."
+        medium: "Panne majeure : plusieurs processus et applications à l'arrêt."
+        high: "Défaillance critique du SI : l'activité opérationnelle est paralysée."
+
+  # ---------------------------------------------------------------------------
+  # EVT-CIE-03: Crise RH / Mouvement social
+  # ---------------------------------------------------------------------------
+  - id: EVT-CIE-03
+    name: "Crise RH / Mouvement social"
+    type: company
+    category: RH
+    enabled: true
+    mvp: false  # V1+
+    
+    probability:
+      base: 0.02
+    
+    auto_trigger:
+      condition: "IERH < 30 for 3 consecutive turns"
+      probability: 1.0
+    
+    vulnerability_factors:
+      - source: IERH
+        threshold: 40
+        operator: "<"
+        probability_modifier: 3.0
+      
+      - source: turnover
+        threshold: 0.20
+        operator: ">"
+        probability_modifier: 1.5
+      
+      - source: climat_social
+        threshold: 40
+        operator: "<"
+        probability_modifier: 2.0
+    
+    intensity:
+      distribution: uniform
+      min: 0.7
+      max: 1.5
+    
+    effects:
+      - target: IERH
+        type: absolute
+        base_value: -20
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: IPQO
+        type: absolute
+        base_value: -15
+        intensity_multiplier: 0.8
+        delay: 0
+      
+      - target: capacite_sinistres
+        type: relative
+        base_value: -0.20
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: IAC
+        type: absolute
+        base_value: -5
+        intensity_multiplier: 0.5
+        delay: 1
+    
+    duration: 3
+    recovery_rate: 0.25
+    cooldown: 4
+    
+    mitigation_factors:
+      - source: LEV-RH-05
+        option: high
+        reduction: 0.25
+      - source: LEV-RH-06
+        reduction: 0.30
+      - source: IERH
+        condition: "> 70"
+        reduction: 0.40
+    
+    news_flash:
+      title: "👥 Tensions sociales"
+      icon: "groups"
+      severity_levels:
+        low: "Des signaux faibles de mécontentement apparaissent dans certaines équipes."
+        medium: "Mouvement social : négociations en cours avec les représentants du personnel."
+        high: "Crise RH majeure : grève et vague de départs, l'activité est gravement impactée."
+
+  # ---------------------------------------------------------------------------
+  # EVT-CIE-04: Défaillance prestataire
+  # ---------------------------------------------------------------------------
+  - id: EVT-CIE-04
+    name: "Défaillance prestataire critique"
+    type: company
+    category: OPERATIONNEL
+    enabled: true
+    mvp: false  # V1+
+    
+    probability:
+      base: 0.03
+    
+    vulnerability_factors:
+      - source: LEV-PRES-01
+        option: high_outsourcing
+        probability_modifier: 2.0
+      
+      - source: qualite_presta
+        threshold: 50
+        operator: "<"
+        probability_modifier: 1.5
+    
+    intensity:
+      distribution: uniform
+      min: 0.6
+      max: 1.4
+    
+    effects:
+      - target: IPQO
+        type: absolute
+        base_value: -12
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: capacite_sinistres
+        type: relative
+        base_value: -0.15
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: severite
+        type: relative
+        base_value: 0.10
+        intensity_multiplier: 0.8
+        delay: 0
+    
+    duration: 2
+    recovery_rate: 0.50
+    cooldown: 3
+    
+    mitigation_factors:
+      - source: LEV-PRES-02
+        option: strict_sla
+        reduction: 0.35
+      - source: LEV-PRES-01
+        option: low_outsourcing
+        reduction: 0.50
+    
+    news_flash:
+      title: "🔧 Problème prestataire"
+      icon: "handyman"
+      severity_levels:
+        low: "Un partenaire rencontre des difficultés temporaires de capacité."
+        medium: "Défaillance prestataire : plan de continuité activé, dégradation de service."
+        high: "Rupture de service : prestataire critique en faillite, situation de crise."
+
+  # ---------------------------------------------------------------------------
+  # EVT-CIE-05: Litige / Sanction
+  # ---------------------------------------------------------------------------
+  - id: EVT-CIE-05
+    name: "Litige majeur ou sanction"
+    type: company
+    category: REGLEMENTAIRE
+    enabled: true
+    mvp: false  # V1+
+    
+    probability:
+      base: 0.02
+    
+    vulnerability_factors:
+      - source: IS
+        threshold: 40
+        operator: "<"
+        probability_modifier: 3.0
+      
+      - source: LEV-CONF-01
+        condition: inactive
+        probability_modifier: 2.0
+      
+      - source: taux_reclamation
+        threshold: 0.05
+        operator: ">"
+        probability_modifier: 1.5
+    
+    intensity:
+      distribution: uniform
+      min: 0.5
+      max: 2.0
+    
+    effects:
+      - target: frais_exceptionnels
+        type: absolute
+        base_value: 1500000
+        intensity_multiplier: 1.5
+        delay: 0
+      
+      - target: IAC
+        type: absolute
+        base_value: -8
+        intensity_multiplier: 1.0
+        delay: 0
+      
+      - target: IS
+        type: absolute
+        base_value: -10
+        intensity_multiplier: 1.0
+        delay: 0
+    
+    duration: 2
+    recovery_rate: 0.40
+    cooldown: 4
+    
+    mitigation_factors:
+      - source: LEV-CONF-01
+        option: reinforced
+        reduction: 0.50
+      - source: IS
+        condition: "> 70"
+        reduction: 0.40
+    
+    news_flash:
+      title: "⚖️ Mise en cause"
+      icon: "balance"
+      severity_levels:
+        low: "Une réclamation client fait l'objet d'une médiation. Suivi en cours."
+        medium: "L'ACPR lance une inspection sur les pratiques commerciales de la compagnie."
+        high: "Sanction majeure : amende significative et obligations de remédiation imposées."
+
+
+# =============================================================================
+# REGLES GLOBALES
+# =============================================================================
+
+global_rules:
+  
+  # Plafond de probabilité après modifiers
+  max_probability: 0.50
+  
+  # Plancher d'impact après mitigations
+  min_impact_factor: 0.10
+  
+  # Cooldown minimum entre deux occurrences du même événement
+  default_cooldown: 1
+  
+  # Nombre max d'événements par tour
+  max_events_per_turn:
+    market: 2
+    company: 1
+  
+  # Ordre de résolution
+  resolution_order:
+    - market_events
+    - company_events
+
+# =============================================================================
+# INVARIANTS
+# =============================================================================
+
+invariants:
+  - id: INV-EVT-01
+    rule: "probability_final <= 0.50"
+    description: "Probabilité ajustée plafonnée à 50%"
+  
+  - id: INV-EVT-02
+    rule: "impact_net >= 0.10 * impact_brut"
+    description: "Impact minimum 10% même avec mitigations"
+  
+  - id: INV-EVT-03
+    rule: "company_event targets single company"
+    description: "Un événement compagnie ne touche qu'une compagnie"
+  
+  - id: INV-EVT-04
+    rule: "market_event affects all companies"
+    description: "Un événement marché affecte tous les acteurs"
+  
+  - id: INV-EVT-05
+    rule: "intensity in [min, max]"
+    description: "Intensité toujours dans les bornes configurées"
+  
+  - id: INV-EVT-06
+    rule: "same event not consecutive without cooldown"
+    description: "Respect du cooldown entre occurrences"

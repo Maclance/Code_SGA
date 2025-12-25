@@ -1,0 +1,1032 @@
+{
+    "_metadata": {
+        "version": "1.0",
+        "last_updated": "2025-12-25",
+        "author": "Simulation Engineer",
+        "description": "Test vectors for simulation engine validation. Format: Given/When/Then",
+        "total_cases": 15
+    },
+    "test_vectors": [
+        {
+            "id": "TV-001",
+            "name": "Levier Tarification Agressive - Impact IAC et IPP",
+            "category": "levers",
+            "priority": "P0",
+            "given": {
+                "description": "Compagnie standard avec indices neutres",
+                "state": {
+                    "turn": 1,
+                    "difficulty": "Intermediate",
+                    "indices": {
+                        "IAC": 55,
+                        "IPQO": 60,
+                        "IERH": 65,
+                        "IRF": 70,
+                        "IMD": 45,
+                        "IS": 70,
+                        "IPP": 50
+                    },
+                    "portfolio": {
+                        "AUTO": {
+                            "contracts": 80000,
+                            "premium_avg": 600,
+                            "frequency_base": 0.08,
+                            "severity_base": 2500
+                        }
+                    },
+                    "active_levers": []
+                }
+            },
+            "when": {
+                "action": "Activation LEV-TAR-01 option 'aggressive' (-15%)",
+                "lever": {
+                    "id": "LEV-TAR-01",
+                    "option": "aggressive",
+                    "product": "AUTO"
+                }
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "IAC augmente de +15 au tour suivant",
+                        "check": "indices.IAC(t+1) == indices.IAC(t) + 15",
+                        "expected": {
+                            "indices.IAC": 70
+                        }
+                    },
+                    {
+                        "description": "IPP diminue avec retard (risque anti-sélection)",
+                        "check": "indices.IPP(t+2) < indices.IPP(t)",
+                        "expected_range": {
+                            "indices.IPP": {
+                                "min": 35,
+                                "max": 45
+                            }
+                        }
+                    },
+                    {
+                        "description": "Acquisition augmente",
+                        "check": "portfolio.AUTO.acquisition(t+1) > baseline",
+                        "expected_increase_pct": 20
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-IDX-01",
+                    "INV-L5"
+                ]
+            }
+        },
+        {
+            "id": "TV-002",
+            "name": "Levier Recrutement Sinistres - Effet Retard RH",
+            "category": "levers",
+            "subcategory": "delayed_effects",
+            "priority": "P0",
+            "given": {
+                "description": "Compagnie en surcharge sinistres",
+                "state": {
+                    "turn": 3,
+                    "difficulty": "Intermediate",
+                    "indices": {
+                        "IAC": 60,
+                        "IPQO": 45,
+                        "IERH": 55,
+                        "IRF": 65,
+                        "IMD": 40,
+                        "IS": 70,
+                        "IPP": 48
+                    },
+                    "workforce": {
+                        "sinistres": 140,
+                        "productivite_etp": 15
+                    },
+                    "claims": {
+                        "stock": 12000,
+                        "capacite": 2100
+                    },
+                    "ratio_surcharge": 5.7
+                }
+            },
+            "when": {
+                "action": "Activation LEV-RH-01 (2 unités = 10 ETP)",
+                "lever": {
+                    "id": "LEV-RH-01",
+                    "budget_units": 2
+                }
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "IERH augmente immédiatement (+3)",
+                        "check": "indices.IERH(t) == indices.IERH(t-1) + 3",
+                        "expected": {
+                            "indices.IERH": 58
+                        }
+                    },
+                    {
+                        "description": "Effectifs augmentent après 2 tours",
+                        "check": "workforce.sinistres(t+2) == workforce.sinistres(t) + 10",
+                        "expected": {
+                            "workforce.sinistres": 150
+                        }
+                    },
+                    {
+                        "description": "IPQO augmente après 2 tours",
+                        "check": "indices.IPQO(t+2) >= indices.IPQO(t) + 5",
+                        "expected_range": {
+                            "indices.IPQO": {
+                                "min": 50,
+                                "max": 55
+                            }
+                        }
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-DELAY-01",
+                    "INV-IDX-05"
+                ]
+            }
+        },
+        {
+            "id": "TV-003",
+            "name": "Événement Climatique - Impact MRH avec Mitigation Réassurance",
+            "category": "events",
+            "subcategory": "market",
+            "priority": "P0",
+            "given": {
+                "description": "Compagnie avec réassurance forte",
+                "state": {
+                    "turn": 5,
+                    "difficulty": "Intermediate",
+                    "seed": 42,
+                    "indices": {
+                        "IAC": 62,
+                        "IPQO": 58,
+                        "IERH": 60,
+                        "IRF": 75,
+                        "IMD": 48,
+                        "IS": 70,
+                        "IPP": 55
+                    },
+                    "portfolio": {
+                        "MRH": {
+                            "contracts": 60000,
+                            "frequency_base": 0.06,
+                            "severity_base": 4000,
+                            "stock_sinistres": 8000
+                        }
+                    },
+                    "active_levers": [
+                        {
+                            "id": "LEV-REA-01",
+                            "option": "strong"
+                        }
+                    ]
+                }
+            },
+            "when": {
+                "event": {
+                    "id": "EVT-MKT-01",
+                    "name": "Épisode climatique",
+                    "intensity": 1.5
+                }
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "Fréquence MRH augmente (impact brut +30%)",
+                        "check": "impact_brut = 0.20 * 1.5 = 0.30",
+                        "note": "30% avant mitigation"
+                    },
+                    {
+                        "description": "Mitigation réassurance forte (-30%)",
+                        "check": "mitigation = 0.30",
+                        "impact_net": "0.30 * (1 - 0.30) = 0.21"
+                    },
+                    {
+                        "description": "Fréquence finale MRH",
+                        "check": "portfolio.MRH.frequency(t) = 0.06 * 1.21 = 0.0726",
+                        "expected_range": {
+                            "portfolio.MRH.frequency": {
+                                "min": 0.070,
+                                "max": 0.075
+                            }
+                        }
+                    },
+                    {
+                        "description": "Stock sinistres augmente",
+                        "check": "stock_sinistres(t) > stock_sinistres(t-1) * 1.20",
+                        "expected_range": {
+                            "portfolio.MRH.stock_sinistres": {
+                                "min": 10000,
+                                "max": 12000
+                            }
+                        }
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-EVT-02",
+                    "INV-EVT-05"
+                ]
+            }
+        },
+        {
+            "id": "TV-004",
+            "name": "Événement Cyberattaque - Vulnérabilité IMD Faible",
+            "category": "events",
+            "subcategory": "company",
+            "priority": "P0",
+            "given": {
+                "description": "Compagnie avec faible maturité data et pas de sécurité SI",
+                "state": {
+                    "turn": 7,
+                    "difficulty": "Intermediate",
+                    "indices": {
+                        "IAC": 58,
+                        "IPQO": 62,
+                        "IERH": 55,
+                        "IRF": 60,
+                        "IMD": 35,
+                        "IS": 70,
+                        "IPP": 52
+                    },
+                    "dette_technique": 65,
+                    "active_levers": []
+                }
+            },
+            "when": {
+                "event": {
+                    "id": "EVT-CIE-01",
+                    "name": "Cyberattaque",
+                    "intensity": 1.2,
+                    "triggered": true
+                }
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "Probabilité augmentée par vulnérabilités",
+                        "check": "proba_finale = 0.03 * 2.0 * 1.5 * 1.3 = 0.117",
+                        "note": "IMD<40 (×2), IT-06 inactive (×1.5), dette>60 (×1.3)"
+                    },
+                    {
+                        "description": "IPQO baisse fortement",
+                        "check": "indices.IPQO(t) = indices.IPQO(t-1) - 20 * 1.2 = 62 - 24 = 38",
+                        "expected": {
+                            "indices.IPQO": 38
+                        }
+                    },
+                    {
+                        "description": "Capacité réduite de 48%",
+                        "check": "capacite(t) = capacite(t-1) * (1 - 0.40 * 1.2) = capacite * 0.52",
+                        "expected_reduction_pct": 48
+                    },
+                    {
+                        "description": "Frais exceptionnels",
+                        "check": "frais_exceptionnels(t) = 2_000_000 * 1.2 = 2_400_000",
+                        "expected": {
+                            "frais_exceptionnels": 2400000
+                        }
+                    },
+                    {
+                        "description": "Récupération au tour suivant (50%)",
+                        "check": "IPQO(t+1) = IPQO(t) + 24 * 0.50 = 38 + 12 = 50",
+                        "expected_range": {
+                            "indices.IPQO": {
+                                "min": 48,
+                                "max": 52
+                            }
+                        }
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-EVT-01",
+                    "INV-IDX-01"
+                ]
+            }
+        },
+        {
+            "id": "TV-005",
+            "name": "Levier Fraude Progressif N1 → N2 → N3",
+            "category": "levers",
+            "subcategory": "progressive",
+            "priority": "P0",
+            "given": {
+                "description": "Compagnie évoluant sur plusieurs tours",
+                "state": {
+                    "turn": 1,
+                    "difficulty": "Expert",
+                    "indices": {
+                        "IAC": 55,
+                        "IPQO": 58,
+                        "IERH": 60,
+                        "IRF": 65,
+                        "IMD": 65,
+                        "IS": 70,
+                        "IPP": 50
+                    },
+                    "sinistres_payes": 15000000,
+                    "fraude_baseline": 1050000,
+                    "active_levers": []
+                }
+            },
+            "when": {
+                "actions": [
+                    {
+                        "turn": 1,
+                        "lever": "LEV-SIN-02-N1"
+                    },
+                    {
+                        "turn": 4,
+                        "lever": "LEV-SIN-02-N2",
+                        "prerequisite": "N1 actif + IMD >= 40"
+                    },
+                    {
+                        "turn": 9,
+                        "lever": "LEV-SIN-02-N3",
+                        "prerequisite": "N2 actif + IMD >= 60"
+                    }
+                ]
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "N1 actif - fraude évitée +5% après 1T",
+                        "check": "fraude_evitee(t=2) = 1_050_000 * 0.05 = 52_500",
+                        "expected": {
+                            "fraude_evitee": 52500
+                        }
+                    },
+                    {
+                        "description": "N2 actif - fraude évitée +15% après 2T",
+                        "check": "fraude_evitee(t=6) = 1_050_000 * 0.15 = 157_500",
+                        "expected": {
+                            "fraude_evitee": 157500
+                        }
+                    },
+                    {
+                        "description": "N3 actif - fraude évitée +30% après 4T",
+                        "check": "fraude_evitee(t=13) = 1_050_000 * 0.30 = 315_000",
+                        "expected": {
+                            "fraude_evitee": 315000
+                        }
+                    },
+                    {
+                        "description": "Pas de régression de niveau",
+                        "check": "niveau_fraude(t) >= niveau_fraude(t-1)",
+                        "invariant": "INV-L3"
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-L3",
+                    "INV-L2"
+                ]
+            }
+        },
+        {
+            "id": "TV-006",
+            "name": "Cascade RH → IPQO → Satisfaction → IAC",
+            "category": "delayed_effects",
+            "subcategory": "cascade",
+            "priority": "P0",
+            "given": {
+                "description": "Compagnie subissant sous-investissement RH",
+                "state": {
+                    "turn": 0,
+                    "difficulty": "Intermediate",
+                    "indices": {
+                        "IAC": 60,
+                        "IPQO": 65,
+                        "IERH": 50,
+                        "IRF": 60,
+                        "IMD": 45,
+                        "IS": 70,
+                        "IPP": 55
+                    },
+                    "satisfaction": 60
+                }
+            },
+            "when": {
+                "action": "Aucune action RH pendant 4 tours (sous-investissement)",
+                "conditions": [
+                    "IERH se dégrade naturellement de -3/tour"
+                ]
+            },
+            "then": {
+                "timeline": [
+                    {
+                        "turn": 2,
+                        "description": "IERH atteint niveau bas",
+                        "expected": {
+                            "IERH": 44
+                        }
+                    },
+                    {
+                        "turn": 4,
+                        "description": "IPQO impacté (+2T cascade)",
+                        "expected_range": {
+                            "IPQO": {
+                                "min": 55,
+                                "max": 60
+                            }
+                        }
+                    },
+                    {
+                        "turn": 5,
+                        "description": "Satisfaction impactée (+1T)",
+                        "expected_range": {
+                            "satisfaction": {
+                                "min": 50,
+                                "max": 55
+                            }
+                        }
+                    },
+                    {
+                        "turn": 6,
+                        "description": "IAC impacté (+1T)",
+                        "expected_range": {
+                            "IAC": {
+                                "min": 52,
+                                "max": 58
+                            }
+                        }
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-DELAY-01",
+                    "INV-IDX-01"
+                ]
+            }
+        },
+        {
+            "id": "TV-007",
+            "name": "Mix Canaux - Contrainte Somme 100%",
+            "category": "levers",
+            "subcategory": "constraints",
+            "priority": "P0",
+            "given": {
+                "description": "Configuration distribution initiale",
+                "state": {
+                    "mix_canaux": {
+                        "digital": 20,
+                        "agents": 50,
+                        "courtiers": 30,
+                        "affinitaires": 0
+                    }
+                }
+            },
+            "when": {
+                "action": "Tentative de modifier le mix",
+                "new_mix": {
+                    "digital": 40,
+                    "agents": 30,
+                    "courtiers": 25,
+                    "affinitaires": 10
+                }
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "La somme doit être 100%",
+                        "check": "SUM(digital, agents, courtiers, affinitaires) == 100",
+                        "expected": true
+                    },
+                    {
+                        "description": "Si somme != 100%, erreur de validation",
+                        "invalid_example": {
+                            "digital": 50,
+                            "agents": 30,
+                            "courtiers": 25,
+                            "affinitaires": 10
+                        },
+                        "expected_error": "VALIDATION_ERROR: Sum of mix_canaux must equal 100"
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-L5",
+                    "INV-FORM-04"
+                ]
+            }
+        },
+        {
+            "id": "TV-008",
+            "name": "Provisions Agressives - Impact IS et Mali Différé",
+            "category": "levers",
+            "subcategory": "consequences",
+            "priority": "P0",
+            "given": {
+                "description": "Compagnie avec provisions standard",
+                "state": {
+                    "turn": 1,
+                    "difficulty": "Intermediate",
+                    "indices": {
+                        "IAC": 58,
+                        "IPQO": 62,
+                        "IERH": 60,
+                        "IRF": 65,
+                        "IMD": 50,
+                        "IS": 70,
+                        "IPP": 55
+                    }
+                }
+            },
+            "when": {
+                "action": "Activation LEV-PROV-01 option 'aggressive'",
+                "lever": {
+                    "id": "LEV-PROV-01",
+                    "option": "aggressive"
+                }
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "IS diminue immédiatement (-15)",
+                        "check": "indices.IS(t) = 70 - 15 = 55",
+                        "expected": {
+                            "indices.IS": 55
+                        }
+                    },
+                    {
+                        "description": "IPP apparent augmente immédiatement (+5)",
+                        "check": "indices.IPP(t) = 55 + 5 = 60",
+                        "expected": {
+                            "indices.IPP": 60
+                        }
+                    },
+                    {
+                        "description": "IRF diminue (-10)",
+                        "check": "indices.IRF(t) = 65 - 10 = 55",
+                        "expected": {
+                            "indices.IRF": 55
+                        }
+                    },
+                    {
+                        "description": "Mali probable entre T+2 et T+4",
+                        "check": "probability(mali) = 0.70",
+                        "expected_range": {
+                            "indices.IPP_t+3": {
+                                "min": 45,
+                                "max": 55
+                            }
+                        },
+                        "note": "Mali de -10 à -15 points si déclenché"
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-IDX-01"
+                ]
+            }
+        },
+        {
+            "id": "TV-009",
+            "name": "Prévention N1 → N2 - Effet Retard Long",
+            "category": "levers",
+            "subcategory": "delayed_effects",
+            "priority": "P0",
+            "given": {
+                "description": "Compagnie investissant en prévention MRH",
+                "state": {
+                    "turn": 0,
+                    "difficulty": "Intermediate",
+                    "portfolio": {
+                        "MRH": {
+                            "contracts": 60000,
+                            "frequency_base": 0.06,
+                            "severity_base": 4000
+                        }
+                    }
+                }
+            },
+            "when": {
+                "actions": [
+                    {
+                        "turn": 2,
+                        "lever": "LEV-PREV-01-N1"
+                    },
+                    {
+                        "turn": 4,
+                        "lever": "LEV-PREV-01-N2"
+                    }
+                ]
+            },
+            "then": {
+                "timeline": [
+                    {
+                        "turn": 6,
+                        "description": "Effet N1 après 4T",
+                        "expected": {
+                            "frequence_mrh": 0.0582,
+                            "calculation": "0.06 * 0.97 = 0.0582"
+                        }
+                    },
+                    {
+                        "turn": 10,
+                        "description": "Effet N2 après 6T",
+                        "expected": {
+                            "frequence_mrh": 0.0552,
+                            "severite_mrh": 3800,
+                            "calculation": "freq: 0.06 * 0.92, sev: 4000 * 0.95"
+                        }
+                    }
+                ],
+                "economic_impact": {
+                    "description": "Économie annuelle avec N2 actif",
+                    "before": "100k × 0.06 × 4000 = 24M€",
+                    "after": "100k × 0.0552 × 3800 = 20.98M€",
+                    "saving": "3.02M€/an"
+                },
+                "invariants_checked": [
+                    "INV-DELAY-01",
+                    "INV-L3"
+                ]
+            }
+        },
+        {
+            "id": "TV-010",
+            "name": "Scoring avec Pondérations Variables",
+            "category": "scoring",
+            "priority": "P0",
+            "given": {
+                "description": "Fin de partie avec indices variés",
+                "state": {
+                    "turn": 20,
+                    "difficulty": "Intermediate",
+                    "indices": {
+                        "IAC": 72,
+                        "IPQO": 68,
+                        "IERH": 60,
+                        "IRF": 75,
+                        "IMD": 55,
+                        "IS": 65,
+                        "IPP": 70
+                    }
+                },
+                "weights_intermediate": {
+                    "IAC": 0.15,
+                    "IPQO": 0.20,
+                    "IERH": 0.10,
+                    "IRF": 0.15,
+                    "IMD": 0.10,
+                    "IS": 0.10,
+                    "IPP": 0.20
+                }
+            },
+            "when": {
+                "action": "Calcul du score final"
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "Score = somme pondérée des indices",
+                        "calculation": "72*0.15 + 68*0.20 + 60*0.10 + 75*0.15 + 55*0.10 + 65*0.10 + 70*0.20",
+                        "steps": "10.8 + 13.6 + 6.0 + 11.25 + 5.5 + 6.5 + 14.0 = 67.65",
+                        "expected": {
+                            "score": 67.65
+                        }
+                    },
+                    {
+                        "description": "Somme des poids = 1.0",
+                        "check": "SUM(weights) == 1.0",
+                        "invariant": "INV-IDX-02"
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-IDX-02",
+                    "INV-SCORE-01"
+                ]
+            }
+        },
+        {
+            "id": "TV-011",
+            "name": "Reproductibilité Seed",
+            "category": "randomness",
+            "priority": "P0",
+            "given": {
+                "description": "Deux simulations avec même seed et décisions",
+                "simulation_a": {
+                    "seed": 12345,
+                    "decisions": [
+                        "LEV-TAR-01:aggressive",
+                        "LEV-RH-01",
+                        "LEV-MKT-01"
+                    ]
+                },
+                "simulation_b": {
+                    "seed": 12345,
+                    "decisions": [
+                        "LEV-TAR-01:aggressive",
+                        "LEV-RH-01",
+                        "LEV-MKT-01"
+                    ]
+                }
+            },
+            "when": {
+                "action": "Exécuter les deux simulations pendant 10 tours"
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "Les états finaux sont identiques",
+                        "check": "state_a(t=10) === state_b(t=10)",
+                        "expected": true
+                    },
+                    {
+                        "description": "Mêmes événements déclenchés",
+                        "check": "events_a === events_b",
+                        "expected": true
+                    },
+                    {
+                        "description": "Mêmes intensités",
+                        "check": "intensities_a === intensities_b",
+                        "expected": true
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-SEED-01",
+                    "INV-ENGINE-05"
+                ]
+            }
+        },
+        {
+            "id": "TV-012",
+            "name": "Budget Dépassé - Contrainte",
+            "category": "levers",
+            "subcategory": "constraints",
+            "priority": "P0",
+            "given": {
+                "description": "Budget limité de tour",
+                "state": {
+                    "budget_disponible": 5,
+                    "active_levers": []
+                }
+            },
+            "when": {
+                "action": "Tentative d'activer des leviers coûtant 7 unités",
+                "attempted_levers": [
+                    {
+                        "id": "LEV-RH-01",
+                        "cost": 2
+                    },
+                    {
+                        "id": "LEV-IT-02",
+                        "cost": 3
+                    },
+                    {
+                        "id": "LEV-MKT-01",
+                        "cost": 3
+                    }
+                ],
+                "total_cost": 8
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "Validation échoue",
+                        "check": "total_cost > budget_disponible",
+                        "expected_error": "BUDGET_EXCEEDED: Requested 8 units, available 5"
+                    },
+                    {
+                        "description": "Aucun levier activé",
+                        "check": "active_levers.length == 0",
+                        "expected": true
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-L1"
+                ]
+            }
+        },
+        {
+            "id": "TV-013",
+            "name": "Crise RH Auto-Trigger",
+            "category": "events",
+            "subcategory": "auto_trigger",
+            "priority": "P0",
+            "given": {
+                "description": "IERH bas pendant 3 tours consécutifs",
+                "history": [
+                    {
+                        "turn": 5,
+                        "IERH": 28
+                    },
+                    {
+                        "turn": 6,
+                        "IERH": 26
+                    },
+                    {
+                        "turn": 7,
+                        "IERH": 25
+                    }
+                ],
+                "current_turn": 8
+            },
+            "when": {
+                "condition": "IERH < 30 pendant 3 tours consécutifs"
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "Événement Crise RH déclenché automatiquement",
+                        "check": "EVT-CIE-03.triggered == true",
+                        "probability": 1.0
+                    },
+                    {
+                        "description": "IERH baisse brutalement",
+                        "check": "IERH(t=8) = 25 - 20 = 5",
+                        "clamped": {
+                            "IERH": 5
+                        }
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-EVT-07",
+                    "INV-IDX-03"
+                ]
+            }
+        },
+        {
+            "id": "TV-014",
+            "name": "Prérequis Levier Non Satisfait",
+            "category": "levers",
+            "subcategory": "prerequisites",
+            "priority": "P0",
+            "given": {
+                "description": "IMD insuffisant pour levier IA",
+                "state": {
+                    "difficulty": "Expert",
+                    "indices": {
+                        "IMD": 45
+                    },
+                    "active_levers": []
+                }
+            },
+            "when": {
+                "action": "Tentative activation LEV-IT-05a (IA Fraude)",
+                "lever_prerequisites": {
+                    "IMD_min": 60
+                }
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "Activation refusée",
+                        "check": "IMD(45) < prerequisite(60)",
+                        "expected_error": "PREREQUISITE_NOT_MET: IMD must be >= 60"
+                    },
+                    {
+                        "description": "Levier grisé dans l'UI",
+                        "check": "lever.enabled == false",
+                        "expected": true
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-L2"
+                ]
+            }
+        },
+        {
+            "id": "TV-015",
+            "name": "Game Over - IRF Critique",
+            "category": "game_over",
+            "priority": "P0",
+            "given": {
+                "description": "IRF en zone critique",
+                "state": {
+                    "difficulty": "Intermediate",
+                    "turn": 15,
+                    "indices": {
+                        "IRF": 18
+                    },
+                    "game_over_condition": "IRF < 15 for 2 turns"
+                }
+            },
+            "when": {
+                "events": [
+                    {
+                        "turn": 15,
+                        "action": "Choc climatique majeur, IRF -5"
+                    },
+                    {
+                        "turn": 16,
+                        "IRF": 13
+                    }
+                ]
+            },
+            "then": {
+                "assertions": [
+                    {
+                        "description": "Alerte critique au tour 15",
+                        "check": "alert_level == 'critical'",
+                        "message": "Solvabilité critique : IRF = 18"
+                    },
+                    {
+                        "description": "IRF sous 15 au tour 16",
+                        "check": "IRF(16) == 13",
+                        "expected": true
+                    },
+                    {
+                        "description": "Game over si IRF < 15 pendant 2 tours",
+                        "check": "game_over_triggered(17) == true if IRF(17) < 15",
+                        "note": "Condition vérifiée sur 2 tours consécutifs"
+                    }
+                ],
+                "invariants_checked": [
+                    "INV-IDX-04"
+                ]
+            }
+        }
+    ],
+    "invariants_summary": [
+        {
+            "id": "INV-IDX-01",
+            "rule": "∀ Indice ∈ [0, 100]",
+            "tested_in": [
+                "TV-001",
+                "TV-004",
+                "TV-008",
+                "TV-013"
+            ]
+        },
+        {
+            "id": "INV-IDX-02",
+            "rule": "Σ Poids_Scoring = 1.0",
+            "tested_in": [
+                "TV-010"
+            ]
+        },
+        {
+            "id": "INV-IDX-03",
+            "rule": "IERH < 30 pendant 3T → Crise RH",
+            "tested_in": [
+                "TV-013"
+            ]
+        },
+        {
+            "id": "INV-IDX-04",
+            "rule": "IRF < 20 → Game Over possible",
+            "tested_in": [
+                "TV-015"
+            ]
+        },
+        {
+            "id": "INV-L1",
+            "rule": "Σ Coût_Leviers ≤ Budget_Tour",
+            "tested_in": [
+                "TV-012"
+            ]
+        },
+        {
+            "id": "INV-L2",
+            "rule": "Prérequis non satisfait → Levier non activable",
+            "tested_in": [
+                "TV-005",
+                "TV-014"
+            ]
+        },
+        {
+            "id": "INV-L3",
+            "rule": "Niveau_Progressif(t) ≥ Niveau(t-1)",
+            "tested_in": [
+                "TV-005",
+                "TV-009"
+            ]
+        },
+        {
+            "id": "INV-L5",
+            "rule": "Σ Mix_Canaux = 100%",
+            "tested_in": [
+                "TV-007"
+            ]
+        },
+        {
+            "id": "INV-DELAY-01",
+            "rule": "effet.target_turn = effet.source_turn + delai",
+            "tested_in": [
+                "TV-002",
+                "TV-006",
+                "TV-009"
+            ]
+        },
+        {
+            "id": "INV-EVT-01",
+            "rule": "Probabilité_finale ≤ 0.50",
+            "tested_in": [
+                "TV-004"
+            ]
+        },
+        {
+            "id": "INV-EVT-02",
+            "rule": "Impact_net ≥ 0.10 × Impact_brut",
+            "tested_in": [
+                "TV-003"
+            ]
+        },
+        {
+            "id": "INV-SEED-01",
+            "rule": "Même (seed, decisions, engine_version) → même résultat",
+            "tested_in": [
+                "TV-011"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,432 @@
+# defaults_by_difficulty.yaml — Paramètres par Niveau de Difficulté
+
+# Version: 1.0
+# Dernière MAJ: 2025-12-25
+# Auteur: Simulation Engineer
+#
+# Ce fichier définit les valeurs par défaut pour chaque niveau de difficulté.
+# Les paramètres contrôlent la complexité, l'amplitude des effets, les délais,
+# et la surface de décision (leviers disponibles).
+
+---
+
+# =============================================================================
+# DIFFICULTE: NOVICE
+# =============================================================================
+# Objectif: Apprendre les fondamentaux sans être submergé
+# Philosophie: Effets plus rapides, moins intenses, moins de leviers
+
+Novice:
+  
+  # --- Métadonnées ---
+  id: "Novice"
+  display_name: "Novice"
+  description: >
+    Mode d'apprentissage. Événements moins violents, effets plus rapides,
+    leviers macro uniquement. Idéal pour découvrir le jeu.
+  
+  # --- Amplitude des variations ---
+  amplitude:
+    index_change_max_per_turn: 5  # ±5 points max par indice par tour
+    portfolio_variance: 0.05      # ±5% variation portefeuille
+  
+  # --- Effets retard ---
+  delays:
+    factor: 0.5                   # Délais ÷ 2 (arrondis au tour)
+    rh_turns: 1                   # Recrutement: 1T (au lieu de 2T)
+    it_turns: 2                   # IT/Data: 2T (au lieu de 3-6T)
+    prevention_turns: 2           # Prévention: 2T (au lieu de 4-8T)
+    reputation_turns: 1           # Réputation: 1T
+  
+  # --- Seuils d'alerte ---
+  alerts:
+    threshold_display: 60         # Alertes visibles dès indice < 60
+    critical_threshold: 20        # Zone critique < 20
+    game_over_enabled: false      # Pas de game over
+  
+  # --- Score et pondérations ---
+  scoring:
+    weights:
+      IAC: 0.20
+      IPQO: 0.15
+      IERH: 0.10
+      IRF: 0.10
+      IMD: 0.10
+      IS: 0.05                    # Sincérité moins pénalisante
+      IPP: 0.30                   # Focus sur le P&L
+    total: 1.00
+  
+  # --- Claims / Sinistralité ---
+  claims:
+    frequency_variance: 0.02      # ±2% variation fréquence
+    severity_variance: 0.03       # ±3% variation sévérité
+    catastrophe_intensity_factor: 0.7  # Cat Nat moins sévères
+  
+  # --- Événements ---
+  events:
+    market_probability_factor: 0.7    # -30% proba événements marché
+    company_probability_factor: 0.5   # -50% proba événements compagnie
+    intensity_factor: 0.7             # -30% intensité
+    mitigation_bonus: 0.10            # +10% efficacité mitigations
+  
+  # --- Concurrence IA ---
+  ai_competitors:
+    aggressiveness: 0.7           # IA moins agressif
+    reactivity: 0.5               # Réagit moins souvent
+    strategy_variance: 0.3        # Comportement plus prévisible
+  
+  # --- Budget ---
+  budget:
+    initial_multiplier: 1.2       # +20% budget initial
+    growth_bonus: 0.05            # +5% croissance budget/tour
+  
+  # --- Leviers disponibles ---
+  # Environ 12 leviers macro
+  levers_available:
+    # Produit/Tarification (2)
+    - LEV-TAR-01                  # Niveau de prime
+    - LEV-GAR-01                  # Niveau franchise
+    # Distribution (1)
+    - LEV-DIS-01                  # Mix canaux
+    # Marketing (1)
+    - LEV-MKT-01                  # Publicité marque
+    # RH (2)
+    - LEV-RH-01                   # Recrutement sinistres
+    - LEV-RH-03                   # Recrutement distribution
+    # IT/Data (1)
+    - LEV-IT-01                   # Stabilité SI
+    # Sinistres (2)
+    - LEV-SIN-01                  # Organisation
+    - LEV-SIN-02-N1               # Fraude niveau 1
+    # Réassurance (1)
+    - LEV-REA-01                  # Niveau protection
+    # Provisions (2)
+    - LEV-PROV-01                 # Politique provisions
+    - LEV-PLAC-01                 # Allocation placements (simplifié)
+  
+  # --- Explainability ---
+  explainability:
+    show_formulas: false
+    show_delays: true
+    show_top_drivers: 3           # Top 3 causes des variations
+    guided_tips: true             # Conseils guidés activés
+
+---
+
+# =============================================================================
+# DIFFICULTE: INTERMEDIATE
+# =============================================================================
+# Objectif: Expérience complète avec complexité modérée
+# Philosophie: Modèle complet, effets standard, plus de leviers
+
+Intermediate:
+  
+  # --- Métadonnées ---
+  id: "Intermediate"
+  display_name: "Intermédiaire"
+  description: >
+    Mode standard. Modèles complets, concurrence réaliste,
+    leviers supplémentaires et granularité accrue.
+  
+  # --- Amplitude des variations ---
+  amplitude:
+    index_change_max_per_turn: 10  # ±10 points max
+    portfolio_variance: 0.10       # ±10% variation portefeuille
+  
+  # --- Effets retard ---
+  delays:
+    factor: 1.0                    # Délais standard
+    rh_turns: 2
+    it_turns: 4
+    prevention_turns: 5
+    reputation_turns: 2
+  
+  # --- Seuils d'alerte ---
+  alerts:
+    threshold_display: 50
+    critical_threshold: 25
+    game_over_enabled: true
+    game_over_condition: "IRF < 15 for 2 turns"
+  
+  # --- Score et pondérations ---
+  scoring:
+    weights:
+      IAC: 0.15
+      IPQO: 0.20
+      IERH: 0.10
+      IRF: 0.15
+      IMD: 0.10
+      IS: 0.10
+      IPP: 0.20
+    total: 1.00
+  
+  # --- Claims / Sinistralité ---
+  claims:
+    frequency_variance: 0.05
+    severity_variance: 0.08
+    catastrophe_intensity_factor: 1.0
+  
+  # --- Événements ---
+  events:
+    market_probability_factor: 1.0
+    company_probability_factor: 1.0
+    intensity_factor: 1.0
+    mitigation_bonus: 0.0
+  
+  # --- Concurrence IA ---
+  ai_competitors:
+    aggressiveness: 1.0
+    reactivity: 0.7
+    strategy_variance: 0.5
+  
+  # --- Budget ---
+  budget:
+    initial_multiplier: 1.0
+    growth_bonus: 0.0
+  
+  # --- Leviers disponibles ---
+  # Environ 22 leviers
+  levers_available:
+    # Produit/Tarification (3)
+    - LEV-TAR-01
+    - LEV-TAR-02                  # Segmentation tarifaire
+    - LEV-GAR-01
+    - LEV-GAR-02                  # Étendue garanties
+    # Distribution (3)
+    - LEV-DIS-01
+    - LEV-DIS-02                  # Niveau commissions
+    - LEV-DIS-03                  # Formation réseau
+    # Marketing (2)
+    - LEV-MKT-01
+    - LEV-MKT-02                  # Marketing direct
+    # RH (4)
+    - LEV-RH-01
+    - LEV-RH-02                   # Recrutement IT/Data
+    - LEV-RH-03
+    - LEV-RH-04                   # Formation
+    # IT/Data (3)
+    - LEV-IT-01
+    - LEV-IT-02                   # Automatisation
+    - LEV-IT-03                   # Qualité données
+    # Prestataires (1)
+    - LEV-PRES-01                 # Niveau externalisation
+    # Sinistres (4)
+    - LEV-SIN-01
+    - LEV-SIN-02-N1
+    - LEV-SIN-02-N2               # Fraude niveau 2
+    - LEV-SIN-03                  # Recours
+    # Réassurance (1)
+    - LEV-REA-01
+    # Prévention (2)
+    - LEV-PREV-01-N1              # Prévention habitat N1
+    - LEV-PREV-02-N1              # Prévention auto N1
+    # Provisions (2)
+    - LEV-PROV-01
+    - LEV-PLAC-01
+    # Conformité (1)
+    - LEV-CONF-01
+  
+  # --- Explainability ---
+  explainability:
+    show_formulas: false
+    show_delays: true
+    show_top_drivers: 5
+    guided_tips: false
+
+---
+
+# =============================================================================
+# DIFFICULTE: EXPERT
+# =============================================================================
+# Objectif: Simulation réaliste avec toutes les subtilités
+# Philosophie: Effets plus intenses, délais allongés, tous les leviers
+
+Expert:
+  
+  # --- Métadonnées ---
+  id: "Expert"
+  display_name: "Expert"
+  description: >
+    Mode avancé. Contraintes strictes, effets retard renforcés,
+    tous les leviers disponibles. Pour joueurs expérimentés.
+  
+  # --- Amplitude des variations ---
+  amplitude:
+    index_change_max_per_turn: 15  # ±15 points max
+    portfolio_variance: 0.15       # ±15% variation portefeuille
+  
+  # --- Effets retard ---
+  delays:
+    factor: 1.5                    # Délais × 1.5
+    rh_turns: 3
+    it_turns: 6
+    prevention_turns: 8
+    reputation_turns: 3
+  
+  # --- Seuils d'alerte ---
+  alerts:
+    threshold_display: 40
+    critical_threshold: 30
+    game_over_enabled: true
+    game_over_condition: "IRF < 20 for 1 turn"
+  
+  # --- Score et pondérations ---
+  scoring:
+    weights:
+      IAC: 0.12
+      IPQO: 0.22
+      IERH: 0.10
+      IRF: 0.15
+      IMD: 0.12
+      IS: 0.20                    # Sincérité très importante
+      IPP: 0.09
+    total: 1.00
+  
+  # --- Claims / Sinistralité ---
+  claims:
+    frequency_variance: 0.10
+    severity_variance: 0.12
+    catastrophe_intensity_factor: 1.3  # Cat Nat plus sévères
+  
+  # --- Événements ---
+  events:
+    market_probability_factor: 1.2    # +20% proba
+    company_probability_factor: 1.5   # +50% proba événements compagnie
+    intensity_factor: 1.3             # +30% intensité
+    mitigation_bonus: -0.10           # -10% efficacité mitigations
+  
+  # --- Concurrence IA ---
+  ai_competitors:
+    aggressiveness: 1.3           # IA plus agressif
+    reactivity: 0.9               # Réagit presque toujours
+    strategy_variance: 0.7        # Comportement plus imprévisible
+  
+  # --- Budget ---
+  budget:
+    initial_multiplier: 0.9       # -10% budget initial
+    growth_bonus: -0.03           # -3% croissance budget
+  
+  # --- Leviers disponibles ---
+  # ~30+ leviers (tous)
+  levers_available:
+    # Produit/Tarification (4)
+    - LEV-TAR-01
+    - LEV-TAR-02
+    - LEV-TAR-03                  # Révision annuelle
+    - LEV-GAR-01
+    - LEV-GAR-02
+    - LEV-GAR-03                  # Exclusions
+    # Distribution (4)
+    - LEV-DIS-01
+    - LEV-DIS-02
+    - LEV-DIS-03
+    - LEV-DIS-04                  # Schéma incentive
+    # Marketing (3)
+    - LEV-MKT-01
+    - LEV-MKT-02
+    - LEV-MKT-03                  # Activation digitale
+    # RH (6)
+    - LEV-RH-01
+    - LEV-RH-02
+    - LEV-RH-03
+    - LEV-RH-04
+    - LEV-RH-05                   # Rémunération
+    - LEV-RH-06                   # QVT
+    # IT/Data (6)
+    - LEV-IT-01
+    - LEV-IT-02
+    - LEV-IT-03
+    - LEV-IT-04                   # Gouvernance data
+    - LEV-IT-05a                  # IA Fraude
+    - LEV-IT-06                   # Sécurité SI
+    # Prestataires (3)
+    - LEV-PRES-01
+    - LEV-PRES-02                 # Exigences SLA
+    - LEV-PRES-03                 # Réseau agréé
+    # Sinistres (5)
+    - LEV-SIN-01
+    - LEV-SIN-02-N1
+    - LEV-SIN-02-N2
+    - LEV-SIN-02-N3               # Fraude niveau 3
+    - LEV-SIN-03
+    - LEV-SIN-04                  # Expertise
+    # Réassurance (2)
+    - LEV-REA-01
+    - LEV-REA-02                  # Types de traités
+    # Prévention (5)
+    - LEV-PREV-01-N1
+    - LEV-PREV-01-N2
+    - LEV-PREV-01-N3              # Prévention habitat N3
+    - LEV-PREV-02-N1
+    - LEV-PREV-02-N2
+    - LEV-PREV-03                 # Prévention data-driven
+    # Provisions (2)
+    - LEV-PROV-01
+    - LEV-PLAC-01
+    # Conformité (1)
+    - LEV-CONF-01
+  
+  # --- Explainability ---
+  explainability:
+    show_formulas: true           # Afficher les formules
+    show_delays: true
+    show_top_drivers: 10          # Plus de détails
+    guided_tips: false
+
+---
+
+# =============================================================================
+# MODE SURVIE (optionnel, pour référence)
+# =============================================================================
+# Note: Mode Survie prévu pour V1+, paramètres indicatifs
+
+Survival:
+  
+  id: "Survival"
+  display_name: "Mode Survie"
+  description: >
+    Vagues d'événements rapprochées, budget contraint, pénalités accrues.
+    Objectif: survivre X tours.
+  
+  base_difficulty: "Expert"       # Hérite des paramètres Expert
+  
+  # Overrides
+  overrides:
+    events:
+      market_probability_factor: 1.5
+      company_probability_factor: 2.0
+      intensity_factor: 1.5
+      cooldown_reduction: 0.5     # Événements peuvent se répéter plus vite
+    
+    budget:
+      initial_multiplier: 0.7
+      growth_bonus: -0.05
+    
+    scoring:
+      weights:
+        IRF: 0.35                 # Survie = résilience
+        IPQO: 0.30
+        IS: 0.10
+        IPP: 0.05
+        IAC: 0.08
+        IERH: 0.07
+        IMD: 0.05
+    
+    victory_condition:
+      type: "survive_turns"
+      target_turns: 20            # Survivre 20 tours = victoire
+
+---
+
+# =============================================================================
+# VALIDATION RULES
+# =============================================================================
+
+# Règles à vérifier par le code lors du chargement:
+#
+# 1. scoring.weights.total MUST equal 1.0
+# 2. All lever IDs in levers_available MUST exist in lever catalog
+# 3. delays.factor * delay_base <= reasonable_max (ex: 12 tours)
+# 4. amplitude.index_change_max_per_turn <= 20
+# 5. All events factors >= 0
+# 6. Inheritance (Survival.base_difficulty) correctly applied

@@ -1,0 +1,635 @@
+# schema_config.yaml — Schéma de Validation Configuration Simulation
+
+# Version: 1.0
+# Dernière MAJ: 2025-12-25
+# Auteur: Simulation Engineer
+#
+# Ce schéma définit la structure et les contraintes de validation
+# pour tous les fichiers de configuration du moteur de simulation.
+
+---
+
+# =============================================================================
+# SECTION 1: CONFIGURATION SESSION
+# =============================================================================
+
+SessionConfig:
+  type: object
+  required:
+    - session_id
+    - engine_version
+    - difficulty
+    - speed
+    - products
+    - turns_max
+  properties:
+    
+    session_id:
+      type: string
+      pattern: "^[a-zA-Z0-9_-]{8,36}$"
+      description: "Identifiant unique de la session"
+    
+    engine_version:
+      type: string
+      pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+      description: "Version du moteur (semver)"
+      example: "1.0.0"
+    
+    seed:
+      type: integer
+      minimum: 0
+      maximum: 4294967295  # 2^32 - 1
+      description: "Seed PRNG (optionnel, généré si absent)"
+    
+    difficulty:
+      type: string
+      enum: ["Novice", "Intermediate", "Expert"]
+      description: "Niveau de difficulté"
+    
+    speed:
+      type: string
+      enum: ["Fast", "Medium", "Slow"]
+      description: "Vitesse de jeu (période par tour)"
+    
+    products:
+      type: array
+      items:
+        type: string
+        enum: ["AUTO", "MRH", "PJ", "GAV"]
+      minItems: 1
+      maxItems: 4
+      description: "Produits inclus dans la session"
+    
+    turns_max:
+      type: integer
+      minimum: 4
+      maximum: 48
+      description: "Nombre max de tours"
+    
+    company_id:
+      type: string
+      description: "ID de la compagnie jouée"
+
+
+# =============================================================================
+# SECTION 2: CONFIGURATION DIFFICULTE
+# =============================================================================
+
+DifficultyConfig:
+  type: object
+  required:
+    - name
+    - amplitude_max
+    - delay_factor
+    - alert_threshold
+    - scoring_weights
+    - levers_available
+    - variance_claims
+  properties:
+    
+    name:
+      type: string
+      enum: ["Novice", "Intermediate", "Expert"]
+    
+    amplitude_max:
+      type: integer
+      minimum: 3
+      maximum: 20
+      description: "Variation max d'indice par tour"
+      # Novice: 5, Intermediate: 10, Expert: 15
+    
+    delay_factor:
+      type: number
+      minimum: 0.25
+      maximum: 2.0
+      description: "Multiplicateur des délais d'effet"
+      # Novice: 0.5, Intermediate: 1.0, Expert: 1.5
+    
+    alert_threshold:
+      type: integer
+      minimum: 30
+      maximum: 70
+      description: "Seuil d'affichage des alertes"
+      # Novice: 60, Intermediate: 50, Expert: 40
+    
+    scoring_weights:
+      type: object
+      required: [IAC, IPQO, IERH, IRF, IMD, IS, IPP]
+      properties:
+        IAC: { type: number, minimum: 0, maximum: 1 }
+        IPQO: { type: number, minimum: 0, maximum: 1 }
+        IERH: { type: number, minimum: 0, maximum: 1 }
+        IRF: { type: number, minimum: 0, maximum: 1 }
+        IMD: { type: number, minimum: 0, maximum: 1 }
+        IS: { type: number, minimum: 0, maximum: 1 }
+        IPP: { type: number, minimum: 0, maximum: 1 }
+      additionalProperties: false
+      # Contrainte: somme = 1.0 (validée par logique applicative)
+    
+    levers_available:
+      type: array
+      items:
+        type: string
+        pattern: "^LEV-[A-Z]+-[0-9]+(-N[1-3])?$"
+      description: "Liste des IDs de leviers disponibles"
+    
+    variance_claims:
+      type: object
+      required: [frequency, severity]
+      properties:
+        frequency:
+          type: number
+          minimum: 0.01
+          maximum: 0.20
+        severity:
+          type: number
+          minimum: 0.01
+          maximum: 0.20
+    
+    ai_aggressiveness:
+      type: number
+      minimum: 0.5
+      maximum: 2.0
+      default: 1.0
+      description: "Multiplicateur agressivité concurrents IA"
+
+
+# =============================================================================
+# SECTION 3: CONFIGURATION VITESSE
+# =============================================================================
+
+SpeedConfig:
+  type: object
+  required:
+    - name
+    - period_per_turn
+    - turns_per_year
+    - delay_multiplier
+  properties:
+    
+    name:
+      type: string
+      enum: ["Fast", "Medium", "Slow"]
+    
+    period_per_turn:
+      type: string
+      enum: ["Year", "Quarter", "Month"]
+    
+    turns_per_year:
+      type: integer
+      enum: [1, 4, 12]
+      description: "Nb de tours par année simulée"
+    
+    delay_multiplier:
+      type: number
+      minimum: 0.1
+      maximum: 5.0
+      description: "Ajustement des délais d'effet"
+      # Fast: 0.5, Medium: 1.0, Slow: 3.0
+
+
+# =============================================================================
+# SECTION 4: CONFIGURATION INDICE
+# =============================================================================
+
+IndexConfig:
+  type: object
+  required:
+    - id
+    - name
+    - min
+    - max
+    - initial_range
+    - inertia
+    - sub_indicators
+  properties:
+    
+    id:
+      type: string
+      enum: ["IAC", "IPQO", "IERH", "IRF", "IMD", "IS", "IPP"]
+    
+    name:
+      type: string
+    
+    min:
+      type: number
+      const: 0
+    
+    max:
+      type: number
+      const: 100
+    
+    initial_range:
+      type: object
+      required: [min, max]
+      properties:
+        min: { type: number, minimum: 0, maximum: 100 }
+        max: { type: number, minimum: 0, maximum: 100 }
+    
+    inertia:
+      type: string
+      enum: ["Low", "Medium", "High", "VeryHigh"]
+    
+    sub_indicators:
+      type: array
+      items:
+        type: object
+        required: [id, name, weight]
+        properties:
+          id: { type: string }
+          name: { type: string }
+          weight: { type: number, minimum: 0, maximum: 1 }
+    
+    critical_threshold:
+      type: integer
+      minimum: 0
+      maximum: 50
+      description: "Seuil critique déclenchant alertes/événements"
+    
+    auto_events:
+      type: array
+      items:
+        type: object
+        required: [condition, event_id]
+        properties:
+          condition: { type: string }  # Ex: "< 30 for 3 turns"
+          event_id: { type: string }
+
+
+# =============================================================================
+# SECTION 5: CONFIGURATION LEVIER
+# =============================================================================
+
+LeverConfig:
+  type: object
+  required:
+    - id
+    - name
+    - category
+    - availability
+    - type
+    - scope
+    - cost
+    - effects
+    - delay
+  properties:
+    
+    id:
+      type: string
+      pattern: "^LEV-[A-Z]+-[0-9]+[a-z]?$"
+    
+    name:
+      type: string
+    
+    category:
+      type: string
+      enum:
+        - PRODUIT_TARIFICATION
+        - DISTRIBUTION
+        - MARKETING
+        - RH
+        - IT_DATA
+        - PRESTATAIRES
+        - SINISTRES
+        - REASSURANCE
+        - PREVENTION
+        - PROVISIONS
+    
+    availability:
+      type: string
+      enum: ["Novice", "Intermediate", "Expert"]
+    
+    type:
+      type: string
+      enum: ["Punctual", "Persistent", "Progressive"]
+    
+    scope:
+      type: string
+      enum: ["Global", "PerProduct"]
+    
+    cost:
+      type: object
+      required: [budget_units]
+      properties:
+        budget_units:
+          type: integer
+          minimum: 0
+          maximum: 10
+        recurring:
+          type: boolean
+          default: false
+        scaling:
+          type: string
+          enum: ["fixed", "per_unit"]
+    
+    prerequisites:
+      type: array
+      items:
+        type: object
+        required: [type, target, value]
+        properties:
+          type:
+            type: string
+            enum: ["index_min", "lever_active", "lever_level"]
+          target: { type: string }
+          value: { type: ["number", "string"] }
+    
+    options:
+      type: array
+      items:
+        type: object
+        required: [id, label, effects]
+        properties:
+          id: { type: string }
+          label: { type: string }
+          effects: { type: array }
+    
+    levels:
+      type: object
+      description: "Pour leviers progressifs (N1/N2/N3)"
+      patternProperties:
+        "^N[1-3]$":
+          type: object
+          required: [cost, effects, delay]
+    
+    effects:
+      type: array
+      items:
+        $ref: "#/EffectConfig"
+    
+    delay:
+      type: integer
+      minimum: 0
+      maximum: 12
+      description: "Tours avant effet principal"
+    
+    incompatible_with:
+      type: array
+      items: { type: string }
+
+
+# =============================================================================
+# SECTION 6: CONFIGURATION EFFET
+# =============================================================================
+
+EffectConfig:
+  type: object
+  required:
+    - target
+    - type
+    - value
+  properties:
+    
+    target:
+      type: string
+      description: "Indice ou variable cible"
+    
+    type:
+      type: string
+      enum: ["absolute", "relative"]
+    
+    value:
+      type: number
+      description: "Valeur de l'effet"
+    
+    delay:
+      type: integer
+      minimum: 0
+      maximum: 12
+      default: 0
+    
+    duration:
+      type: integer
+      minimum: 1
+      maximum: 12
+      description: "Durée en tours (si temporaire)"
+    
+    condition:
+      type: string
+      description: "Condition d'application (optionnel)"
+    
+    decay:
+      type: object
+      properties:
+        type: { type: string, enum: ["linear", "exponential"] }
+        rate: { type: number }
+        min_residual: { type: number }
+
+
+# =============================================================================
+# SECTION 7: CONFIGURATION EVENEMENT
+# =============================================================================
+
+EventConfig:
+  type: object
+  required:
+    - id
+    - name
+    - type
+    - category
+    - probability_base
+    - intensity
+    - effects
+    - duration
+    - news_flash
+  properties:
+    
+    id:
+      type: string
+      pattern: "^EVT-(MKT|CIE)-[0-9]+$"
+    
+    name:
+      type: string
+    
+    type:
+      type: string
+      enum: ["market", "company"]
+    
+    category:
+      type: string
+      enum:
+        - CLIMAT
+        - ECONOMIQUE
+        - REGLEMENTAIRE
+        - TECHNOLOGIQUE
+        - RH
+        - OPERATIONNEL
+        - CYBER
+    
+    probability_base:
+      type: number
+      minimum: 0.01
+      maximum: 0.50
+    
+    vulnerability_factors:
+      type: array
+      items:
+        type: object
+        required: [source, threshold, operator, probability_modifier]
+        properties:
+          source: { type: string }
+          threshold: { type: number }
+          operator: { type: string, enum: ["<", ">", "<=", ">="] }
+          probability_modifier: { type: number, minimum: 0.5, maximum: 5.0 }
+    
+    intensity:
+      type: object
+      required: [distribution, min, max]
+      properties:
+        distribution: { type: string, enum: ["uniform", "gaussian"] }
+        min: { type: number }
+        max: { type: number }
+        mean: { type: number }
+        std: { type: number }
+    
+    effects:
+      type: array
+      items:
+        $ref: "#/EventEffectConfig"
+    
+    duration:
+      type: integer
+      minimum: 1
+      maximum: 8
+    
+    mitigation_factors:
+      type: array
+      items:
+        type: object
+        required: [source, reduction]
+        properties:
+          source: { type: string }
+          reduction: { type: number, minimum: 0, maximum: 0.8 }
+          condition: { type: string }
+    
+    recovery_rate:
+      type: number
+      minimum: 0
+      maximum: 1
+      description: "Taux de récupération par tour"
+    
+    cooldown:
+      type: integer
+      minimum: 1
+      default: 1
+      description: "Tours minimum entre deux occurrences"
+    
+    news_flash:
+      type: object
+      required: [title, severity_levels]
+      properties:
+        title: { type: string }
+        severity_levels:
+          type: object
+          required: [low, medium, high]
+          properties:
+            low: { type: string }
+            medium: { type: string }
+            high: { type: string }
+
+
+EventEffectConfig:
+  type: object
+  required:
+    - target
+    - type
+    - base_value
+    - intensity_multiplier
+  properties:
+    target: { type: string }
+    type: { type: string, enum: ["absolute", "relative"] }
+    base_value: { type: number }
+    intensity_multiplier: { type: number, minimum: 0, maximum: 2 }
+    delay: { type: integer, minimum: 0, maximum: 4, default: 0 }
+    condition: { type: string }
+
+
+# =============================================================================
+# SECTION 8: CONFIGURATION COMPAGNIE
+# =============================================================================
+
+CompanyConfig:
+  type: object
+  required:
+    - id
+    - name
+    - traits
+    - initial_indices
+    - initial_portfolio
+  properties:
+    
+    id:
+      type: string
+      pattern: "^CIE-[0-9]{2}$"
+    
+    name:
+      type: string
+      maxLength: 50
+    
+    traits:
+      type: array
+      items:
+        type: object
+        required: [id, name, effect]
+        properties:
+          id: { type: string }
+          name: { type: string }
+          effect:
+            type: object
+            required: [target, modifier]
+      minItems: 3
+      maxItems: 5
+    
+    initial_indices:
+      type: object
+      required: [IAC, IPQO, IERH, IRF, IMD, IS, IPP]
+      properties:
+        IAC: { type: integer, minimum: 30, maximum: 80 }
+        IPQO: { type: integer, minimum: 40, maximum: 80 }
+        IERH: { type: integer, minimum: 40, maximum: 75 }
+        IRF: { type: integer, minimum: 30, maximum: 85 }
+        IMD: { type: integer, minimum: 20, maximum: 70 }
+        IS: { type: integer, const: 70 }  # Toujours 70 (invariant)
+        IPP: { type: integer, minimum: 35, maximum: 75 }
+    
+    initial_portfolio:
+      type: object
+      patternProperties:
+        "^(AUTO|MRH|PJ|GAV)$":
+          type: object
+          required: [contracts, premium_avg, frequency_base, severity_base]
+          properties:
+            contracts: { type: integer, minimum: 0 }
+            premium_avg: { type: number, minimum: 0 }
+            frequency_base: { type: number, minimum: 0, maximum: 1 }
+            severity_base: { type: number, minimum: 0 }
+
+
+# =============================================================================
+# SECTION 9: OPEN QUESTIONS
+# =============================================================================
+
+# [OPEN QUESTION] Gestion des scénarios personnalisés
+# - Structure pour scénarios avec objectifs spécifiques ?
+# - Pondérations scoring par scénario ?
+# Option A: Ajouter ScenarioConfig distinct
+# Option B: Étendre SessionConfig avec overrides
+
+# [OPEN QUESTION] Historisation des configs
+# - Comment versionner les changements de config ?
+# - Impact sur les sessions en cours ?
+
+# [OPEN QUESTION] Multi-tenant config
+# - Permettre des configs par tenant ?
+# - Niveau de personnalisation autorisé ?
+
+
+# =============================================================================
+# VALIDATION RULES (à implémenter en code)
+# =============================================================================
+
+# RULE-01: scoring_weights sum must equal 1.0
+# RULE-02: products in session must be subset of ["AUTO", "MRH", "PJ", "GAV"]
+# RULE-03: lever.prerequisites must reference valid targets
+# RULE-04: event.mitigation_factors must reference valid levers or indices
+# RULE-05: all referenced IDs must exist in respective catalogs
