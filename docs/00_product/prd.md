@@ -54,7 +54,7 @@ Les organisations doivent former rapidement des équipes (et managers) à :
 ### 3.2 Cas d’usage
 
 - Formation initiale / onboarding (nouveaux managers, nouveaux métiers).
-- Formation continue (modules thématiques : réassurance, sinistres, distribution, data, RH).
+- Formation continue (modules thématiques : réassurance, sinistres, distribution, data, RH, conformité).
 - Séminaires (mode multi-joueurs) : alignement inter-fonctions, prise de décision collective.
 - Évaluation (debrief & score) : mesurer la progression et les biais de pilotage.
 
@@ -193,7 +193,7 @@ Le joueur arbitre un budget par tour (et parfois des décisions structurelles). 
 
 ### 7.1 Produit & technique (par produit)
 
-- **Tarification (par produit sélectionné)** : niveau de prime, segmentation (selon difficulté), révisions.
+- **Tarification (par produit sélectionné)** : niveau de prime, segmentation tarifaire (ex. profil de risque, zone géographique — selon difficulté), révisions.
 - Niveau de franchise : plus/moins protecteur, effet sur attractivité et coût.
 - Niveau de couverture : garanties, options, exclusions.
 
@@ -229,7 +229,7 @@ Le joueur arbitre un budget par tour (et parfois des décisions structurelles). 
 ### 7.7 Gestion des sinistres
 
 - Process & organisation (centralisé/délégué/mix) selon paramétrage.
-- Lutte contre la fraude (progressive N1/N2/N3), recours, expertise.
+- Lutte contre la fraude (progressive N1/N2/N3), recours, expertise (évaluation dommage par expert-assesseur).
 - Réseaux agréés vs gré à gré ; maîtrise coût vs satisfaction.
 
 ### 7.8 Réassurance
@@ -244,7 +244,7 @@ Le joueur arbitre un budget par tour (et parfois des décisions structurelles). 
 
 ### 7.10 Provisions & placements
 
-- Politique de provisionnement (prudente vs agressive) et impacts.
+- Politique de provisionnement (prudente vs agressive) et impacts. *Note pédagogique : en réalité, inclut PSNEM/IBNR (sinistres survenus non déclarés).*
 - Stratégie d’allocation financière (prudent vs risqué) sur résultat et résilience.
 
 ---
@@ -302,7 +302,7 @@ Le catalogue d’événements est structuré en deux familles :
 - Inflation (coûts réparation, frais, commissions).
 - Chocs réglementaires (contraintes de croissance, exigences de conformité).
 - Disrupteur (insurtech) : guerre des prix, nouveaux canaux.
-- Mutation parc auto (électrique) : coûts/pièces, expertise nécessaire.
+- Mutation parc auto (électrification, ADAS, véhicules autonomes) : coûts/pièces, expertise spécialisée nécessaire.
 
 **B) Événements “compagnie” (idiosyncratiques)**
 
@@ -365,7 +365,7 @@ Le cockpit doit afficher, en plus des indices déjà prévus, des indicateurs **
   - Charge vs capacité (si modélisé)
 - **Finance (niveau pédagogique)** :
   - P&L synthétique
-  - Indicateurs clés de performance proxy (ex : résultat, ratio combiné/profitabilité proxy)
+  - Indicateurs clés de performance proxy (ex : résultat, ratio combiné simplifié = (sinistres+frais)/primes)
 
 > Le niveau de détail est adaptable selon la difficulté : novice = indicateurs macro, expert = plus de décomposition.
 

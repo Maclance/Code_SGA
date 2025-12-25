@@ -40,7 +40,7 @@ Identifiant de version du moteur de simulation. Sert à assurer la traçabilité
 ## 3) Termes métier IARD (France)
 
 ### IARD
-« Incendie, Accidents et Risques Divers » : branche d’assurance dommages (hors assurance vie). Couvre notamment **Auto** et **MRH**.
+« Incendie, Accidents et Risques Divers » : biens et responsabilité (non-vie, hors santé individuelle). Couvre notamment **Auto** et **MRH**.
 
 ### Auto
 Produit d’assurance automobile (responsabilité civile obligatoire + garanties optionnelles). En jeu : produit avec dynamique propre (acquisition, sinistralité, coûts).
@@ -142,6 +142,18 @@ Hausse générale des coûts (réparation, pièces, main d’œuvre, frais). En 
 
 ### Conformité
 Respect des exigences légales/réglementaires (RGPD, contrôles, sanctions, etc.). En jeu : contrainte structurante pouvant générer des événements, coûts, ou pénalités.
+
+### IBNR (Incurred But Not Reported)
+Sinistres survenus mais non encore déclarés. Composante essentielle des provisions techniques (PSNEM). En jeu : agrégé dans le « stock de sinistres » pour simplification pédagogique.
+
+### S/P (Sinistres sur Primes)
+Ratio sinistres / primes acquises. Composante principale du ratio combiné (avant frais). En jeu : proxy de rentabilité technique.
+
+### Primes acquises
+Fraction de prime correspondant à la période de couverture échue. Différent des primes collectées (encaissées). En jeu : simplification → primes acquises = primes collectées.
+
+### Cat Nat (Catastrophe Naturelle)
+Régime légal français des catastrophes naturelles (loi 1982). Couverture obligatoire, réassurance via CCR (Caisse Centrale de Réassurance). En jeu : inclus dans les « chocs climatiques » sans distinction tarifaire spécifique.
 
 ---
 
