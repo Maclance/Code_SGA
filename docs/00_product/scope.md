@@ -46,6 +46,11 @@ Valeur cœur : **acculturer** et **entraîner** aux arbitrages (croissance, P\&L
 - Ressources communes (budget, effectifs, IT/Data) qui « compétitionnent » entre produits
 - Effets retard (RH/IT/Prévention/Réputation) paramétrés par vitesse
 - Leviers progressifs : Fraude **N1** en MVP (N2/N3 en V1)
+- **[NOUVEAU]** Levier Posture de Souscription (Permissive → Sélective) — impact sur volume et qualité portefeuille
+- **[NOUVEAU]** Levier Politique d'Indemnisation (Généreuse/Restrictive) — arbitrage coût/satisfaction
+- **[V1]** Leviers Gestion de Crise (Plan de crise, Surge capacity) — résilience opérationnelle CatNat
+- **[V1]** Leviers Conformité (Contrôle interne, Audit délégataires) — gouvernance et risque régulateur
+- **[V1]** Leviers Qualité Distribution (Exigences canal, Concentration apporteurs) — qualité portefeuille par canal
 - Concurrence IA **simple** (réagit prix/parts) pour dynamiser le marché
 
 **D. UI Cockpit (lisible, actionnable)**

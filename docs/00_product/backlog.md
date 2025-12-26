@@ -223,6 +223,40 @@
 **US-045** (P1, V1, M) — Scénarios thématiques préconfigurés
 - AC1 Then objectifs + pondérations scoring spécifiques
 
+## E4.5 Souscription & Appétit au risque (PRD 7.11)
+**US-046** (P0, MVP, M) — Levier Posture de Souscription (Permissive → Sélective)
+- AC1 Then impact volume (IAC) et qualité portefeuille (S/P futur) visible avec effet retard 4-6T
+- AC2 Then disponible dès difficulté Novice
+- AC3 Then UI affiche une alerte si posture "Permissive" maintenue > 4 tours
+- AC4 Then tooltip explique le risque d'anti-sélection en langage pédagogique
+
+**US-047** (P1, V1, M) — Levier Règles de Sélection Avancées (Scoring métier/data-driven)
+- AC1 Then prérequis IMD ≥ 40 pour scoring data-driven
+- AC2 Then réduit le risque d'anti-sélection (Adverse_Selection_Risk)
+- AC3 Then le passage à scoring data-driven nécessite 2 tours d'implémentation (effet retard)
+- AC4 Then l'UI affiche le niveau de scoring actif et son influence sur la qualité portefeuille
+
+## E4.6 Gestion de Crise & Réclamations (PRD 7.12-7.13)
+**US-048** (P0, MVP, M) — Levier Politique d'Indemnisation (Généreuse/Standard/Restrictive)
+- AC1 Then impact sur coût moyen sinistre (+5-15% généreuse, -5-10% restrictive)
+- AC2 Then disponible dès difficulté Novice
+- AC3 Then politique restrictive augmente Complaints_Rate et Litigation_Risk
+- AC4 Then le debrief analyse l'arbitrage coût/satisfaction choisi
+
+*Note : remonter en P0 car levier Novice fondamental (arbitrage coût vs satisfaction).*
+
+**US-049** (P1, V1, M) — Levier Plan de Crise & Surge Capacity
+- AC1 Then réduction backlog sinistres post-CatNat proportionnelle au niveau de plan
+- AC2 Then mitigation Regulator_Heat et Reputation_Temperature
+- AC3 Then coût récurrent visible (budget RH/organisation)
+- AC4 Then le plan est testé lors du premier événement CatNat : feedback sur efficacité
+
+**US-055** (P1, V1, M) — Levier Service Client & Médiation
+- AC1 Then réduction Complaints_Rate (-20 à -40% selon niveau)
+- AC2 Then réduction Litigation_Risk et Legal_Cost_Ratio
+- AC3 Then prérequis : investissement service client (RH + outils)
+- AC4 Then le cockpit affiche le taux de résolution amiable vs contentieuse
+
 ---
 
 # EPIC E5 — Scoring, progression & Debrief (MVP → V1)
@@ -262,7 +296,20 @@
 **US-063** (P2, V2, M) — Branding tenant
 - AC1 Then logo/couleurs reflétés dans UI + exports
 
-## E6.3 Suivi pédagogique
+## E6.3 Gouvernance & Conformité (PRD 7.14)
+**US-065** (P1, V1, M) — Levier Dispositif de Contrôle Interne (Minimal/Standard/Renforcé)
+- AC1 Then impact sur Compliance_Control_Maturity et vulnérabilité aux audits régulateur
+- AC2 Then coût en effectifs conformité
+
+**US-066** (P1, V1, M) — Levier Audit Délégataires & Affinitaires
+- AC1 Then prérequis : utilisation canaux délégataires
+- AC2 Then améliore Fraud_Procedural_Robustness et qualité portefeuille délégataires
+
+**US-067** (P1, V1, M) — Levier Anti-fraude Procédurale (Progressif N1/N2/N3)
+- AC1 Then complémentaire à LEV-FRAUDE (fraude sinistres) : sécurise les process internes
+- AC2 Then mitige "Pic fraude opportuniste post-CatNat"
+
+## E6.4 Suivi pédagogique
 **US-064** (P0, MVP, M) — Vue admin : score, complétion, temps/tour, export
 - AC1 Then filtre par session / produit / difficulté
 
@@ -347,10 +394,16 @@
 - L-PROD-03 (P1, V1) Segmentation tarifaire (expert)
 - L-PROD-04 (P1, V1) Couverture/garanties avancées
 
+### Souscription & Appétit au risque (NOUVEAU - PRD 7.11)
+- L-UND-01 (P0, MVP) Posture de souscription (Permissive → Sélective)
+- L-UND-02 (P1, V1) Règles de sélection avancées (scoring data-driven)
+
 ### Distribution
 - L-DIST-01 (P0, MVP) Mix canaux (macro)
 - L-DIST-02 (P0, MVP) Commissions (macro)
 - L-DIST-03 (P1, V1) Incentives avancés par canal
+- L-DIST-04 (P1, V1) Exigences qualité canal (Bonus-malus S/P)
+- L-DIST-05 (P1, V1) Gestion concentration apporteurs
 
 ### Marketing
 - L-MKT-01 (P0, MVP) Campagne marque vs activation
@@ -372,9 +425,22 @@
 
 ### Sinistres & fraude
 - L-SIN-01 (P0, MVP) Capacité sinistres (via RH)
-- L-FRAUDE-01 (P0, MVP) Fraude N1
-- L-FRAUDE-02 (P1, V1) Fraude N2
-- L-FRAUDE-03 (P1, V1) Fraude N3
+- L-SIN-02 (P1, V1) Recours (Passif / Actif / Industrialisé)
+- L-FRAUDE-01 (P0, MVP) Fraude N1 (détection)
+- L-FRAUDE-02 (P1, V1) Fraude N2 (détection)
+- L-FRAUDE-03 (P1, V1) Fraude N3 (détection)
+- L-FRAUD-PROC-01 (P1, V1) Anti-fraude procédurale (N1/N2/N3)
+
+### Relation Client & Réclamations (NOUVEAU - PRD 7.13)
+- L-CLI-01 (P0, MVP) Politique d'indemnisation (Généreuse/Restrictive)
+- L-CLI-02 (P1, V1) Service Client & Médiation
+
+### Gestion de Crise (NOUVEAU - PRD 7.12)
+- L-CRISE-01 (P1, V1) Plan de Crise & Surge Capacity
+
+### Gouvernance & Conformité (NOUVEAU - PRD 7.14)
+- L-CONF-02 (P1, V1) Dispositif de contrôle interne
+- L-CONF-03 (P1, V1) Audit délégataires & affinitaires
 
 ### Réassurance
 - L-REASS-01 (P0, MVP) Niveau de protection (macro)

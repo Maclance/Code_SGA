@@ -207,6 +207,12 @@ Performance technique (S/P) des contrats selon leur source de distribution (digi
 ### Température réputationnelle
 Indicateur de la pression médiatique et de la confiance publique. En jeu : indice REP_TEMP, influence IAC et déclenche l'attention régulateur.
 
+### Pression régulateur (Regulator_Heat)
+Indicateur de tension avec le régulateur (ACPR). Augmente en cas de backlog élevé, plaintes collectives, manquements conformité. En jeu : seuil critique → risque d'injonction ou sanction. Décroît lentement si les mesures correctives sont prises.
+
+### Taux de réclamations (Complaints_Rate)
+Proportion de clients exprimant une insatisfaction formelle (réclamation écrite, saisine médiateur). En jeu : driver de satisfaction, de NPS et de risque contentieux. Influencé par la politique d'indemnisation et le service client.
+
 ---
 
 ## 4) Termes « entreprise » (transverses)

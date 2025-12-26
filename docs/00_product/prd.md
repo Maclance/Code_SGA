@@ -259,16 +259,17 @@ Le joueur arbitre un budget par tour (et parfois des décisions structurelles). 
 **LEV-UND-01 — Posture de souscription** (Novice)
 - Options : Permissive / Équilibrée / Sélective / Très sélective
 - Effets :
-  - Permissive → IAC ↑ (+10), mais Adverse_Selection_Risk ↑, IPP ↓ (retard 2-3T)
-  - Sélective → IAC ↓ (-5), Adverse_Selection_Risk ↓, IPP ↑ (retard 2-3T)
+  - Permissive → IAC ↑ (+10), mais Adverse_Selection_Risk ↑, IPP ↓ (retard 4-6T)
+  - Sélective → IAC ↓ (-5), Adverse_Selection_Risk ↓, IPP ↑ (retard 4-6T)
 - *Arbitrage clé* : volume vs qualité du portefeuille
+- *Note métier* : l'anti-sélection se matérialise sur 12-24 mois (survenance + développement sinistres)
 
 **LEV-UND-02 — Règles de sélection avancées** (Intermédiaire)
 - Options : Règles simples / Scoring métier / Scoring data-driven
 - Prérequis : IMD ≥ 40 pour scoring data-driven
 - Effets :
   - Améliore la précision de sélection → réduit l'anti-sélection
-  - Scoring data-driven → Adverse_Selection_Risk ↓ (-15), délai 3T, nécessite IMD ≥ 60
+  - Scoring data-driven → Adverse_Selection_Risk ↓ (-15), délai 4-6T, nécessite IMD ≥ 60
 
 **Pseudo-formule** :
 ```
@@ -439,6 +440,31 @@ Chaque indice est normalisé (ex : 0–100) et possède des sous-indicateurs.
 - Indice de Sincérité (IS) (Boni/Mali)
 - Indice Performance P&L (IPP)
 
+### 8.2bis Matrice Levier → Indices (vue synthétique)
+
+> Cette matrice présente les **influences principales** de chaque famille de leviers sur les 7 indices. ↑ = impact positif, ↓ = impact négatif, (r) = effet retardé.
+
+| Levier | IAC | IPQO | IERH | IRF | IMD | IS | IPP |
+|--------|:---:|:----:|:----:|:---:|:---:|:--:|:---:|
+| **Tarif ↓** | ↑ | - | - | - | - | - | ↓ |
+| **Tarif ↑** | ↓ | - | - | - | - | - | ↑ |
+| **Franchise ↑** | ↓ | - | - | - | - | - | ↑ |
+| **Posture Permissive** | ↑ | - | - | - | - | ↓(r) | ↓(r) |
+| **Posture Sélective** | ↓ | - | - | - | - | ↑(r) | ↑(r) |
+| **RH ↑** | - | ↑(r) | ↑ | - | - | - | ↓ |
+| **RH ↓** | - | ↓(r) | ↓ | - | - | - | ↑ |
+| **IT/Data ↑** | - | ↑(r) | - | - | ↑(r) | - | ↓/↑(r) |
+| **Fraude N1/N2/N3** | - | ↑ | - | - | - | - | ↑(r) |
+| **Réassurance ↑** | - | - | - | ↑ | - | - | ↓ |
+| **Prévention ↑** | - | - | - | ↑(r) | - | - | ↑(r) |
+| **Provisions prudentes** | - | - | - | ↑ | - | ↑ | ↓ |
+| **Provisions agressives** | - | - | - | ↓ | - | ↓ | ↑ |
+| **Politique indemn. Généreuse** | ↑ | - | - | - | - | - | ↓ |
+| **Politique indemn. Restrictive** | ↓ | - | - | - | - | - | ↑ |
+| **Recours Actif** | - | ↑ | - | - | - | - | ↑(r) |
+
+*Légende* : (r) = effet retardé (2-6 tours selon levier)
+
 ### 8.3 Interactions & exemples (règles de design)
 
 - Tarifs bas → IAC ↑ court terme, mais risque IPP ↓ si portefeuille se dégrade.
@@ -459,7 +485,23 @@ Chaque indice est normalisé (ex : 0–100) et possède des sous-indicateurs.
 - Prévention : 4–8 tours, effet progressif.
 - Réputation/NPS : 1–3 tours.
 
-### 8.5 Événements externes (catalogue)
+### 8.5 Seuils critiques & alertes (nouveaux indices)
+
+> Ces seuils définissent les niveaux d'alerte et de criticité pour les indices ajoutés dans les sections 7.11-7.15.
+
+| Indice | Seuil alerte | Seuil critique | Effet en jeu |
+|--------|:------------:|:--------------:|--------------|
+| **Regulator_Heat** | > 60 | > 80 | Risque d'injonction, audit renforcé |
+| **Backlog_Days** | > 30 jours | > 60 jours | Dégradation massive NPS, plaintes |
+| **Distributor_Concentration_Risk** | > 50% (Top 3) | > 70% | Vulnérabilité stratégique |
+| **Adverse_Selection_Risk** | > 40 | > 60 | Dégradation S/P prévisible T+4-6 |
+| **Complaints_Rate** | > 5% | > 10% | NPS ↓, Litigation_Risk ↑ |
+| **Litigation_Risk** | > 30 | > 50 | Coûts juridiques significatifs |
+| **Compliance_Control_Maturity** | < 40 | < 25 | Vulnérabilité audits/sanctions |
+
+*Règle de design* : seuil alerte → notification cockpit. Seuil critique → impact IS + risque événement "compagnie".
+
+### 8.6 Événements externes (catalogue)
 
 Le catalogue d’événements est structuré en deux familles :
 
