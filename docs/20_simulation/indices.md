@@ -1,11 +1,13 @@
 # indices.md — Spécification Technique des Indices
 
-**Version** : 1.1  
+**Version** : 1.3  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-26  
+**Dernière MAJ** : 2025-12-27  
 **Auteur** : Simulation Engineer
 
 > **CHANGELOG**
+> - **2025-12-27** : Review Simulation Engineer — Fix exemple IERH, ajout variable `competence_rh`, guard division LEGAL_COST_RATIO, invariants implémentation (INV-IMPL), ordre calcul indices.
+> - **2025-12-27** : Review métier IARD — Corrections formules (IERH, IPP, BACKLOG_DAYS, CHAN_QUALITY, ADVERSE_SEL_RISK). Ajout 5 invariants (INV-BIZ-06 à INV-BIZ-10). Ajout section test vectors.
 > - **2025-12-26** : Ajout de 13 nouveaux indices IARD (souscription, crise, réclamations, conformité, distribution). Extension de IPQO et IS avec nouvelles variables.
 
 > Ce document complète `docs/00_product/indices.md` (source of truth) avec les détails techniques d'implémentation.
@@ -123,6 +125,7 @@ Résultat: IAC = 70 (zone verte)
 | `taux_erreur` | % de dossiers avec erreur/reprise | [0, 1] | % |
 | `qualite_presta` | Performance SLA prestataires | [0, 100] | - |
 | `stabilite_si` | Score stabilité SI (inverse dette tech) | [0, 100] | - |
+| `competence_rh` | Niveau moyen de compétences RH (ou IERH × 0.5) | [0, 100] | - |
 
 #### Formule
 
@@ -220,8 +223,9 @@ Résultat: IPQO = 66 (zone verte, mais fragile)
 # Impact effectif (optimal si ratio = 1)
 effet_effectif = 100 - abs(effectif_vs_besoin - 1.0) × 50
 
-# Impact turnover (pénalité si > 10%)
-effet_turnover = max(0, 100 - (turnover - 0.10) × 200)
+# Impact turnover (pénalité si > 12% — baseline marché assurance H5)
+# Pente modérée : 15% → score 95.5, 20% → score 88, 30% → score 73
+effet_turnover = max(0, 100 - (turnover - 0.12) × 150)
 
 IERH(t) = clamp(
     0.30 × effet_effectif
@@ -252,20 +256,20 @@ competences = 70
 turnover = 0.18 (18%)
 climat_social = 55
 
-# Calculs intermédiaires
+# Calculs intermédiaires (formule v1.3)
 effet_effectif = 100 - |0.85 - 1.0| × 50 = 100 - 7.5 = 92.5
-effet_turnover = max(0, 100 - (0.18 - 0.10) × 200) = 100 - 16 = 84
+effet_turnover = max(0, 100 - (0.18 - 0.12) × 150) = 100 - 9 = 91
 
 # IERH
-IERH = 0.30×92.5 + 0.25×70 + 0.25×84 + 0.20×55
-     = 27.75 + 17.5 + 21 + 11
-     = 77.25
+IERH = 0.30×92.5 + 0.25×70 + 0.25×91 + 0.20×55
+     = 27.75 + 17.5 + 22.75 + 11
+     = 79
 
-Résultat: IERH = 77 (zone verte)
+Résultat: IERH = 79 (zone verte)
 
 # Si turnover monte à 25%:
-effet_turnover_degradé = max(0, 100 - (0.25 - 0.10) × 200) = 100 - 30 = 70
-IERH_degradé = 0.30×92.5 + 0.25×70 + 0.25×70 + 0.20×55 = 73.75
+effet_turnover_degradé = max(0, 100 - (0.25 - 0.12) × 150) = 100 - 19.5 = 80.5
+IERH_degradé = 0.30×92.5 + 0.25×70 + 0.25×80.5 + 0.20×55 = 76.4
 
 → Turnover élevé dégrade IERH progressivement
 ```
@@ -514,10 +518,13 @@ ratio_combine_brut = (sinistres_bruts + frais) / primes_brutes × 100
 # Ratio combiné net (après réassurance) ← Indicateur clé
 ratio_combine_net = (sinistres_nets + frais) / primes_nettes × 100
 
-# Performance relative au marché
-performance_relative = (resultat_total - resultat_marche) / abs(resultat_marche)
+# Performance relative au marché (bornée pour éviter valeurs extrêmes)
+performance_relative_raw = (resultat_total - resultat_marche) / max(abs(resultat_marche), 1)
+performance_relative = clamp(performance_relative_raw, -2.0, +2.0)
 
 # Normalisation en indice
+# perf_rel = -2 → -50, perf_rel = 0 → 0, perf_rel = +2 → +50
+# ratio_combine = 100% → 0, ratio_combine = 80% → +10
 IPP(t) = clamp(
     50 + performance_relative × 25 + (100 - ratio_combine_net) × 0.5,
     0, 100
@@ -634,6 +641,21 @@ INV-BIZ-04  Acquisition_Nette(t) ≤ Portefeuille(t-1) × 0.15
 
 INV-BIZ-05  Recours_Recouvres ≤ Sinistres_RC × 0.30
             → Recours ne peuvent excéder 30% des sinistres RC payés
+
+INV-BIZ-06  BACKLOG_DAYS > 90 pendant 2T consécutifs → événement "Médiatisation Retards"
+            → Seuil Médiateur de l'Assurance / signalement ACPR
+
+INV-BIZ-07  Si ADVERSE_SEL_RISK > 60 ET UND_STRICTNESS < 40 pendant 3T
+            → S/P_brut dégradation automatique +5 points par tour
+
+INV-BIZ-08  Σ effets_relatifs sur même cible dans même tour ≤ ±50%
+            → Empêche doublons et explosions de valeurs
+
+INV-BIZ-09  delai_effet(Levier) ≥ 1T si target ∈ {IPP, IRF, IS}
+            → Pas d'effets immédiats sur indicateurs financiers structurels
+
+INV-BIZ-10  primes_cedees_rate ≤ 0.40 (40%)
+            → Au-delà = modèle fronting, hors scope pédagogique
 ```
 
 ---
@@ -705,17 +727,23 @@ UND_STRICTNESS(t) = clamp(
 #### Formule
 
 ```
-# Base = exposition brute
-base_risk = max(0, -delta_prix_marche × 2)  // prix bas → risque
+# Base = exposition brute (prix bas vs marché → risque anti-sélection)
+base_risk = max(0, -delta_prix_marche × 2)  // -20% prix → base_risk = 40
 
-# Modulation par sélection
+# Modulation par sélection et qualité distribution
 modulation = (100 - UND_STRICTNESS) × 0.3 + (100 - CHAN_QUALITY) × 0.2
 
+# Effet mémoire : l'anti-sélection est cumulative sur plusieurs trimestres
+# decay naturel 20% par tour si conditions améliorées
 ADVERSE_SEL_RISK(t) = clamp(
-    base_risk + modulation,
+    ADVERSE_SEL_RISK(t-1) × 0.8  // decay naturel
+  + base_risk × 0.3              // nouvelle exposition (30% du delta)
+  + modulation × 0.1,            // facteurs aggravants
     0, 100
 )
 ```
+
+> **Note métier** : L'anti-sélection se matérialise sur 2-3 trimestres. Un prix bas ponctuel a moins d'impact qu'une politique tarifaire agressive maintenue.
 
 #### Bornes et contraintes
 
@@ -780,16 +808,29 @@ OPS_SURGE_CAP(t) = clamp(
 #### Formule
 
 ```
-# Flux net de backlog
+# Flux net de backlog (dossiers non traités)
 flux_net = max(0, stock_sinistres - capacite_traitement)
 
 # Atténuation si surge capacity
 surge_factor = OPS_SURGE_CAP / 100
 
-# Calcul en jours (1 tour trimestre = ~65 jours ouvrés)
-BACKLOG_DAYS(t) = BACKLOG_DAYS(t-1) × 0.7  // decay naturel
-                + flux_net / capacite_traitement × 30 × (1 - surge_factor × 0.5)
+# Garde contre division par zéro
+capacite_safe = max(capacite_traitement, 1)
+
+# Conversion en jours de retard
+# 1 tour = 1 trimestre ≈ 65 jours ouvrés
+# ratio_surcharge = flux_net / capacite = nb de tours de retard théorique
+# × 65 jours = retard en jours
+retard_additionnel = (flux_net / capacite_safe) × 65
+
+# Formule avec decay naturel (résorption progressive)
+BACKLOG_DAYS(t) = max(0,
+    BACKLOG_DAYS(t-1) × 0.7  // decay naturel 30%/tour
+  + retard_additionnel × (1 - surge_factor × 0.5)  // atténuation surge
+)
 ```
+
+> **Unités** : BACKLOG_DAYS est exprimé en **jours ouvrés**. Valeur initiale 15j = situation normale.
 
 #### Bornes et contraintes
 
@@ -974,7 +1015,10 @@ LITIGATION_RISK(t) = clamp(
 # Coûts = contentieux × coût moyen
 couts_juridiques = litigation_count × cout_moyen_contentieux
 
-LEGAL_COST_RATIO(t) = couts_juridiques / primes × 100
+# Guard division par zéro (primes = 0 si compagnie fermée)
+primes_safe = max(primes, 1)
+
+LEGAL_COST_RATIO(t) = couts_juridiques / primes_safe × 100
 ```
 
 | Paramètre | Valeur |
@@ -1070,11 +1114,21 @@ FRAUD_PROC_ROB(t) = clamp(
 #### Formule
 
 ```
-# Score pondéré par canal (inversé : S/P bas = qualité haute)
-score_canal(sp) = max(0, 100 - sp × 100)
+# IMPORTANT : sp est un ratio en décimal (0.65 = 65%)
+# Score canal : S/P 65% → score 85, S/P 100% → score 50, S/P 120% → score 30
+score_canal(sp) = clamp(
+    100 - (sp - 0.50) × 100,  // baseline S/P 50% → score 100
+    0, 100
+)
 
-CHAN_QUALITY(t) = Σ(mix_canal × score_canal(SP_canal)) / 100
+# Qualité globale = moyenne pondérée par mix canaux
+CHAN_QUALITY(t) = Σ(mix_canal × score_canal(SP_canal))
 ```
+
+> **Exemple** : mix_digital=40%, SP_digital=0.70 | mix_agents=60%, SP_agents=0.65
+> → score_digital = 100-(0.70-0.50)×100 = 80
+> → score_agents = 100-(0.65-0.50)×100 = 85
+> → CHAN_QUALITY = 0.40×80 + 0.60×85 = 32 + 51 = 83
 
 #### Bornes et contraintes
 
@@ -1138,6 +1192,30 @@ INV-IDX-13  DISTRIB_CONC_RISK > 70 → vulnérabilité ×3 événement "Rupture 
 
 ---
 
+## 8.3) Invariants d'Implémentation
+
+> Règles techniques pour la robustesse du moteur de simulation.
+
+```
+INV-IMPL-01  ∀ Effect: delay ≥ 0 (default = 0 si non spécifié)
+
+INV-IMPL-02  ∀ Effect.type == "relative" : value ∈ [-100, +100] (% raisonnable)
+
+INV-IMPL-03  ∀ Levier.Progressive : Σ cost_cumulatif(Niveau_Max) ≤ Budget_Max_Session
+
+INV-IMPL-04  Ordre de calcul indices (pas de circularité) :
+             1. Sources     : IMD, IERH (pas de dépendances)
+             2. Dérivés     : CHAN_QUALITY, OPS_SURGE_CAP, UND_STRICTNESS
+             3. Agrégés     : ADVERSE_SEL_RISK, REP_TEMP, REG_HEAT, COMPLAINTS_RATE
+             4. Terminaux   : IPP, IRF, IS, IAC, IPQO
+
+INV-IMPL-05  ∀ division par variable : max(variable, 1) pour éviter NaN/Infinity
+
+INV-IMPL-06  ∀ Indice avec decay : decay_factor ∈ [0.5, 0.95] (convergence garantie ≤ 10T)
+```
+
+---
+
 ## 9) Checklist Implémentation
 
 - [ ] Toutes les formules retournent des valeurs dans [0, 100] (sauf BACKLOG_DAYS, LEGAL_COST_RATIO)
@@ -1148,3 +1226,124 @@ INV-IDX-13  DISTRIB_CONC_RISK > 70 → vulnérabilité ×3 événement "Rupture 
 - [ ] Les exemples chiffrés correspondent aux formules
 - [ ] Les 13 nouveaux indices sont intégrés au cockpit (selon difficulté)
 
+---
+
+## 10) Test Vectors (Given/When/Then)
+
+> Cas de test pour validation des formules et invariants.
+
+### TEST-IDX-01 — Anti-sélection tarification agressive
+
+```gherkin
+Given:
+  IAC = 55
+  IPP = 60
+  delta_prix_marche = -15%
+  UND_STRICTNESS = 50
+  ADVERSE_SEL_RISK(t-1) = 30
+
+When:
+  Joueur active LEV-TAR-01:aggressive au tour t=0
+
+Then:
+  t=1: IAC = 70 (+15)
+  t=1: ADVERSE_SEL_RISK = 30 × 0.8 + 30 × 0.3 + modulation = 24 + 9 + ~5 = 38
+  t=3: IPP = 52 (-8, probability 60% si anti-sélection observée)
+  Invariant: IPP ∈ [0, 100] ✓
+  Invariant: ADVERSE_SEL_RISK ∈ [0, 100] ✓
+```
+
+### TEST-IDX-02 — Surcharge sinistres CatNat
+
+```gherkin
+Given:
+  BACKLOG_DAYS(t-1) = 15
+  stock_sinistres = 5000
+  capacite_traitement = 2000
+  OPS_SURGE_CAP = 30
+
+When:
+  Événement "CatNat Tempête" ajoute 8000 sinistres au tour t=0
+
+Then:
+  stock_sinistres = 13000
+  flux_net = max(0, 13000 - 2000) = 11000
+  capacite_safe = 2000
+  retard_additionnel = (11000 / 2000) × 65 = 357.5 jours
+  surge_factor = 0.30
+  BACKLOG_DAYS = max(0, 15 × 0.7 + 357.5 × (1 - 0.30 × 0.5))
+               = max(0, 10.5 + 357.5 × 0.85)
+               = max(0, 10.5 + 303.9) = 314.4 jours
+  
+  → INV-IDX-10 déclenché (BACKLOG > 60)
+  → REG_HEAT augmente automatiquement
+```
+
+### TEST-IDX-03 — Boni provisions prudentes
+
+```gherkin
+Given:
+  IS(t-1) = 70
+  IPP = 55
+  adequation_provisions = +0.10 (10% prudent)
+  court_termisme_score = 80
+
+When:
+  Politique prudente maintenue sur 3T
+
+Then:
+  penalite_provisions = 0.10 × 10 = 1 (sur-provisionnement)
+  penalite_ct = (100 - 80) × 0.2 = 4
+  bonus_prudence = +3 (adequation > 0.05)
+  
+  IS(t) = 70 - 1 - 4 + 3 = 68
+  IS(t) stable autour de 68-70
+  
+  t=3: Probabilité 60% → boni dégagé
+  t=3: IPP = 60 (+5)
+  
+  Invariant: IS ∈ [0, 100] ✓
+  Invariant: adequation_provisions ∈ [-0.30, +0.30] ✓
+```
+
+### TEST-IDX-04 — CHAN_QUALITY calcul
+
+```gherkin
+Given:
+  mix_digital = 0.40 (40%)
+  mix_agents = 0.60 (60%)
+  SP_digital = 0.70 (70%)
+  SP_agents = 0.65 (65%)
+
+When:
+  Calcul CHAN_QUALITY(t)
+
+Then:
+  score_digital = clamp(100 - (0.70 - 0.50) × 100, 0, 100) = 80
+  score_agents = clamp(100 - (0.65 - 0.50) × 100, 0, 100) = 85
+  CHAN_QUALITY = 0.40 × 80 + 0.60 × 85 = 32 + 51 = 83
+  
+  Invariant: CHAN_QUALITY ∈ [0, 100] ✓
+```
+
+### TEST-IDX-05 — IPP bornes extrêmes
+
+```gherkin
+Given:
+  resultat_total = -5_000_000 € (perte)
+  resultat_marche = 4_000_000 €
+  ratio_combine_net = 130%
+
+When:
+  Calcul IPP(t)
+
+Then:
+  performance_relative_raw = (-5M - 4M) / max(4M, 1) = -9/4 = -2.25
+  performance_relative = clamp(-2.25, -2, +2) = -2.0
+  
+  IPP = clamp(50 + (-2) × 25 + (100 - 130) × 0.5, 0, 100)
+      = clamp(50 - 50 - 15, 0, 100)
+      = clamp(-15, 0, 100) = 0
+  
+  Invariant: IPP ≥ 0 ✓ (borne respectée malgré valeurs extrêmes)
+```

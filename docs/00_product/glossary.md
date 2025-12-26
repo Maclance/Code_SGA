@@ -1,6 +1,7 @@
 # glossary.md — AssurManager : Le Défi IARD
 
 > **CHANGELOG**
+> - **2025-12-27** : Ajout conventions de nommage, terme "Driver", standardisation SCREAMING_CASE pour indices.
 > - **2025-12-26** : Ajout de 15+ nouveaux termes IARD (appétit au risque, posture de souscription, anti-sélection, gestion de crise, médiation, dispositif de contrôle, concentration apporteur, etc.)
 
 Objectif : fournir un **vocabulaire de référence** (métier IARD + termes du jeu) avec des définitions **non ambiguës** pour limiter les erreurs d’interprétation.
@@ -15,6 +16,14 @@ Objectif : fournir un **vocabulaire de référence** (métier IARD + termes du j
 - **Indice** : score normalisé (ex. 0–100) représentant un état systémique (attractivité, qualité, résilience…).
 - **P&L pédagogique** : compte de résultat **cohérent pour apprendre**, pas une reproduction fidèle de comptabilité assureur.
 - **Comparabilité** : on ne compare des scores/indices **que** si les paramètres de session (vitesse, difficulté, produits, scénario) et la version moteur (**engine_version**) sont identiques.
+
+### Convention de nommage
+
+- **Indices principaux** : SCREAMING_CASE sans préfixe (ex : `IAC`, `IPQO`, `IRF`)
+- **Indices secondaires** : SCREAMING_CASE (ex : `BACKLOG_DAYS`, `REG_HEAT`, `ADVERSE_SEL_RISK`)
+- **Leviers** : Préfixe `LEV-` + catégorie 3 lettres + numéro (ex : `LEV-UND-01`, `LEV-SIN-02`)
+- **Variables internes** : snake_case (ex : `delta_prix_vs_marche`, `capacite_traitement`)
+- **Effet retard** : notation `(r:X-YT)` où X-Y est la plage de tours
 
 ---
 
@@ -169,7 +178,7 @@ Niveau de risque qu'une compagnie est prête à accepter pour atteindre ses obje
 Politique d'acceptation ou de refus des risques présentés. En jeu : levier LEV-UND-01 (Permissive → Sélective). Affecte le volume et la qualité du portefeuille.
 
 ### Anti-sélection (Adverse Selection)
-Phénomène où un assureur attire une proportion anormale de "mauvais risques" (clients à sinistralité élevée). En jeu : se matérialise quand prix bas + posture permissive, mesuré par ADVERSE_SEL_RISK.
+Phénomène où un assureur attire une proportion anormale de "mauvais risques" (clients à sinistralité élevée). En jeu : se matérialise quand prix bas + posture permissive, mesuré par `ADVERSE_SEL_RISK`.
 
 ### CAT Modeling (Modélisation CAT)
 Techniques de modélisation des risques catastrophiques pour estimer l'exposition et calibrer la réassurance. En jeu : simplifié en probabilités d'événements + intensité + mitigation.
@@ -178,39 +187,39 @@ Techniques de modélisation des risques catastrophiques pour estimer l'expositio
 Organisation mise en place pour gérer un afflux exceptionnel (CatNat, panne, incident majeur). En jeu : levier LEV-CRISE-01, affecte OPS_SURGE_CAP.
 
 ### Surge capacity
-Capacité à absorber un pic d'activité exceptionnel (sinistres, appels, tâches). En jeu : indice OPS_SURGE_CAP, piloté par le plan de crise et les effectifs.
+Capacité à absorber un pic d'activité exceptionnel (sinistres, appels, tâches). En jeu : indice `OPS_SURGE_CAP`, piloté par le plan de crise et les effectifs.
 
 ### Backlog sinistres
-Stock de dossiers en attente de traitement, au-delà de la capacité normale. En jeu : indice BACKLOG_DAYS, génère frustration client et pression régulateur.
+Stock de dossiers en attente de traitement, au-delà de la capacité normale. En jeu : indice `BACKLOG_DAYS`, génère frustration client et pression régulateur.
 
 ### Médiation
-Processus de résolution amiable des litiges assureur-assuré, souvent via un médiateur indépendant. En jeu : levier LEV-CLI-02, réduit LITIGATION_RISK.
+Processus de résolution amiable des litiges assureur-assuré, souvent via un médiateur indépendant. En jeu : levier `LEV-CLI-02`, réduit `LITIGATION_RISK`.
 
 ### Transaction
 Accord amiable pour clore un litige, évitant une procédure judiciaire. En jeu : partie de la politique d'indemnisation, réduit les coûts juridiques.
 
 ### Contentieux
-Procédure judiciaire entre l'assureur et un assuré ou tiers. En jeu : mesuré par LITIGATION_RISK et LEGAL_COST_RATIO.
+Procédure judiciaire entre l'assureur et un assuré ou tiers. En jeu : mesuré par `LITIGATION_RISK` et `LEGAL_COST_RATIO`.
 
 ### Dispositif de contrôle interne
-Organisation des contrôles permanents (conformité, risques, qualité) au sein de l'entreprise. En jeu : levier LEV-CONF-02, affecte CTRL_MATURITY et la vulnérabilité aux audits.
+Organisation des contrôles permanents (conformité, risques, qualité) au sein de l'entreprise. En jeu : levier `LEV-CONF-02`, affecte `CTRL_MATURITY` et la vulnérabilité aux audits.
 
 ### Audit délégataire
-Contrôle d'un partenaire à qui la gestion est déléguée (courtier gestionnaire, plateforme affinitaire). En jeu : levier LEV-CONF-03, améliore FRAUD_PROC_ROB et CHAN_QUALITY.
+Contrôle d'un partenaire à qui la gestion est déléguée (courtier gestionnaire, plateforme affinitaire). En jeu : levier `LEV-CONF-03`, améliore `FRAUD_PROC_ROB` et `CHAN_QUALITY`.
 
 ### Concentration apporteur
-Dépendance d'une compagnie à un petit nombre de distributeurs pour son chiffre d'affaires. En jeu : indice DISTRIB_CONC_RISK. > 50% = dépendance élevée, risque de rupture.
+Dépendance d'une compagnie à un petit nombre de distributeurs pour son chiffre d'affaires. En jeu : indice `DISTRIB_CONC_RISK`. > 50% = dépendance élevée, risque de rupture.
 
 ### Qualité portefeuille par canal
-Performance technique (S/P) des contrats selon leur source de distribution (digital, agents, courtiers, affinitaires). En jeu : indice CHAN_QUALITY.
+Performance technique (S/P) des contrats selon leur source de distribution (digital, agents, courtiers, affinitaires). En jeu : indice `CHAN_QUALITY`.
 
 ### Température réputationnelle
-Indicateur de la pression médiatique et de la confiance publique. En jeu : indice REP_TEMP, influence IAC et déclenche l'attention régulateur.
+Indicateur de la pression médiatique et de la confiance publique. En jeu : indice `REP_TEMP`, influence IAC et déclenche l'attention régulateur.
 
-### Pression régulateur (Regulator_Heat)
+### Pression régulateur (`REG_HEAT`)
 Indicateur de tension avec le régulateur (ACPR). Augmente en cas de backlog élevé, plaintes collectives, manquements conformité. En jeu : seuil critique → risque d'injonction ou sanction. Décroît lentement si les mesures correctives sont prises.
 
-### Taux de réclamations (Complaints_Rate)
+### Taux de réclamations (`COMPLAINTS_RATE`)
 Proportion de clients exprimant une insatisfaction formelle (réclamation écrite, saisine médiateur). En jeu : driver de satisfaction, de NPS et de risque contentieux. Influencé par la politique d'indemnisation et le service client.
 
 ---
@@ -339,6 +348,9 @@ Rôle optionnel en séminaire : consolide les propositions/votes et valide la d�
 
 ### Explainability (« pourquoi ça bouge »)
 Mécanisme pédagogique qui explique les variations (ex. top drivers : décisions/événements/effets retard). La profondeur dépend de la version.
+
+### Driver (explication)
+Facteur principal expliquant une variation d'indice. En jeu : le système affiche les "top 3 drivers" pour chaque changement significatif (ex : « IAC +5 → drivers : LEV-TAR-01 (-3%), événement Inflation, effet retard Marketing »).
 
 ### Feedback
 Retour immédiat de fin de tour : alertes, évolutions d’indices, impacts P&L, contraintes à venir.

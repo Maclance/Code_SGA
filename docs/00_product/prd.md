@@ -1,6 +1,7 @@
 # PRD — AssurManager : Le Défi IARD
 
 > **CHANGELOG**
+> - **2025-12-27** : Corrections Learning Designer — ajout table objectifs pédagogiques par niveau, notation précise des délais (r:X-YT), parcours d'apprentissage recommandé, note de calibration métier, standardisation nommage indices (SCREAMING_CASE), gardes formules.
 > - **2025-12-26** : Ajout sections 7.11-7.15 couvrant 5 gaps IARD (souscription, CatNat/crise, réclamations/contentieux, gouvernance/conformité, distribution qualité/concentration). Source: feedback intégration IARD complet.
 
 ## 1) Résumé exécutif
@@ -80,6 +81,14 @@ Les organisations doivent former rapidement des équipes (et managers) à :
 - Anticiper RH/IT/Data (inertie, dette technique, ROI différé).
 - Intégrer la conformité comme contrainte structurante (et non un “frein”).
 
+**Parcours d'apprentissage recommandé (3 sessions)**
+
+| Session | Niveau | Durée | Objectif principal | Compétences visées |
+|:-------:|--------|:-----:|-------------------|-------------------|
+| 1 | Novice | 4-6 tours | Comprendre la boucle | Lecture cockpit, cause→effet direct |
+| 2 | Intermédiaire | 8-10 tours | Expérimenter les arbitrages | Compromis multi-indices, effets retard |
+| 3 | Expert | 12+ tours | Optimiser sous contraintes | Prérequis data, régulateur, gestion crise |
+
 ### 4.2 Objectifs business
 
 - Produire un produit SaaS vendable en B2B : multi-tenant, administration, contenu paramétrable, analytics.
@@ -151,6 +160,15 @@ Règle de design :
   - plus leur granularité augmente,
   - plus les interactions/effets retard sont marqués,
   - plus l’explainability devient nécessaire.
+
+**Objectifs pédagogiques par niveau**
+
+| Niveau | Objectif principal | Compétences visées | Nb leviers | Effets retard |
+|--------|-------------------|-------------------|:----------:|:-------------:|
+| Novice | Comprendre la boucle de jeu | Lecture cockpit, décision→impact direct | 8-10 | Raccourcis (50%) |
+| Intermédiaire | Arbitrer entre indices | Compromis, effets retard, budget | 15-18 | Standard |
+| Expert | Optimiser sous contraintes | Prérequis data, régulateur, crise | 22-28 | Amplifiés |
+| Survie | Résister aux chocs | Résilience, priorisation urgente | 22-28 | Standard |
 
 ### 6.6 Vitesse de jeu (période d’un tour)
 
@@ -273,12 +291,13 @@ Le joueur arbitre un budget par tour (et parfois des décisions structurelles). 
 
 **Pseudo-formule** :
 ```
-Adverse_Selection_Risk(t) = f(
+ADVERSE_SEL_RISK(t) = f(
     delta_prix_vs_marché,        # si prix bas → anti-sélection ↑
     Posture_Souscription,        # permissive → risque ↑
     Scoring_Maturité,            # data-driven → risque ↓
     Mix_Canaux                   # certains canaux moins qualitatifs
 )
+→ Affecte : IS (r:4-6T), IPP (r:4-6T)
 ```
 
 ### 7.12 Gestion de Crise CatNat — Triple Impact (NOUVEAU)
@@ -303,10 +322,11 @@ Adverse_Selection_Risk(t) = f(
 
 **Pseudo-formule** :
 ```
-Backlog_Days(t) = Backlog_Days(t-1) + (Entrees_Sinistres - Capacite_Traitement)
-                  × (1 - Surge_Capacity_Factor)
+BACKLOG_DAYS(t) = BACKLOG_DAYS(t-1) + (Entrees_Sinistres - Capacite_Traitement)
+                  × (1 - OPS_SURGE_CAP_Factor)
 
-Regulator_Heat(t) += f(Backlog_Days, Media_Coverage, Plaintes_Collectives)
+REG_HEAT(t) += f(BACKLOG_DAYS, Media_Coverage, Plaintes_Collectives)
+→ Affecte : IPQO, IAC (r:1-2T)
 ```
 
 ### 7.13 Expérience Client / Réclamations / Contentieux (NOUVEAU)
@@ -333,15 +353,17 @@ Regulator_Heat(t) += f(Backlog_Days, Media_Coverage, Plaintes_Collectives)
 
 **Pseudo-formule** :
 ```
-Litigation_Risk(t) = f(
-    Complaints_Rate,             # plus de réclamations → plus de contentieux
+LITIGATION_RISK(t) = f(
+    COMPLAINTS_RATE,             # plus de réclamations → plus de contentieux
     Politique_Indemnisation,     # restrictive → contentieux ↑
     Service_Mediation_Level,     # proactif → contentieux ↓
-    Backlog_Days                 # délais longs → frustration → contentieux ↑
+    BACKLOG_DAYS                 # délais longs → frustration → contentieux ↑
 )
 
-Legal_Cost_Ratio = Litigation_Count × Cout_Moyen_Contentieux / Primes
+LEGAL_COST_RATIO = Litigation_Count × Cout_Moyen_Contentieux / max(Primes, 1)
+→ Affecte : IPP, IS
 ```
+*Note : garde `max(Primes, 1)` pour éviter division par zéro en début de partie.*
 
 ### 7.14 Gouvernance Risques & Conformité (NOUVEAU)
 
@@ -375,13 +397,14 @@ Legal_Cost_Ratio = Litigation_Count × Cout_Moyen_Contentieux / Primes
 
 **Pseudo-formule** :
 ```
-Compliance_Control_Maturity(t) = f(
+CTRL_MATURITY(t) = f(
     Investment_Controle_Interne,
     Audit_Delegataires_Level,
-    Fraud_Procedural_Level
+    FRAUD_PROC_ROB
 )
 
-Vulnerabilite_Sanction = 100 - Compliance_Control_Maturity
+VULN_SANCTION = 100 - CTRL_MATURITY
+→ Affecte : IS, vulnérabilité événements "Audit régulateur"
 ```
 
 ### 7.15 Distribution : Qualité vs Volume & Concentration (NOUVEAU)
@@ -407,12 +430,13 @@ Vulnerabilite_Sanction = 100 - Compliance_Control_Maturity
 
 **Pseudo-formule** :
 ```
-Channel_Portfolio_Quality(t) = Σ(Part_Canal × SP_Canal) / Total
+CHAN_QUALITY(t) = Σ(Part_Canal × SP_Canal) / Total
   où SP_Canal = ratio S/P historique par canal
 
-Distributor_Concentration_Risk = Part_CA_Top3_Apporteurs
+DISTRIB_CONC_RISK = Part_CA_Top3_Apporteurs
   Seuil d'alerte : > 50% → risque élevé
   Seuil critique : > 70% → très vulnérable
+→ Affecte : IAC (qualité acquisition), vulnérabilité rupture apporteur
 ```
 
 ---
@@ -449,21 +473,21 @@ Chaque indice est normalisé (ex : 0–100) et possède des sous-indicateurs.
 | **Tarif ↓** | ↑ | - | - | - | - | - | ↓ |
 | **Tarif ↑** | ↓ | - | - | - | - | - | ↑ |
 | **Franchise ↑** | ↓ | - | - | - | - | - | ↑ |
-| **Posture Permissive** | ↑ | - | - | - | - | ↓(r) | ↓(r) |
-| **Posture Sélective** | ↓ | - | - | - | - | ↑(r) | ↑(r) |
-| **RH ↑** | - | ↑(r) | ↑ | - | - | - | ↓ |
-| **RH ↓** | - | ↓(r) | ↓ | - | - | - | ↑ |
-| **IT/Data ↑** | - | ↑(r) | - | - | ↑(r) | - | ↓/↑(r) |
-| **Fraude N1/N2/N3** | - | ↑ | - | - | - | - | ↑(r) |
+| **Posture Permissive** | ↑ | - | - | - | - | ↓(r:4-6T) | ↓(r:4-6T) |
+| **Posture Sélective** | ↓ | - | - | - | - | ↑(r:4-6T) | ↑(r:4-6T) |
+| **RH ↑** | - | ↑(r:2T) | ↑ | - | - | - | ↓ |
+| **RH ↓** | - | ↓(r:2T) | ↓ | - | - | - | ↑ |
+| **IT/Data ↑** | - | ↑(r:3-6T) | - | - | ↑(r:3-6T) | - | ↓/↑(r:4-8T) |
+| **Fraude N1/N2/N3** | - | ↑ | - | - | - | - | ↑(r:1-4T) |
 | **Réassurance ↑** | - | - | - | ↑ | - | - | ↓ |
-| **Prévention ↑** | - | - | - | ↑(r) | - | - | ↑(r) |
+| **Prévention ↑** | - | - | - | ↑(r:4-8T) | - | - | ↑(r:4-8T) |
 | **Provisions prudentes** | - | - | - | ↑ | - | ↑ | ↓ |
 | **Provisions agressives** | - | - | - | ↓ | - | ↓ | ↑ |
 | **Politique indemn. Généreuse** | ↑ | - | - | - | - | - | ↓ |
 | **Politique indemn. Restrictive** | ↓ | - | - | - | - | - | ↑ |
-| **Recours Actif** | - | ↑ | - | - | - | - | ↑(r) |
+| **Recours Actif** | - | ↑ | - | - | - | - | ↑(r:2-4T) |
 
-*Légende* : (r) = effet retardé (2-6 tours selon levier)
+*Légende* : (r:X-YT) = effet retardé de X à Y tours
 
 ### 8.3 Interactions & exemples (règles de design)
 
@@ -491,15 +515,26 @@ Chaque indice est normalisé (ex : 0–100) et possède des sous-indicateurs.
 
 | Indice | Seuil alerte | Seuil critique | Effet en jeu |
 |--------|:------------:|:--------------:|--------------|
-| **Regulator_Heat** | > 60 | > 80 | Risque d'injonction, audit renforcé |
-| **Backlog_Days** | > 30 jours | > 60 jours | Dégradation massive NPS, plaintes |
-| **Distributor_Concentration_Risk** | > 50% (Top 3) | > 70% | Vulnérabilité stratégique |
-| **Adverse_Selection_Risk** | > 40 | > 60 | Dégradation S/P prévisible T+4-6 |
-| **Complaints_Rate** | > 5% | > 10% | NPS ↓, Litigation_Risk ↑ |
-| **Litigation_Risk** | > 30 | > 50 | Coûts juridiques significatifs |
-| **Compliance_Control_Maturity** | < 40 | < 25 | Vulnérabilité audits/sanctions |
+| **REG_HEAT** | > 60 | > 80 | Risque d'injonction, audit renforcé |
+| **BACKLOG_DAYS** (matériel) | > 30 jours | > 45 jours | Dégradation NPS, plaintes |
+| **BACKLOG_DAYS** (corporel) | > 90 jours | > 180 jours | Cycle naturel long, surveiller tendance |
+| **DISTRIB_CONC_RISK** | > 50% (Top 3) | > 70% | Vulnérabilité stratégique |
+| **ADVERSE_SEL_RISK** | > 40 | > 60 | Dégradation S/P prévisible T+4-6 |
+| **COMPLAINTS_RATE** | > 5% | > 10% | NPS ↓, LITIGATION_RISK ↑ |
+| **LITIGATION_RISK** | > 30 | > 50 | Coûts juridiques significatifs |
+| **CTRL_MATURITY** | < 40 | < 25 | Vulnérabilité audits/sanctions |
 
 *Règle de design* : seuil alerte → notification cockpit. Seuil critique → impact IS + risque événement "compagnie".
+
+### 8.6 Note de calibration métier
+
+> Les ordres de grandeur sont issus de ratios moyens du marché français IARD :
+> - **S/P moyen Auto** : 75-85%
+> - **S/P moyen MRH** : 55-70%
+> - **Taux de réclamation acceptable** : < 2%
+> - **Ratio combiné cible** : < 100% (breakeven technique)
+> - **Délai moyen sinistre matériel** : 15-25 jours
+> - **Délai moyen sinistre corporel** : 6-18 mois
 
 ### 8.6 Événements externes (catalogue)
 

@@ -1,11 +1,13 @@
 # leviers_catalogue.md — Catalogue Technique des Leviers
 
-**Version** : 1.1  
+**Version** : 1.3  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-26  
+**Dernière MAJ** : 2025-12-27  
 **Auteur** : Simulation Engineer
 
 > **CHANGELOG**
+> - **2025-12-27** : Review Simulation Engineer — Extension schema TypeScript (probability, duration, decay, formula, note). Ajout catégories manquantes. Fix delay implicites.
+> - **2025-12-27** : Review métier IARD — Corrections LEV-TAR-01 (hypothèse H-PRICING), LEV-REA-01 (taux réalistes 10-40%), LEV-CLI-01 (effets harmonisés relatifs). Ajout section test vectors.
 > - **2025-12-26** : Ajout de 10 nouveaux leviers IARD (souscription, crise, client, conformité, distribution). Catégories ajoutées : SOUSCRIPTION, GESTION_CRISE, EXPERIENCE_CLIENT, CONFORMITE.
 
 > Ce document complète `docs/00_product/leviers_catalogue.md` (source of truth) avec les spécifications techniques d'implémentation.
@@ -55,7 +57,12 @@ type LeverCategory =
   | "SINISTRES"
   | "REASSURANCE"
   | "PREVENTION"
-  | "PROVISIONS";
+  | "PROVISIONS"
+  // Catégories ajoutées v1.2+
+  | "SOUSCRIPTION"
+  | "GESTION_CRISE"
+  | "EXPERIENCE_CLIENT"
+  | "CONFORMITE";
 
 type Difficulty = "Novice" | "Intermediate" | "Expert";
 type LeverType = "Punctual" | "Persistent" | "Progressive";
@@ -65,8 +72,21 @@ interface Effect {
   target: string;                // Indice ou variable cible
   type: "absolute" | "relative"; // +10 vs +10%
   value: number;
-  delay: number;                 // Délai spécifique à cet effet
+  delay: number;                 // Délai spécifique à cet effet (default: 0)
   condition?: string;            // Condition d'application
+  
+  // Champs optionnels étendus (v1.3)
+  probability?: number;          // Probabilité d'occurrence [0, 1]
+  duration?: number;             // Durée de l'effet en tours
+  decay?: DecayConfig;           // Configuration de décroissance
+  formula?: string;              // Formule personnalisée (pour effets complexes)
+  note?: string;                 // Note explicative (metadata)
+}
+
+interface DecayConfig {
+  type: "linear" | "exponential";
+  value_per_turn: number;        // Décroissance par tour
+  min_residual?: number;         // Valeur résiduelle minimale
 }
 
 interface Prerequisite {
@@ -143,6 +163,12 @@ options:
     meta:
       benefit: "Meilleur profil risque (sélection positive)"
 
+# Hypothèse métier H-PRICING (marché mass market français)
+# Source: études actuarielles AXA/Allianz, benchmarks FFA
+# - Écart prix -10% vs marché → S/P +2 à +5 pts sur 2-3T (anti-sélection)
+# - Écart prix +10% vs marché → S/P -2 à -4 pts sur 2-3T (sélection positive)
+# - Délai matérialisation : 2T minimum (renouvellements + sinistralité observée)
+
 delay: 1
 ```
 
@@ -189,6 +215,7 @@ options:
       - target: IAC
         type: absolute
         value: 8
+        delay: 0
       - target: sinistres_cost
         type: relative
         value: 10
@@ -686,51 +713,54 @@ cost:
 # Note métier: Les taux de cession sont simplifiés pour le jeu.
 # En réalité, la réassurance combine proportionnelle (QP) et non-proportionnelle (XS).
 
+# Taux de cession réalistes marché IARD français (source: FFA, Swiss Re)
+# Inclut QP (proportionnelle) + XS (excédent sinistres) simplifié
 options:
   - id: minimal
-    label: "Minimal (2% cédés)"
+    label: "Minimal (10% cédés)"
     effects:
       - target: IRF
         type: absolute
-        value: 5
-        delay: 0
-      - target: primes_cedees_rate
-        type: absolute
-        value: 0.02
-    meta:
-      protection_cat: Low
-      description: "Couverture minimale, exposition forte aux cat nat"
-  
-  - id: standard
-    label: "Standard (5% cédés)"
-    effects:
-      - target: IRF
-        type: absolute
-        value: 15
-        delay: 0
-      - target: primes_cedees_rate
-        type: absolute
-        value: 0.05
-    meta:
-      protection_cat: Medium
-      description: "Couverture standard marché"
-  
-  - id: strong
-    label: "Fort (10% cédés)"
-    effects:
-      - target: IRF
-        type: absolute
-        value: 25
+        value: 10
         delay: 0
       - target: primes_cedees_rate
         type: absolute
         value: 0.10
     meta:
+      protection_cat: Low
+      description: "Couverture minimale, forte exposition CatNat"
+      risque: "Vulnérabilité événement majeur (tempête, grêle)"
+  
+  - id: standard
+    label: "Standard (20% cédés)"
+    effects:
+      - target: IRF
+        type: absolute
+        value: 20
+        delay: 0
+      - target: primes_cedees_rate
+        type: absolute
+        value: 0.20
+    meta:
+      protection_cat: Medium
+      description: "Niveau marché français moyen"
+  
+  - id: strong
+    label: "Fort (30% cédés)"
+    effects:
+      - target: IRF
+        type: absolute
+        value: 30
+        delay: 0
+      - target: primes_cedees_rate
+        type: absolute
+        value: 0.30
+    meta:
       protection_cat: High
-      description: "Bonne protection, coût modéré"
+      description: "Bonne protection, équilibre coût/sécurité"
   
   - id: maximum
-    label: "Maximum (18% cédés)"
+    label: "Maximum (40% cédés)"
     effects:
       - target: IRF
         type: absolute
@@ -738,10 +768,11 @@ options:
         delay: 0
       - target: primes_cedees_rate
         type: absolute
-        value: 0.18
+        value: 0.40
     meta:
       protection_cat: VeryHigh
-      description: "Protection maximale, coût élevé"
+      description: "Protection maximale, marge technique réduite"
+      contrainte: "INV-BIZ-10 : ne peut dépasser 40%"
 
 delay: 0
 ```
@@ -1159,6 +1190,7 @@ cost:
   budget_units: 0
   recurring: false
 
+# Effets harmonisés : severite et satisfaction en relatif, litiges en absolu (seuils fixes)
 options:
   - id: genereuse
     label: "Généreuse"
@@ -1167,19 +1199,22 @@ options:
         type: relative
         value: 8
         delay: 0
-        note: "Coûts sinistres +8%"
+        note: "Coûts sinistres +8% (indemnisations plus larges)"
       - target: COMPLAINTS_RATE
         type: relative
         value: -40
         delay: 1
+        note: "Réduction des réclamations"
       - target: LITIGATION_RISK
-        type: absolute
-        value: -15
+        type: relative
+        value: -30
         delay: 1
+        note: "Moins de contentieux"
       - target: satisfaction_nps
-        type: absolute
-        value: 10
+        type: relative
+        value: 15
         delay: 1
+        note: "NPS baseline 50 → 57.5"
   
   - id: standard
     label: "Standard"
@@ -1192,19 +1227,22 @@ options:
         type: relative
         value: -8
         delay: 0
-        note: "Coûts sinistres -8%"
+        note: "Coûts sinistres -8% (indemnisations plus serrées)"
       - target: COMPLAINTS_RATE
         type: relative
         value: 50
         delay: 1
+        note: "Hausse des réclamations"
       - target: LITIGATION_RISK
-        type: absolute
-        value: 20
+        type: relative
+        value: 40
         delay: 1
+        note: "Risque contentieux accru"
       - target: satisfaction_nps
-        type: absolute
-        value: -10
+        type: relative
+        value: -15
         delay: 1
+        note: "NPS baseline 50 → 42.5"
 
 delay: 0
 ```
@@ -1681,3 +1719,101 @@ INV-L8  ∀ Levier activé: Effet enregistré avec (tour_creation, delai, tour_a
 - [ ] Disponibilité filtrée par difficulté
 - [ ] UI affiche prérequis manquants
 - [ ] Leviers scope "PerProduct" s'appliquent au bon produit
+
+---
+
+## 6) Test Vectors (Given/When/Then)
+
+> Cas de test pour validation des effets leviers.
+
+### TEST-LEV-01 — Tarification agressive anti-sélection
+
+```gherkin
+Given:
+  IAC = 55
+  IPP = 60
+  ADVERSE_SEL_RISK = 30
+  Profil compagnie: Standard
+
+When:
+  Joueur active LEV-TAR-01:aggressive (prix -15% vs marché)
+
+Then:
+  t=0: Décision enregistrée, coût 0 unités
+  t=1: IAC = 55 + 15 = 70
+  t=1: ADVERSE_SEL_RISK augmente (formule indices.md)
+  t=2-3: Observation S/P (probabilité 60% dégradation)
+  t=3: Si anti-sélection → IPP = 60 - 8 = 52
+  
+  Invariant: IAC ∈ [0, 100] ✓
+  H-PRICING respectée ✓
+```
+
+### TEST-LEV-02 — Réassurance standard
+
+```gherkin
+Given:
+  IRF = 50
+  primes_brutes = 100_000_000 €
+  primes_cedees_rate = 0.10 (minimal précédent)
+
+When:
+  Joueur change LEV-REA-01:standard (20% cédés)
+
+Then:
+  t=0: IRF = 50 + (20 - 10) = 60 (+10 delta)
+  t=0: primes_cedees_rate = 0.20
+  t=1: primes_cedees = 100M × 0.20 = 20M €
+  t=1: primes_nettes = 80M €
+  
+  Invariant: primes_cedees_rate ≤ 0.40 (INV-BIZ-10) ✓
+  Invariant: IRF ∈ [0, 100] ✓
+```
+
+### TEST-LEV-03 — Politique indemnisation généreuse
+
+```gherkin
+Given:
+  severite_baseline = 3000 €
+  COMPLAINTS_RATE = 8‰
+  LITIGATION_RISK = 30
+  satisfaction_nps = 50
+
+When:
+  Joueur active LEV-CLI-01:genereuse
+
+Then:
+  t=0: severite = 3000 × 1.08 = 3240 € (+8%)
+  t=1: COMPLAINTS_RATE = 8 × 0.60 = 4.8‰ (-40%)
+  t=1: LITIGATION_RISK = 30 × 0.70 = 21 (-30%)
+  t=1: satisfaction_nps = 50 × 1.15 = 57.5 (+15%)
+  
+  Invariant: effets relatifs cohérents ✓
+  Trade-off: meilleure satisfaction vs coûts sinistres ✓
+```
+
+### TEST-LEV-04 — Plan de crise niveau N2
+
+```gherkin
+Given:
+  OPS_SURGE_CAP = 20 (N1 actif)
+  BACKLOG_DAYS = 15
+  REP_TEMP = 30
+  evenement_catnat_actif = false
+
+When:
+  Joueur upgrade LEV-CRISE-01 de N1 à N2
+
+Then:
+  t=0: Coût 2 unités budget (cumulative)
+  t=2: OPS_SURGE_CAP = 40 (effet retard)
+  
+  Si événement CatNat survient après upgrade:
+    BACKLOG_DAYS réduit de 20% (effet conditionnel)
+    REP_TEMP réduit de 10 points
+
+  Invariant: INV-L3 (pas régression niveau) ✓
+  Invariant: OPS_SURGE_CAP ∈ [0, 100] ✓
+```
+
+---
