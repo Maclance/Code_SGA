@@ -5,16 +5,18 @@ Ce document définit les rôles à utiliser dans Antigravity pour produire et re
 ## 0) Règles communes (s’appliquent à tous les rôles)
 
 **Source de vérité**
-- Produit : `docs/00_product/prd.md`, `docs/00_product/backlog_mvp.md`
+- Produit : `docs/00_product/prd.md`, `docs/00_product/backlog.md`
 - Glossaire : `docs/00_product/glossary.md`
 - Simulation : `docs/20_simulation/*` + `docs/20_simulation/config/*`
 - Engineering : `docs/40_engineering/*`
+- Working Agreement : `docs/70_ai/working_agreement.md`
 
 **Méthode**
 - Travailler fichier par fichier (éviter les pavés).
 - Si une information manque : marquer `[OPEN QUESTION]`, proposer 2 options, recommander 1.
 - Ne pas ajouter de features hors PRD (tagger `[OUT OF SCOPE]`).
 - Toujours produire une section : **Décisions**, **Risques & mitigations**, **Checklist de validation**.
+- **1 ticket = 1 PR** (voir working_agreement.md)
 
 **Format de sortie**
 - Markdown clair, titres stables, listes courtes.

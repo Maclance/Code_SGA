@@ -1,5 +1,8 @@
 # kpi_success.md — AssurManager : Le Défi IARD
 
+> **CHANGELOG**
+> - **2025-12-26** : Ajout section 16 "KPI IARD Complets (Gameplay)" avec 10 nouveaux KPIs métier (Portfolio_Mix_Quality, Acceptance_Rate, Complaint_Rate, etc.)
+
 Objectif : définir un référentiel **strict** des KPI produit (activation, engagement, complétion, apprentissage, rétention, séminaire, conformité/enterprise) avec **formules**, **fenêtres temporelles**, et **règles de calcul**.
 
 > Important : la comparabilité des résultats de jeu dépend des paramètres de session et de **engine_version** (cf. glossary). Les KPI “learning” et “score” doivent toujours être segmentés par ces dimensions.
@@ -338,4 +341,156 @@ Pour chaque KPI, conserver systématiquement ces champs :
 - Tenant Activated : **≥ 1 run** + **≥ 5 participants actifs** sous 28 jours.
 
 > Ces seuils doivent être validés par tests utilisateurs et observation de sessions réelles.
+
+---
+
+## 16) KPI IARD Complets (Gameplay) — NOUVEAU
+
+> KPIs spécifiques au pilotage métier IARD dans le jeu, complémentaires aux KPIs produit.
+
+### 16.1 Portfolio_Mix_Quality
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Portfolio Mix Quality |
+| **Intention** | Mesurer la qualité du mix portefeuille (répartition par segment de risque) |
+| **Définition** | Score pondéré reflétant la proportion de "bons risques" vs "risques dégradés" |
+| **Formule** | `Σ(Part_Segment × Score_SP_Segment) / 100` où Score_SP = 100 - (S/P - 70) |
+| **Fenêtre** | Par tour |
+| **Unité** | Score [0-100] |
+| **Segments** | difficulty, products_scope |
+| **Seuil alerte** | < 60 → "Qualité dégradée" |
+
+---
+
+### 16.2 Acceptance_Rate
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Acceptance Rate |
+| **Intention** | Mesurer le taux d'acceptation des demandes de souscription |
+| **Définition** | Ratio contrats acceptés / demandes reçues |
+| **Formule** | `Contrats_Acceptes / Demandes_Totales × 100` |
+| **Fenêtre** | T4 rolling (4 tours) |
+| **Unité** | % |
+| **Segments** | UND_STRICTNESS, products_scope, difficulty |
+| **Interprétation** | Bas = sélectif (qualité), Haut = permissif (volume) |
+
+---
+
+### 16.3 Bad_Risks_Share
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Bad Risks Share |
+| **Intention** | Proxy du risque d'anti-sélection |
+| **Définition** | Part des contrats à S/P élevé (> seuil) dans le portefeuille |
+| **Formule** | `Contrats_SP_Eleve / Total_Contrats × 100` où SP_Eleve > 85% |
+| **Fenêtre** | Par tour |
+| **Unité** | % |
+| **Seuil alerte** | > 15% → attention anti-sélection |
+
+---
+
+### 16.4 Complaint_Rate
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Complaint Rate |
+| **Intention** | Mesurer l'insatisfaction client exprimée |
+| **Définition** | Réclamations pour 1000 sinistres traités |
+| **Formule** | `Reclamations / Sinistres_Traites × 1000` |
+| **Fenêtre** | T4 rolling |
+| **Unité** | ‰ (pour mille) |
+| **Seuil baseline** | 5‰ (marché français) |
+| **Seuil alerte** | > 10‰ |
+
+---
+
+### 16.5 Average_Claims_Cycle_Time
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Average Claims Cycle Time |
+| **Intention** | Mesurer la rapidité de traitement des sinistres |
+| **Définition** | Délai moyen entre déclaration et clôture |
+| **Formule** | `Σ(Date_Cloture - Date_Declaration) / Nb_Sinistres_Clos` |
+| **Fenêtre** | Par tour |
+| **Unité** | Jours |
+| **Baseline** | 30-45 jours |
+| **Seuil alerte** | > 60 jours |
+
+---
+
+### 16.6 Litigation_Rate
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Litigation Rate |
+| **Intention** | Mesurer l'exposition aux contentieux judiciaires |
+| **Définition** | Contentieux / sinistres traités |
+| **Formule** | `Contentieux_Ouverts / Sinistres_Traites × 1000` |
+| **Fenêtre** | T4 rolling |
+| **Unité** | ‰ |
+| **Baseline** | 1-2‰ |
+| **Seuil alerte** | > 5‰ |
+
+---
+
+### 16.7 Legal_Cost_Ratio
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Legal Cost Ratio |
+| **Intention** | Mesurer le poids des frais juridiques |
+| **Définition** | Coûts juridiques / primes |
+| **Formule** | `Couts_Juridiques / Primes × 100` |
+| **Fenêtre** | Par tour |
+| **Unité** | % |
+| **Baseline** | 0.2-0.5% |
+| **Seuil alerte** | > 1% |
+
+---
+
+### 16.8 Compliance_Findings_Count
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Compliance Findings Count |
+| **Intention** | Mesurer le volume de constats de contrôle interne |
+| **Définition** | Nombre de constats/observations relevés par tour |
+| **Formule** | `Σ Constats_Audit + Constats_Controle_Interne` |
+| **Fenêtre** | Par tour (cumulé sur la partie) |
+| **Unité** | Nombre |
+| **Seuil alerte** | > 10 constats/tour non résolus |
+
+---
+
+### 16.9 Remediation_Delay
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Remediation Delay |
+| **Intention** | Mesurer la rapidité de correction des constats |
+| **Définition** | Délai moyen entre constat et clôture remédiation |
+| **Formule** | `Σ(Date_Resolution - Date_Constat) / Nb_Constats_Resolus` |
+| **Fenêtre** | Par tour |
+| **Unité** | Tours |
+| **Baseline** | 1-2 tours |
+| **Seuil alerte** | > 3 tours |
+
+---
+
+### 16.10 Distribution_Concentration_Index
+
+| Champ | Valeur |
+|-------|--------|
+| **Nom** | Distribution Concentration Index |
+| **Intention** | Mesurer la dépendance aux gros apporteurs |
+| **Définition** | Part du CA réalisée par les top 3 apporteurs |
+| **Formule** | `CA_Top3_Apporteurs / CA_Total × 100` |
+| **Fenêtre** | Par tour |
+| **Unité** | % |
+| **Seuil alerte** | > 50% → dépendance élevée |
+| **Seuil critique** | > 70% → très vulnérable |
 

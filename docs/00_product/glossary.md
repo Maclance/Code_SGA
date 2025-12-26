@@ -1,5 +1,8 @@
 # glossary.md — AssurManager : Le Défi IARD
 
+> **CHANGELOG**
+> - **2025-12-26** : Ajout de 15+ nouveaux termes IARD (appétit au risque, posture de souscription, anti-sélection, gestion de crise, médiation, dispositif de contrôle, concentration apporteur, etc.)
+
 Objectif : fournir un **vocabulaire de référence** (métier IARD + termes du jeu) avec des définitions **non ambiguës** pour limiter les erreurs d’interprétation.
 
 > Convention : lorsqu’un terme a un sens **métier** et un sens **jeu**, les deux sont précisés.
@@ -154,6 +157,55 @@ Fraction de prime correspondant à la période de couverture échue. Différent 
 
 ### Cat Nat (Catastrophe Naturelle)
 Régime légal français des catastrophes naturelles (loi 1982). Couverture obligatoire, réassurance via CCR (Caisse Centrale de Réassurance). En jeu : inclus dans les « chocs climatiques » sans distinction tarifaire spécifique.
+
+---
+
+## 3bis) Nouveaux Termes IARD (Compléments)
+
+### Appétit au risque (Risk Appetite)
+Niveau de risque qu'une compagnie est prête à accepter pour atteindre ses objectifs. En jeu : se traduit par la posture de souscription et les règles de sélection.
+
+### Posture de souscription (Underwriting Posture)
+Politique d'acceptation ou de refus des risques présentés. En jeu : levier LEV-UND-01 (Permissive → Sélective). Affecte le volume et la qualité du portefeuille.
+
+### Anti-sélection (Adverse Selection)
+Phénomène où un assureur attire une proportion anormale de "mauvais risques" (clients à sinistralité élevée). En jeu : se matérialise quand prix bas + posture permissive, mesuré par ADVERSE_SEL_RISK.
+
+### CAT Modeling (Modélisation CAT)
+Techniques de modélisation des risques catastrophiques pour estimer l'exposition et calibrer la réassurance. En jeu : simplifié en probabilités d'événements + intensité + mitigation.
+
+### Gestion de crise
+Organisation mise en place pour gérer un afflux exceptionnel (CatNat, panne, incident majeur). En jeu : levier LEV-CRISE-01, affecte OPS_SURGE_CAP.
+
+### Surge capacity
+Capacité à absorber un pic d'activité exceptionnel (sinistres, appels, tâches). En jeu : indice OPS_SURGE_CAP, piloté par le plan de crise et les effectifs.
+
+### Backlog sinistres
+Stock de dossiers en attente de traitement, au-delà de la capacité normale. En jeu : indice BACKLOG_DAYS, génère frustration client et pression régulateur.
+
+### Médiation
+Processus de résolution amiable des litiges assureur-assuré, souvent via un médiateur indépendant. En jeu : levier LEV-CLI-02, réduit LITIGATION_RISK.
+
+### Transaction
+Accord amiable pour clore un litige, évitant une procédure judiciaire. En jeu : partie de la politique d'indemnisation, réduit les coûts juridiques.
+
+### Contentieux
+Procédure judiciaire entre l'assureur et un assuré ou tiers. En jeu : mesuré par LITIGATION_RISK et LEGAL_COST_RATIO.
+
+### Dispositif de contrôle interne
+Organisation des contrôles permanents (conformité, risques, qualité) au sein de l'entreprise. En jeu : levier LEV-CONF-02, affecte CTRL_MATURITY et la vulnérabilité aux audits.
+
+### Audit délégataire
+Contrôle d'un partenaire à qui la gestion est déléguée (courtier gestionnaire, plateforme affinitaire). En jeu : levier LEV-CONF-03, améliore FRAUD_PROC_ROB et CHAN_QUALITY.
+
+### Concentration apporteur
+Dépendance d'une compagnie à un petit nombre de distributeurs pour son chiffre d'affaires. En jeu : indice DISTRIB_CONC_RISK. > 50% = dépendance élevée, risque de rupture.
+
+### Qualité portefeuille par canal
+Performance technique (S/P) des contrats selon leur source de distribution (digital, agents, courtiers, affinitaires). En jeu : indice CHAN_QUALITY.
+
+### Température réputationnelle
+Indicateur de la pression médiatique et de la confiance publique. En jeu : indice REP_TEMP, influence IAC et déclenche l'attention régulateur.
 
 ---
 

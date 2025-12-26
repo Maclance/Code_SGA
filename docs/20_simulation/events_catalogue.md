@@ -1,9 +1,12 @@
 # events_catalogue.md — Catalogue des Événements
 
-**Version** : 1.0  
+**Version** : 1.1  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-25  
+**Dernière MAJ** : 2025-12-26  
 **Auteur** : Simulation Engineer
+
+> **CHANGELOG**
+> - **2025-12-26** : Ajout de 5 nouveaux événements IARD (CatNat triple impact, Audit régulateur, Rupture apporteur, Crise médiatique, Fraude opportuniste).
 
 ---
 
@@ -791,6 +794,481 @@ news_flash:
     low: "Une réclamation client fait l'objet d'une médiation."
     medium: "L'ACPR lance une inspection sur les pratiques."
     high: "Sanction majeure : amende et obligations de remédiation."
+```
+
+---
+
+## 3.6-3.10 NOUVEAUX ÉVÉNEMENTS IARD
+
+### 3.6 EVT-CATNAT-01 — CatNat Triple Impact
+
+```yaml
+id: EVT-CATNAT-01
+name: CatNat Triple Impact (technique + ops + régulateur)
+type: market
+category: CLIMAT
+
+probability_base: 0.08  # 8% par tour (moins fréquent mais plus sévère que EVT-MKT-01)
+
+seasonality:
+  Q1: 1.5   # Tempêtes hivernales
+  Q2: 0.5
+  Q3: 0.8   # Orages grêle
+  Q4: 1.2   # Inondations
+
+intensity:
+  distribution: gaussian
+  min: 1.0
+  max: 3.0
+  mean: 1.5
+  std: 0.5
+
+# TRIPLE IMPACT - caractéristique distinctive
+effects:
+  # 1) IMPACT TECHNIQUE
+  - target: frequence_mrh
+    type: relative
+    base_value: 0.40          # +40% fréquence MRH
+    intensity_multiplier: 1.0
+    delay: 0
+  
+  - target: severite_mrh
+    type: relative
+    base_value: 0.25          # +25% sévérité MRH
+    intensity_multiplier: 1.0
+    delay: 0
+  
+  - target: stock_sinistres
+    type: relative
+    base_value: 0.60          # +60% stock sinistres
+    intensity_multiplier: 1.2
+    delay: 0
+  
+  # 2) IMPACT OPÉRATIONNEL
+  - target: BACKLOG_DAYS
+    type: absolute
+    base_value: 30            # +30 jours de backlog
+    intensity_multiplier: 1.5
+    delay: 0
+  
+  - target: IPQO
+    type: absolute
+    base_value: -15           # Dégradation qualité opérationnelle
+    intensity_multiplier: 1.0
+    delay: 0
+  
+  - target: capacite_sinistres
+    type: relative
+    base_value: -0.20         # -20% capacité (saturation)
+    intensity_multiplier: 0.8
+    delay: 0
+  
+  # 3) IMPACT RÉPUTATION / RÉGULATEUR
+  - target: REP_TEMP
+    type: absolute
+    base_value: 25            # +25 pression médiatique
+    intensity_multiplier: 1.2
+    delay: 0
+  
+  - target: REG_HEAT
+    type: absolute
+    base_value: 15            # +15 attention régulateur
+    intensity_multiplier: 1.0
+    delay: 1
+    condition: "if BACKLOG_DAYS > 30"
+  
+  - target: satisfaction_nps
+    type: absolute
+    base_value: -12
+    intensity_multiplier: 1.0
+    delay: 1
+
+duration: 3
+
+mitigation_factors:
+  # Mitigation technique
+  - source: LEV-REA-01:strong
+    reduction: 0.35
+  - source: LEV-REA-01:maximum
+    reduction: 0.55
+  - source: LEV-PREV-01
+    reduction: 0.10
+  
+  # Mitigation opérationnelle
+  - source: LEV-CRISE-01:N2
+    reduction: 0.25
+  - source: LEV-CRISE-01:N3
+    reduction: 0.45
+  - source: OPS_SURGE_CAP
+    condition: "> 50"
+    reduction: 0.20
+  
+  # Mitigation réputation
+  - source: communication_crise
+    condition: "> 60"
+    reduction: 0.15
+
+news_flash:
+  title: "🌊⚠️ CATASTROPHE NATURELLE MAJEURE"
+  severity_levels:
+    low: "Événement climatique significatif : plusieurs régions touchées. Les équipes sont mobilisées."
+    medium: "Catastrophe naturelle déclarée. Afflux massif de sinistres. La pression médiatique monte."
+    high: "CRISE MAJEURE : les délais explosent, le régulateur interpelle les assureurs. L'État anticipe une intervention."
+```
+
+---
+
+### 3.7 EVT-AUDIT-01 — Audit régulateur / Injonction
+
+```yaml
+id: EVT-AUDIT-01
+name: Audit régulateur / Injonction de remédiation
+type: company
+category: REGLEMENTAIRE
+
+probability_base: 0.03  # 3% par tour
+
+# Déclenchement automatique si condition remplie
+auto_trigger:
+  condition: "REG_HEAT > 70 pendant 2 tours consécutifs"
+  probability: 0.80
+
+vulnerability_factors:
+  - source: CTRL_MATURITY
+    threshold: 40
+    operator: "<"
+    probability_modifier: 2.5
+  
+  - source: IS
+    threshold: 40
+    operator: "<"
+    probability_modifier: 2.0
+  
+  - source: REG_HEAT
+    threshold: 50
+    operator: ">"
+    probability_modifier: 1.8
+  
+  - source: COMPLAINTS_RATE
+    threshold: 15
+    operator: ">"
+    probability_modifier: 1.5
+
+intensity:
+  distribution: uniform
+  min: 0.7
+  max: 1.5
+
+effects:
+  - target: frais_exceptionnels
+    type: absolute
+    base_value: 1000000       # 1M€ coûts remédiation minimum
+    intensity_multiplier: 2.0
+    delay: 0
+  
+  - target: capacite_sinistres
+    type: relative
+    base_value: -0.15         # -15% capacité (mobilisation équipes)
+    intensity_multiplier: 0.8
+    delay: 0
+    duration: 2
+  
+  - target: IS
+    type: absolute
+    base_value: -15
+    intensity_multiplier: 1.0
+    delay: 0
+  
+  - target: REG_HEAT
+    type: absolute
+    base_value: 20            # Attention maintenue
+    intensity_multiplier: 1.0
+    delay: 0
+  
+  - target: croissance_max
+    type: absolute
+    base_value: -0.05         # -5% croissance autorisée
+    intensity_multiplier: 1.0
+    delay: 0
+    duration: 4               # 4 tours de contrainte
+
+duration: 4
+
+recovery_rate: 0.20  # Récupération lente
+
+mitigation_factors:
+  - source: LEV-CONF-02:renforce
+    reduction: 0.40
+  - source: CTRL_MATURITY
+    condition: "> 70"
+    reduction: 0.35
+  - source: IS
+    condition: "> 70"
+    reduction: 0.25
+
+news_flash:
+  title: "🔍 CONTRÔLE ACPR"
+  severity_levels:
+    low: "L'ACPR annonce un contrôle de routine sur les pratiques."
+    medium: "Contrôle approfondi : des observations sont émises, remédiation attendue."
+    high: "INJONCTION : le régulateur exige un plan de remédiation sous 6 mois. Sanction possible."
+```
+
+---
+
+### 3.8 EVT-APPORTEUR-01 — Rupture/Renégociation apporteur majeur
+
+```yaml
+id: EVT-APPORTEUR-01
+name: Rupture ou renégociation d'un apporteur majeur
+type: company
+category: OPERATIONNEL
+
+probability_base: 0.02  # 2% par tour
+
+vulnerability_factors:
+  - source: DISTRIB_CONC_RISK
+    threshold: 60
+    operator: ">"
+    probability_modifier: 3.0
+  
+  - source: DISTRIB_CONC_RISK
+    threshold: 80
+    operator: ">"
+    probability_modifier: 5.0
+  
+  - source: LEV-DIS-03-CONCENTRATION:plafond
+    condition: "active"
+    probability_modifier: 2.0  # Tension créée par le plafond
+  
+  - source: commissions
+    threshold: "below_market"
+    probability_modifier: 1.5
+
+intensity:
+  distribution: uniform
+  min: 0.6
+  max: 1.4
+
+effects:
+  # Impact business
+  - target: portefeuille
+    type: relative
+    base_value: -0.10         # Perte 10% portefeuille de base
+    intensity_multiplier: 1.5
+    delay: 2
+    note: "Perte proportionnelle à la part de l'apporteur"
+  
+  - target: IAC
+    type: absolute
+    base_value: -8
+    intensity_multiplier: 1.0
+    delay: 1
+  
+  - target: primes
+    type: relative
+    base_value: -0.08         # -8% primes
+    intensity_multiplier: 1.5
+    delay: 2
+  
+  # Coûts de remplacement
+  - target: frais_acquisition
+    type: relative
+    base_value: 0.20          # +20% coût acquisition (nouveaux canaux)
+    intensity_multiplier: 1.0
+    delay: 0
+    duration: 4
+  
+  # Impact moral interne
+  - target: IERH
+    type: absolute
+    base_value: -5
+    intensity_multiplier: 0.5
+    delay: 1
+
+duration: 4
+
+recovery_rate: 0.25
+
+mitigation_factors:
+  - source: LEV-DIS-03-CONCENTRATION:diversification
+    reduction: 0.50
+  - source: DISTRIB_CONC_RISK
+    condition: "< 40"
+    reduction: 0.60
+  - source: nb_apporteurs
+    condition: "> 15"
+    reduction: 0.30
+
+news_flash:
+  title: "🤝❌ RUPTURE PARTENARIAT"
+  severity_levels:
+    low: "Un apporteur significatif demande à renégocier les conditions."
+    medium: "Rupture de contrat : un partenaire majeur annonce son départ. Recherche de solutions."
+    high: "CRISE DISTRIBUTION : votre principal apporteur part à la concurrence. Impact immédiat sur le portefeuille."
+```
+
+---
+
+### 3.9 EVT-MEDIACRISE-01 — Crise médiatique sur délais/qualité indemnisation
+
+```yaml
+id: EVT-MEDIACRISE-01
+name: Crise médiatique sur délais/qualité d'indemnisation
+type: company
+category: OPERATIONNEL
+
+probability_base: 0.02  # 2% par tour
+
+vulnerability_factors:
+  - source: BACKLOG_DAYS
+    threshold: 45
+    operator: ">"
+    probability_modifier: 3.0
+  
+  - source: COMPLAINTS_RATE
+    threshold: 12
+    operator: ">"
+    probability_modifier: 2.5
+  
+  - source: REP_TEMP
+    threshold: 50
+    operator: ">"
+    probability_modifier: 2.0
+  
+  - source: LEV-CLI-01:restrictive
+    condition: "active"
+    probability_modifier: 1.8
+
+intensity:
+  distribution: gaussian
+  min: 0.5
+  max: 2.0
+  mean: 1.0
+  std: 0.4
+
+effects:
+  - target: REP_TEMP
+    type: absolute
+    base_value: 35            # Forte hausse pression médiatique
+    intensity_multiplier: 1.2
+    delay: 0
+  
+  - target: IAC
+    type: absolute
+    base_value: -15
+    intensity_multiplier: 1.0
+    delay: 0
+  
+  - target: acquisition
+    type: relative
+    base_value: -0.25         # -25% acquisition
+    intensity_multiplier: 1.0
+    delay: 1
+    duration: 3
+  
+  - target: resiliation
+    type: relative
+    base_value: 0.15          # +15% résiliations
+    intensity_multiplier: 1.0
+    delay: 1
+    duration: 3
+  
+  - target: REG_HEAT
+    type: absolute
+    base_value: 15
+    intensity_multiplier: 0.8
+    delay: 1
+
+duration: 3
+
+recovery_rate: 0.40  # Récupération si réaction rapide
+
+mitigation_factors:
+  - source: LEV-CLI-02:proactif_mediation
+    reduction: 0.35
+  - source: communication_crise
+    condition: "> 70"
+    reduction: 0.30
+  - source: BACKLOG_DAYS
+    condition: "< 20"
+    reduction: 0.50
+  - source: COMPLAINTS_RATE
+    condition: "< 5"
+    reduction: 0.40
+
+news_flash:
+  title: "📺 CRISE MÉDIATIQUE"
+  severity_levels:
+    low: "Des témoignages de clients mécontents circulent sur les réseaux sociaux."
+    medium: "Un reportage TV met en cause vos délais d'indemnisation. La presse s'empare du sujet."
+    high: "TEMPÊTE MÉDIATIQUE : associations de consommateurs, politiques et régulateur vous interpellent publiquement."
+```
+
+---
+
+### 3.10 EVT-FRAUD-OPP-01 — Pic fraude opportuniste post-événement
+
+```yaml
+id: EVT-FRAUD-OPP-01
+name: Pic de fraude opportuniste post-événement
+type: market
+category: OPERATIONNEL
+
+probability_base: 0.00  # Événement conditionnel uniquement
+
+# Déclenchement conditionnel
+trigger_condition:
+  - "EVT-MKT-01 déclenché au tour précédent"
+  - "OU EVT-CATNAT-01 déclenché au tour précédent"
+triggered_probability: 0.60  # 60% si condition remplie
+
+intensity:
+  distribution: uniform
+  min: 0.8
+  max: 1.5
+
+effects:
+  - target: fraude_subie
+    type: relative
+    base_value: 0.40          # +40% fraude (sur baseline 5-7%)
+    intensity_multiplier: 1.0
+    delay: 0
+    note: "Fraude opportuniste : fausses déclarations, majoration dommages"
+  
+  - target: severite
+    type: relative
+    base_value: 0.08          # +8% sévérité (fraude non détectée)
+    intensity_multiplier: 1.0
+    delay: 0
+  
+  - target: IPQO
+    type: absolute
+    base_value: -5            # Temps passé sur contrôles supplémentaires
+    intensity_multiplier: 0.5
+    delay: 0
+
+duration: 2
+
+mitigation_factors:
+  - source: LEV-SIN-02:N2
+    reduction: 0.30
+  - source: LEV-SIN-02:N3
+    reduction: 0.50
+  - source: LEV-FRAUD-PROC-01:N2
+    reduction: 0.25
+  - source: LEV-FRAUD-PROC-01:N3
+    reduction: 0.45
+  - source: FRAUD_PROC_ROB
+    condition: "> 60"
+    reduction: 0.35
+
+news_flash:
+  title: "🎭 ALERTE FRAUDE"
+  severity_levels:
+    low: "Une légère hausse des déclarations suspectes est observée après l'événement climatique."
+    medium: "Pic de fraude détecté : des réseaux opportunistes exploitent la situation. Vigilance renforcée."
+    high: "FRAUDE ORGANISÉE : multiplication des fausses déclarations, montages avec prestataires suspects. Investigation en cours."
 ```
 
 ---

@@ -1,9 +1,12 @@
-# indices.md — Spécification Technique des 7 Indices
+# indices.md — Spécification Technique des Indices
 
-**Version** : 1.0  
+**Version** : 1.1  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-25  
+**Dernière MAJ** : 2025-12-26  
 **Auteur** : Simulation Engineer
+
+> **CHANGELOG**
+> - **2025-12-26** : Ajout de 13 nouveaux indices IARD (souscription, crise, réclamations, conformité, distribution). Extension de IPQO et IS avec nouvelles variables.
 
 > Ce document complète `docs/00_product/indices.md` (source of truth) avec les détails techniques d'implémentation.
 
@@ -649,11 +652,499 @@ INV-BIZ-05  Recours_Recouvres ≤ Sinistres_RC × 0.30
 
 ---
 
-## 5) Checklist Implémentation
+## 7) Nouveaux Indices IARD Complets
 
-- [ ] Toutes les formules retournent des valeurs dans [0, 100]
+> Indices ajoutés pour couvrir les 5 gaps IARD identifiés.
+
+### 7.1 UND_STRICTNESS — Posture de Souscription
+
+**Objectif** : Mesurer le niveau de sélectivité dans l'acceptation des risques.
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `posture_souscription` | Choix du joueur (permissif → sélectif) | [0, 100] | - |
+| `regles_selection_maturite` | Niveau des règles de scoring | [0, 100] | - |
+
+#### Formule
+
+```
+UND_STRICTNESS(t) = clamp(
+    0.50 × posture_souscription
+  + 0.30 × regles_selection_maturite
+  + 0.20 × IMD × 0.5,  // bonus si data-driven
+  0, 100
+)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 (tout accepter) |
+| Maximum | 100 (très sélectif) |
+| Valeur initiale | Selon profil compagnie [40, 60] |
+| Effet sur IAC | UND_STRICTNESS ↑ → IAC ↓ (moins de volume) |
+| Effet sur IPP | UND_STRICTNESS ↑ → IPP ↑ (meilleure qualité, retard 2-3T) |
+
+---
+
+### 7.2 ADVERSE_SEL_RISK — Risque d'Anti-sélection
+
+**Objectif** : Mesurer la dérive qualitative du portefeuille (attraction de mauvais risques).
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `delta_prix_marche` | Écart de tarif vs marché | [-30, +30] | % |
+| `UND_STRICTNESS` | Posture de souscription | [0, 100] | - |
+| `CHAN_QUALITY` | Qualité portefeuille canaux | [0, 100] | - |
+
+#### Formule
+
+```
+# Base = exposition brute
+base_risk = max(0, -delta_prix_marche × 2)  // prix bas → risque
+
+# Modulation par sélection
+modulation = (100 - UND_STRICTNESS) × 0.3 + (100 - CHAN_QUALITY) × 0.2
+
+ADVERSE_SEL_RISK(t) = clamp(
+    base_risk + modulation,
+    0, 100
+)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 |
+| Maximum | 100 |
+| Valeur initiale | 30 (neutre) |
+| Seuil alerte | > 60 → "Portefeuille en dérive" |
+| Effet retard sur IPP | 2-3T (matérialisation S/P) |
+
+---
+
+### 7.3 OPS_SURGE_CAP — Capacité d'Absorption Afflux
+
+**Objectif** : Mesurer la capacité à absorber un pic exceptionnel (CatNat, crise).
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `plan_crise_level` | Niveau plan de crise | [0, 3] | niveau |
+| `effectif_reserve` | % effectif mobilisable en crise | [0, 0.3] | % |
+| `partenaires_crise` | Accords prestataires de crise | [0, 100] | - |
+| `IERH` | Équilibre RH (résilience équipes) | [0, 100] | - |
+
+#### Formule
+
+```
+OPS_SURGE_CAP(t) = clamp(
+    plan_crise_level × 20
+  + effectif_reserve × 100
+  + partenaires_crise × 0.2
+  + IERH × 0.1,
+  0, 100
+)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 |
+| Maximum | 100 |
+| Valeur initiale | 30 (faible préparation) |
+| Utilisation | Mitigation lors événement CatNat |
+
+---
+
+### 7.4 BACKLOG_DAYS — Retard de Traitement Sinistres
+
+**Objectif** : Mesurer le retard moyen dans le traitement des dossiers sinistres.
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `stock_sinistres` | Nombre dossiers ouverts | [0, ∞[ | nb |
+| `capacite_traitement` | Dossiers traitables/tour | [0, ∞[ | nb |
+| `OPS_SURGE_CAP` | Capacité absorption afflux | [0, 100] | - |
+
+#### Formule
+
+```
+# Flux net de backlog
+flux_net = max(0, stock_sinistres - capacite_traitement)
+
+# Atténuation si surge capacity
+surge_factor = OPS_SURGE_CAP / 100
+
+# Calcul en jours (1 tour trimestre = ~65 jours ouvrés)
+BACKLOG_DAYS(t) = BACKLOG_DAYS(t-1) × 0.7  // decay naturel
+                + flux_net / capacite_traitement × 30 × (1 - surge_factor × 0.5)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 |
+| Maximum | ∞ (non borné) |
+| Valeur initiale | 15 jours (normal) |
+| Seuil alerte | > 30 jours → dégradation satisfaction |
+| Seuil crise | > 60 jours → Regulator_Heat ↑, IAC ↓ |
+
+---
+
+### 7.5 REP_TEMP — Température Réputationnelle
+
+**Objectif** : Mesurer la pression médiatique et la confiance publique.
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `BACKLOG_DAYS` | Retard traitement | [0, ∞[ | jours |
+| `COMPLAINTS_RATE` | Taux réclamations | [0, ∞[ | ‰ |
+| `evenement_mediatique` | Événement négatif récent | [0, 1] | binaire |
+| `communication_crise` | Qualité communication | [0, 100] | - |
+
+#### Formule
+
+```
+# Pression = facteurs négatifs
+pression = min(BACKLOG_DAYS, 100) × 0.3
+         + min(COMPLAINTS_RATE × 10, 50)
+         + evenement_mediatique × 30
+
+# Atténuation par communication
+attenuation = communication_crise × 0.3
+
+REP_TEMP(t) = clamp(
+    REP_TEMP(t-1) × 0.8  // decay naturel
+  + pression - attenuation,
+  0, 100
+)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 (sérénité) |
+| Maximum | 100 (crise majeure) |
+| Valeur initiale | 20 (normal) |
+| Seuil alerte | > 50 → impact IAC |
+| Seuil crise | > 80 → Regulator_Heat ↑↑ |
+
+---
+
+### 7.6 REG_HEAT — Intensité Relation Régulateur
+
+**Objectif** : Mesurer la tension avec le régulateur (ACPR) et l'État.
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `BACKLOG_DAYS` | Retard traitement | [0, ∞[ | jours |
+| `REP_TEMP` | Pression réputationnelle | [0, 100] | - |
+| `CTRL_MATURITY` | Maturité dispositif contrôle | [0, 100] | - |
+| `IS` | Indice de sincérité | [0, 100] | - |
+| `plaintes_collectives` | Signalements collectifs | [0, ∞[ | nb |
+
+#### Formule
+
+```
+# Facteurs d'alerte régulateur
+facteurs_alerte = max(0, BACKLOG_DAYS - 30) × 0.5
+                + max(0, REP_TEMP - 50) × 0.3
+                + plaintes_collectives × 5
+
+# Protection par maturité contrôle et sincérité
+protection = (CTRL_MATURITY + IS) / 2 × 0.3
+
+REG_HEAT(t) = clamp(
+    REG_HEAT(t-1) × 0.9  // decay lent
+  + facteurs_alerte - protection,
+  0, 100
+)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 |
+| Maximum | 100 |
+| Valeur initiale | 10 (relation normale) |
+| Seuil alerte | > 40 → "Attention régulateur" |
+| Seuil injonction | > 70 → événement "Audit/Injonction" probable |
+
+---
+
+### 7.7 COMPLAINTS_RATE — Taux de Réclamations
+
+**Objectif** : Mesurer le volume de réclamations clients (pour 1000 sinistres).
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `politique_indemnisation` | Généreuse/Standard/Restrictive | [0, 100] | - |
+| `BACKLOG_DAYS` | Retard traitement | [0, ∞[ | jours |
+| `service_client_level` | Niveau service client | [0, 100] | - |
+| `sinistres_traites` | Volume sinistres traités | [0, ∞[ | nb |
+
+#### Formule
+
+```
+# Baseline réclamations
+baseline = 5  // 5‰ baseline standard
+
+# Facteurs d'aggravation
+aggravation = max(0, 100 - politique_indemnisation) × 0.05
+            + max(0, BACKLOG_DAYS - 20) × 0.1
+
+# Facteurs de réduction
+reduction = service_client_level × 0.03
+
+COMPLAINTS_RATE(t) = max(1, baseline + aggravation - reduction)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 1‰ |
+| Maximum | ∞ |
+| Valeur initiale | 5‰ (marché français) |
+| Seuil alerte | > 10‰ → REP_TEMP ↑ |
+
+---
+
+### 7.8 LITIGATION_RISK — Risque de Contentieux
+
+**Objectif** : Mesurer l'exposition au risque de procédures judiciaires.
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `COMPLAINTS_RATE` | Taux réclamations | [0, ∞[ | ‰ |
+| `politique_indemnisation` | Restrictive = risque | [0, 100] | - |
+| `mediation_level` | Niveau médiation | [0, 100] | - |
+
+#### Formule
+
+```
+LITIGATION_RISK(t) = clamp(
+    COMPLAINTS_RATE × 3
+  + (100 - politique_indemnisation) × 0.2
+  - mediation_level × 0.3,
+  0, 100
+)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 |
+| Maximum | 100 |
+| Valeur initiale | 20 |
+| Effet | Déclenche LEGAL_COST_RATIO ↑ |
+
+---
+
+### 7.9 LEGAL_COST_RATIO — Ratio Coûts Juridiques
+
+**Objectif** : Mesurer le poids des frais juridiques dans les primes.
+
+#### Formule
+
+```
+# Coûts = contentieux × coût moyen
+couts_juridiques = litigation_count × cout_moyen_contentieux
+
+LEGAL_COST_RATIO(t) = couts_juridiques / primes × 100
+```
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Baseline | 0.2-0.5% des primes |
+| Seuil alerte | > 1% |
+| Coût moyen contentieux | 15,000€ (estimation) |
+
+---
+
+### 7.10 CTRL_MATURITY — Maturité Dispositif de Contrôle
+
+**Objectif** : Mesurer la robustesse du dispositif de contrôle interne et conformité.
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `controle_interne_level` | Niveau contrôle interne | [0, 3] | niveau |
+| `audit_delegataires_level` | Niveau audit délégataires | [0, 3] | niveau |
+| `effectif_conformite` | ETP dédiés conformité | [0, ∞[ | ETP |
+
+#### Formule
+
+```
+CTRL_MATURITY(t) = clamp(
+    controle_interne_level × 25
+  + audit_delegataires_level × 15
+  + min(effectif_conformite / 10 × 20, 30),
+  0, 100
+)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 |
+| Maximum | 100 |
+| Valeur initiale | 40 (baseline marché) |
+| Effet | Réduit REG_HEAT, améliore IS |
+
+---
+
+### 7.11 FRAUD_PROC_ROB — Robustesse Anti-Fraude Procédurale
+
+**Objectif** : Mesurer la sécurisation des processus internes contre la fraude organisée.
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `fraud_proc_level` | Niveau anti-fraude procédurale | [0, 3] | niveau |
+| `audit_delegataires_level` | Audit des partenaires | [0, 3] | niveau |
+| `CTRL_MATURITY` | Maturité contrôle | [0, 100] | - |
+
+#### Formule
+
+```
+FRAUD_PROC_ROB(t) = clamp(
+    fraud_proc_level × 30
+  + audit_delegataires_level × 15
+  + CTRL_MATURITY × 0.2,
+  0, 100
+)
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 |
+| Maximum | 100 |
+| Valeur initiale | 30 |
+| Effet | Mitigation événement "Pic fraude post-CatNat" |
+
+---
+
+### 7.12 CHAN_QUALITY — Qualité Portefeuille par Canal
+
+**Objectif** : Mesurer la performance technique (S/P) par canal de distribution.
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `SP_canal_digital` | S/P canal digital | [0, 2] | ratio |
+| `SP_canal_agents` | S/P canal agents | [0, 2] | ratio |
+| `SP_canal_courtiers` | S/P canal courtiers | [0, 2] | ratio |
+| `SP_canal_affinitaires` | S/P canal affinitaires | [0, 2] | ratio |
+| `mix_canaux` | Répartition canaux | % | - |
+
+#### Formule
+
+```
+# Score pondéré par canal (inversé : S/P bas = qualité haute)
+score_canal(sp) = max(0, 100 - sp × 100)
+
+CHAN_QUALITY(t) = Σ(mix_canal × score_canal(SP_canal)) / 100
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 |
+| Maximum | 100 |
+| Valeur initiale | 60 (moyenne) |
+| Effet | Améliore IPP, réduit ADVERSE_SEL_RISK |
+
+---
+
+### 7.13 DISTRIB_CONC_RISK — Risque Concentration Distributeurs
+
+**Objectif** : Mesurer la dépendance aux gros apporteurs.
+
+#### Variables
+
+| Variable | Description | Plage | Unité |
+|----------|-------------|-------|-------|
+| `part_top1` | Part CA du 1er apporteur | [0, 1] | % |
+| `part_top3` | Part CA des 3 premiers | [0, 1] | % |
+| `nb_apporteurs` | Nombre d'apporteurs actifs | [0, ∞[ | nb |
+
+#### Formule
+
+```
+# Indice de concentration (style Herfindahl simplifié)
+concentration = part_top1 × 0.5 + part_top3 × 0.3 + max(0, 1 - nb_apporteurs/20) × 0.2
+
+DISTRIB_CONC_RISK(t) = concentration × 100
+```
+
+#### Bornes et contraintes
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Minimum | 0 |
+| Maximum | 100 |
+| Valeur initiale | Selon profil compagnie [20, 70] |
+| Seuil alerte | > 50% → "Dépendance élevée" |
+| Seuil critique | > 70% → vulnérable rupture |
+
+---
+
+## 8) Invariants des Nouveaux Indices
+
+```
+INV-IDX-08  UND_STRICTNESS ↑ → IAC ↓ ET IPP ↑ (retard 2-3T)
+
+INV-IDX-09  ADVERSE_SEL_RISK > 60 pendant 2T → S/P se dégrade
+
+INV-IDX-10  BACKLOG_DAYS > 60 → REG_HEAT ↑ automatiquement
+
+INV-IDX-11  REP_TEMP > 80 → IAC ↓ (-10) + Regulator_Heat ↑
+
+INV-IDX-12  CTRL_MATURITY < 30 → vulnérabilité ×2 événement "Audit"
+
+INV-IDX-13  DISTRIB_CONC_RISK > 70 → vulnérabilité ×3 événement "Rupture apporteur"
+```
+
+---
+
+## 9) Checklist Implémentation
+
+- [ ] Toutes les formules retournent des valeurs dans [0, 100] (sauf BACKLOG_DAYS, LEGAL_COST_RATIO)
 - [ ] Les pondérations somment à 1.0
 - [ ] Les effets retard sont correctement appliqués
 - [ ] Les invariants sont vérifiés à chaque calcul
 - [ ] Les seuils déclenchent les alertes appropriées
 - [ ] Les exemples chiffrés correspondent aux formules
+- [ ] Les 13 nouveaux indices sont intégrés au cockpit (selon difficulté)
+

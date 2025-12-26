@@ -1,9 +1,12 @@
 # leviers_catalogue.md — Catalogue Technique des Leviers
 
-**Version** : 1.0  
+**Version** : 1.1  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-25  
+**Dernière MAJ** : 2025-12-26  
 **Auteur** : Simulation Engineer
+
+> **CHANGELOG**
+> - **2025-12-26** : Ajout de 10 nouveaux leviers IARD (souscription, crise, client, conformité, distribution). Catégories ajoutées : SOUSCRIPTION, GESTION_CRISE, EXPERIENCE_CLIENT, CONFORMITE.
 
 > Ce document complète `docs/00_product/leviers_catalogue.md` (source of truth) avec les spécifications techniques d'implémentation.
 
@@ -892,6 +895,719 @@ options:
         impact_ipp: 5
 
 delay: 0
+```
+
+---
+
+### 2.11 SOUSCRIPTION & APPÉTIT AU RISQUE (NOUVEAU)
+
+#### LEV-UND-01 — Posture de souscription
+
+```yaml
+id: LEV-UND-01
+name: Posture de souscription
+category: SOUSCRIPTION
+availability: Novice
+type: Persistent
+scope: Global
+
+cost:
+  budget_units: 0
+  recurring: false
+
+options:
+  - id: permissive
+    label: "Permissive (tout accepter)"
+    effects:
+      - target: IAC
+        type: absolute
+        value: 10
+        delay: 0
+      - target: ADVERSE_SEL_RISK
+        type: absolute
+        value: 25
+        delay: 0
+      - target: IPP
+        type: absolute
+        value: -8
+        delay: 3
+        probability: 0.70
+    meta:
+      risk: "Anti-sélection probable - mauvais risques attirés"
+  
+  - id: equilibree
+    label: "Équilibrée"
+    effects:
+      - target: UND_STRICTNESS
+        type: absolute
+        value: 50
+        delay: 0
+  
+  - id: selective
+    label: "Sélective"
+    effects:
+      - target: IAC
+        type: absolute
+        value: -5
+        delay: 0
+      - target: ADVERSE_SEL_RISK
+        type: absolute
+        value: -15
+        delay: 0
+      - target: IPP
+        type: absolute
+        value: 5
+        delay: 3
+  
+  - id: tres_selective
+    label: "Très sélective"
+    effects:
+      - target: IAC
+        type: absolute
+        value: -12
+        delay: 0
+      - target: ADVERSE_SEL_RISK
+        type: absolute
+        value: -25
+        delay: 0
+      - target: IPP
+        type: absolute
+        value: 10
+        delay: 3
+    meta:
+      note: "Risque de perte de parts de marché"
+
+delay: 0
+```
+
+---
+
+#### LEV-UND-02 — Règles de sélection avancées
+
+```yaml
+id: LEV-UND-02
+name: Règles de sélection avancées
+category: SOUSCRIPTION
+availability: Intermediate
+type: Persistent
+scope: Global
+
+prerequisites:
+  - type: lever_active
+    target: LEV-UND-01
+
+cost:
+  budget_units: 1
+  recurring: true
+
+options:
+  - id: regles_simples
+    label: "Règles métier simples"
+    effects:
+      - target: UND_STRICTNESS
+        type: absolute
+        value: 10
+        delay: 1
+  
+  - id: scoring_metier
+    label: "Scoring métier"
+    prerequisites:
+      - type: index_min
+        target: IMD
+        value: 40
+    effects:
+      - target: UND_STRICTNESS
+        type: absolute
+        value: 20
+        delay: 2
+      - target: ADVERSE_SEL_RISK
+        type: absolute
+        value: -10
+        delay: 2
+  
+  - id: scoring_data_driven
+    label: "Scoring data-driven"
+    prerequisites:
+      - type: index_min
+        target: IMD
+        value: 60
+    effects:
+      - target: UND_STRICTNESS
+        type: absolute
+        value: 30
+        delay: 3
+      - target: ADVERSE_SEL_RISK
+        type: absolute
+        value: -20
+        delay: 3
+
+delay: 2
+```
+
+---
+
+### 2.12 GESTION DE CRISE (NOUVEAU)
+
+#### LEV-CRISE-01 — Plan de crise & Surge capacity
+
+```yaml
+id: LEV-CRISE-01
+name: Plan de crise & Surge capacity
+category: GESTION_CRISE
+availability: Intermediate
+type: Progressive
+scope: Global
+
+cost:
+  budget_units: 2
+  recurring: true
+
+levels:
+  N0:
+    label: "Pas de plan"
+    effects: []
+  
+  N1:
+    label: "Plan basique"
+    available_at: Intermediate
+    cost:
+      budget_units: 1
+    effects:
+      - target: OPS_SURGE_CAP
+        type: absolute
+        value: 20
+        delay: 1
+      - target: REP_TEMP
+        type: absolute
+        value: -5
+        delay: 0
+        condition: "if evenement_catnat_actif"
+    description: "Procédures documentées, liste de contacts"
+  
+  N2:
+    label: "Plan industrialisé"
+    available_at: Intermediate
+    cost:
+      budget_units: 2
+      cumulative: true
+    prerequisites:
+      - type: lever_level
+        target: LEV-CRISE-01
+        value: N1
+    effects:
+      - target: OPS_SURGE_CAP
+        type: absolute
+        value: 40
+        delay: 2
+      - target: BACKLOG_DAYS
+        type: relative
+        value: -20
+        delay: 0
+        condition: "if evenement_catnat_actif"
+      - target: REP_TEMP
+        type: absolute
+        value: -10
+        delay: 0
+        condition: "if evenement_catnat_actif"
+    description: "Cellule de crise, effectifs réserve, process rodés"
+  
+  N3:
+    label: "Plan avec partenaires de crise"
+    available_at: Expert
+    cost:
+      budget_units: 3
+      cumulative: true
+    prerequisites:
+      - type: lever_level
+        target: LEV-CRISE-01
+        value: N2
+    effects:
+      - target: OPS_SURGE_CAP
+        type: absolute
+        value: 70
+        delay: 3
+      - target: BACKLOG_DAYS
+        type: relative
+        value: -40
+        delay: 0
+        condition: "if evenement_catnat_actif"
+      - target: REG_HEAT
+        type: absolute
+        value: -10
+        delay: 0
+        condition: "if evenement_catnat_actif"
+    description: "Accords prestataires, renfort externe immédiat"
+
+delay: 2
+```
+
+---
+
+### 2.13 EXPÉRIENCE CLIENT (NOUVEAU)
+
+#### LEV-CLI-01 — Politique d'indemnisation
+
+```yaml
+id: LEV-CLI-01
+name: Politique d'indemnisation
+category: EXPERIENCE_CLIENT
+availability: Novice
+type: Persistent
+scope: Global
+
+cost:
+  budget_units: 0
+  recurring: false
+
+options:
+  - id: genereuse
+    label: "Généreuse"
+    effects:
+      - target: severite
+        type: relative
+        value: 8
+        delay: 0
+        note: "Coûts sinistres +8%"
+      - target: COMPLAINTS_RATE
+        type: relative
+        value: -40
+        delay: 1
+      - target: LITIGATION_RISK
+        type: absolute
+        value: -15
+        delay: 1
+      - target: satisfaction_nps
+        type: absolute
+        value: 10
+        delay: 1
+  
+  - id: standard
+    label: "Standard"
+    effects: []
+  
+  - id: restrictive
+    label: "Restrictive"
+    effects:
+      - target: severite
+        type: relative
+        value: -8
+        delay: 0
+        note: "Coûts sinistres -8%"
+      - target: COMPLAINTS_RATE
+        type: relative
+        value: 50
+        delay: 1
+      - target: LITIGATION_RISK
+        type: absolute
+        value: 20
+        delay: 1
+      - target: satisfaction_nps
+        type: absolute
+        value: -10
+        delay: 1
+
+delay: 0
+```
+
+---
+
+#### LEV-CLI-02 — Service client & Médiation
+
+```yaml
+id: LEV-CLI-02
+name: Service client & Médiation
+category: EXPERIENCE_CLIENT
+availability: Intermediate
+type: Persistent
+scope: Global
+
+cost:
+  budget_units: 1
+  recurring: true
+
+options:
+  - id: minimum_legal
+    label: "Minimum légal"
+    effects: []
+  
+  - id: renforce
+    label: "Renforcé"
+    effects:
+      - target: COMPLAINTS_RATE
+        type: relative
+        value: -20
+        delay: 1
+      - target: LITIGATION_RISK
+        type: absolute
+        value: -10
+        delay: 1
+      - target: IAC
+        type: absolute
+        value: 3
+        delay: 2
+  
+  - id: proactif_mediation
+    label: "Proactif avec médiation interne"
+    cost:
+      budget_units: 2
+    effects:
+      - target: COMPLAINTS_RATE
+        type: relative
+        value: -40
+        delay: 1
+      - target: LITIGATION_RISK
+        type: absolute
+        value: -25
+        delay: 1
+      - target: LEGAL_COST_RATIO
+        type: relative
+        value: -30
+        delay: 2
+      - target: IAC
+        type: absolute
+        value: 5
+        delay: 2
+
+delay: 1
+```
+
+---
+
+### 2.14 GOUVERNANCE & CONFORMITÉ (NOUVEAU)
+
+#### LEV-CONF-02 — Dispositif de contrôle interne
+
+```yaml
+id: LEV-CONF-02
+name: Dispositif de contrôle interne
+category: CONFORMITE
+availability: Intermediate
+type: Persistent
+scope: Global
+
+cost:
+  budget_units: 1
+  recurring: true
+
+options:
+  - id: minimal
+    label: "Minimal"
+    effects:
+      - target: CTRL_MATURITY
+        type: absolute
+        value: 20
+        delay: 0
+  
+  - id: standard
+    label: "Standard"
+    effects:
+      - target: CTRL_MATURITY
+        type: absolute
+        value: 50
+        delay: 1
+      - target: IS
+        type: absolute
+        value: 5
+        delay: 2
+  
+  - id: renforce
+    label: "Renforcé"
+    cost:
+      budget_units: 2
+    effects:
+      - target: CTRL_MATURITY
+        type: absolute
+        value: 80
+        delay: 2
+      - target: IS
+        type: absolute
+        value: 10
+        delay: 2
+      - target: REG_HEAT
+        type: absolute
+        value: -10
+        delay: 2
+
+delay: 1
+```
+
+---
+
+#### LEV-CONF-03 — Audit délégataires & affinitaires
+
+```yaml
+id: LEV-CONF-03
+name: Audit délégataires & affinitaires
+category: CONFORMITE
+availability: Expert
+type: Persistent
+scope: Global
+
+prerequisites:
+  - type: condition
+    description: "Utilisation de canaux délégataires/affinitaires"
+
+cost:
+  budget_units: 1
+  recurring: true
+
+options:
+  - id: pas_audit
+    label: "Pas d'audit"
+    effects: []
+  
+  - id: audit_annuel
+    label: "Audit annuel"
+    effects:
+      - target: FRAUD_PROC_ROB
+        type: absolute
+        value: 15
+        delay: 4  # effet annuel
+      - target: CHAN_QUALITY
+        type: absolute
+        value: 5
+        delay: 4
+  
+  - id: audit_continu
+    label: "Audit continu + reporting"
+    cost:
+      budget_units: 2
+    effects:
+      - target: FRAUD_PROC_ROB
+        type: absolute
+        value: 30
+        delay: 2
+      - target: CHAN_QUALITY
+        type: absolute
+        value: 10
+        delay: 2
+      - target: CTRL_MATURITY
+        type: absolute
+        value: 10
+        delay: 2
+
+delay: 2
+```
+
+---
+
+#### LEV-FRAUD-PROC-01 — Anti-fraude procédurale
+
+```yaml
+id: LEV-FRAUD-PROC-01
+name: Anti-fraude procédurale
+category: CONFORMITE
+availability: Intermediate
+type: Progressive
+scope: Global
+
+cost:
+  budget_units: 1
+  recurring: true
+
+levels:
+  N1:
+    label: "Contrôles basiques"
+    available_at: Intermediate
+    cost:
+      budget_units: 1
+    effects:
+      - target: FRAUD_PROC_ROB
+        type: absolute
+        value: 20
+        delay: 1
+    description: "Séparation des tâches, contrôles aléatoires"
+  
+  N2:
+    label: "Process outillés"
+    available_at: Intermediate
+    cost:
+      budget_units: 2
+      cumulative: true
+    prerequisites:
+      - type: lever_level
+        target: LEV-FRAUD-PROC-01
+        value: N1
+      - type: index_min
+        target: IMD
+        value: 40
+    effects:
+      - target: FRAUD_PROC_ROB
+        type: absolute
+        value: 50
+        delay: 2
+      - target: fraude_interne_evitee
+        type: relative
+        value: 15
+        delay: 2
+    description: "Workflows sécurisés, alertes automatiques"
+  
+  N3:
+    label: "IA + audit continu"
+    available_at: Expert
+    cost:
+      budget_units: 3
+      cumulative: true
+    prerequisites:
+      - type: lever_level
+        target: LEV-FRAUD-PROC-01
+        value: N2
+      - type: index_min
+        target: IMD
+        value: 60
+    effects:
+      - target: FRAUD_PROC_ROB
+        type: absolute
+        value: 85
+        delay: 4
+      - target: fraude_interne_evitee
+        type: relative
+        value: 30
+        delay: 4
+    description: "Détection anomalies temps réel, supervision continue"
+
+delay: 2
+```
+
+---
+
+### 2.15 DISTRIBUTION : QUALITÉ & CONCENTRATION (NOUVEAU)
+
+#### LEV-DIS-02-QUALITY — Exigences qualité canal
+
+```yaml
+id: LEV-DIS-02-QUALITY
+name: Exigences qualité canal
+category: DISTRIBUTION
+availability: Intermediate
+type: Persistent
+scope: Global
+
+cost:
+  budget_units: 1
+  recurring: true
+
+options:
+  - id: pas_exigence
+    label: "Pas d'exigence"
+    effects: []
+  
+  - id: suivi_sp
+    label: "Suivi S/P par canal"
+    effects:
+      - target: CHAN_QUALITY
+        type: absolute
+        value: 5
+        delay: 2
+        note: "Visibilité sans action"
+  
+  - id: bonus_malus
+    label: "Bonus-malus qualité"
+    effects:
+      - target: CHAN_QUALITY
+        type: absolute
+        value: 15
+        delay: 3
+      - target: ADVERSE_SEL_RISK
+        type: absolute
+        value: -10
+        delay: 3
+      - target: IAC
+        type: absolute
+        value: -3
+        delay: 1
+        note: "Tension avec certains distributeurs"
+  
+  - id: selection_active
+    label: "Sélection active"
+    cost:
+      budget_units: 2
+    effects:
+      - target: CHAN_QUALITY
+        type: absolute
+        value: 25
+        delay: 4
+      - target: ADVERSE_SEL_RISK
+        type: absolute
+        value: -20
+        delay: 4
+      - target: IAC
+        type: absolute
+        value: -8
+        delay: 1
+        note: "Perte de volume court terme"
+      - target: IPP
+        type: absolute
+        value: 8
+        delay: 4
+        note: "Amélioration S/P différée"
+
+delay: 2
+```
+
+---
+
+#### LEV-DIS-03-CONCENTRATION — Gestion concentration apporteurs
+
+```yaml
+id: LEV-DIS-03-CONCENTRATION
+name: Gestion concentration apporteurs
+category: DISTRIBUTION
+availability: Expert
+type: Persistent
+scope: Global
+
+cost:
+  budget_units: 1
+  recurring: true
+
+options:
+  - id: pas_suivi
+    label: "Pas de suivi"
+    effects: []
+  
+  - id: monitoring
+    label: "Monitoring"
+    effects:
+      - target: DISTRIB_CONC_RISK
+        type: absolute
+        value: -5
+        delay: 1
+        note: "Visibilité, pas d'action"
+  
+  - id: diversification
+    label: "Diversification active"
+    cost:
+      budget_units: 2
+    effects:
+      - target: DISTRIB_CONC_RISK
+        type: absolute
+        value: -20
+        delay: 4
+      - target: IAC
+        type: absolute
+        value: -5
+        delay: 1
+        note: "Coût développement nouveaux canaux"
+  
+  - id: plafond
+    label: "Plafond par apporteur"
+    cost:
+      budget_units: 2
+    effects:
+      - target: DISTRIB_CONC_RISK
+        type: absolute
+        value: -30
+        delay: 2
+      - target: IAC
+        type: absolute
+        value: -10
+        delay: 1
+        note: "Risque tension avec gros apporteur"
+    meta:
+      risk: "Peut déclencher événement 'Rupture apporteur'"
+
+delay: 2
 ```
 
 ---

@@ -1,5 +1,8 @@
 # PRD — AssurManager : Le Défi IARD
 
+> **CHANGELOG**
+> - **2025-12-26** : Ajout sections 7.11-7.15 couvrant 5 gaps IARD (souscription, CatNat/crise, réclamations/contentieux, gouvernance/conformité, distribution qualité/concentration). Source: feedback intégration IARD complet.
+
 ## 1) Résumé exécutif
 
 AssurManager est une plateforme SaaS B2B de simulation/serious game qui place l’apprenant à la tête d’une compagnie d’assurance IARD opérant sur un marché français concurrentiel. Le produit vise à sensibiliser et former des publics métiers (Direction, Partenariats, Indemnisation, Actuariat, Distribution, Conformité, Finance, Data/IT) aux arbitrages entre croissance, rentabilité, qualité opérationnelle, résilience financière et contraintes réglementaires.
@@ -245,7 +248,171 @@ Le joueur arbitre un budget par tour (et parfois des décisions structurelles). 
 ### 7.10 Provisions & placements
 
 - Politique de provisionnement (prudente vs agressive) et impacts. *Note pédagogique : en réalité, inclut PSNEM/IBNR (sinistres survenus non déclarés).*
-- Stratégie d’allocation financière (prudent vs risqué) sur résultat et résilience.
+- Stratégie d'allocation financière (prudent vs risqué) sur résultat et résilience.
+
+### 7.11 Souscription & Appétit au risque (NOUVEAU)
+
+**Objectif pédagogique** : Montrer que le prix ne suffit pas — la sélection des risques est un levier fondamental de rentabilité et de durabilité du portefeuille.
+
+#### Décisions jouables
+
+**LEV-UND-01 — Posture de souscription** (Novice)
+- Options : Permissive / Équilibrée / Sélective / Très sélective
+- Effets :
+  - Permissive → IAC ↑ (+10), mais Adverse_Selection_Risk ↑, IPP ↓ (retard 2-3T)
+  - Sélective → IAC ↓ (-5), Adverse_Selection_Risk ↓, IPP ↑ (retard 2-3T)
+- *Arbitrage clé* : volume vs qualité du portefeuille
+
+**LEV-UND-02 — Règles de sélection avancées** (Intermédiaire)
+- Options : Règles simples / Scoring métier / Scoring data-driven
+- Prérequis : IMD ≥ 40 pour scoring data-driven
+- Effets :
+  - Améliore la précision de sélection → réduit l'anti-sélection
+  - Scoring data-driven → Adverse_Selection_Risk ↓ (-15), délai 3T, nécessite IMD ≥ 60
+
+**Pseudo-formule** :
+```
+Adverse_Selection_Risk(t) = f(
+    delta_prix_vs_marché,        # si prix bas → anti-sélection ↑
+    Posture_Souscription,        # permissive → risque ↑
+    Scoring_Maturité,            # data-driven → risque ↓
+    Mix_Canaux                   # certains canaux moins qualitatifs
+)
+```
+
+### 7.12 Gestion de Crise CatNat — Triple Impact (NOUVEAU)
+
+**Objectif pédagogique** : Distinguer les 3 dimensions d'une catastrophe : impact technique (S/P), impact opérationnel (backlog, tensions RH), et impact réputation/régulateur-État.
+
+#### Décisions jouables
+
+**LEV-CRISE-01 — Plan de Crise & Surge Capacity** (Intermédiaire)
+- Options : Pas de plan / Plan basique / Plan industrialisé / Plan avec partenaires de crise
+- Effets :
+  - Ops_Surge_Capacity ↑ : capacité à absorber un afflux
+  - Backlog_Days ↓ : réduction du retard en cas de CatNat
+  - Reputation_Temperature ↓ : meilleure gestion médiatique
+  - Regulator_Heat ↓ : relation régulateur apaisée
+- *Coût* : investissement récurrent (budget RH/organisation)
+
+**Mécanisme "Triple Impact CatNat"** :
+1. **Impact technique** : sinistralité (fréquence × sévérité) → affecte S/P et IPP
+2. **Impact opérationnel** : afflux sinistres → Backlog_Days ↑, IPQO ↓, satisfaction ↓
+3. **Impact réputation/régulateur** : si Backlog_Days > seuil → Reputation_Temperature ↑, Regulator_Heat ↑ → risque d'injonction
+
+**Pseudo-formule** :
+```
+Backlog_Days(t) = Backlog_Days(t-1) + (Entrees_Sinistres - Capacite_Traitement)
+                  × (1 - Surge_Capacity_Factor)
+
+Regulator_Heat(t) += f(Backlog_Days, Media_Coverage, Plaintes_Collectives)
+```
+
+### 7.13 Expérience Client / Réclamations / Contentieux (NOUVEAU)
+
+**Objectif pédagogique** : Arbitrage coût vs risque vs réputation. Une politique trop restrictive génère des contentieux coûteux ; une politique trop généreuse dégrade la rentabilité.
+
+#### Décisions jouables
+
+**LEV-CLI-01 — Politique d'indemnisation** (Novice)
+- Options : Généreuse / Standard / Restrictive
+- Effets :
+  - Généreuse → Coûts sinistres ↑ (+5-10%), Complaints_Rate ↓, Litigation_Risk ↓, NPS ↑
+  - Restrictive → Coûts sinistres ↓ (-5-10%), Complaints_Rate ↑, Litigation_Risk ↑, NPS ↓
+- *Arbitrage* : marge technique vs satisfaction vs coûts juridiques
+
+**LEV-CLI-02 — Service client & Médiation** (Intermédiaire)
+- Options : Minimum légal / Renforcé / Proactif avec médiation interne
+- Effets :
+  - Complaints_Rate ↓ (résolution amiable)
+  - Litigation_Risk ↓ (évitement contentieux)
+  - Legal_Cost_Ratio ↓ (moins de frais avocat)
+  - IAC ↑ (satisfaction perçue)
+- *Coût* : investissement service client (RH + outils)
+
+**Pseudo-formule** :
+```
+Litigation_Risk(t) = f(
+    Complaints_Rate,             # plus de réclamations → plus de contentieux
+    Politique_Indemnisation,     # restrictive → contentieux ↑
+    Service_Mediation_Level,     # proactif → contentieux ↓
+    Backlog_Days                 # délais longs → frustration → contentieux ↑
+)
+
+Legal_Cost_Ratio = Litigation_Count × Cout_Moyen_Contentieux / Primes
+```
+
+### 7.14 Gouvernance Risques & Conformité (NOUVEAU)
+
+**Objectif pédagogique** : La conformité n'est pas un "événement" mais une discipline managériale continue. Un dispositif de contrôle faible expose à des sanctions, fraudes procédurales, et dérives délégataires.
+
+#### Décisions jouables
+
+**LEV-CONF-02 — Dispositif de contrôle interne** (Intermédiaire)
+- Options : Minimal / Standard / Renforcé
+- Effets :
+  - Compliance_Control_Maturity ↑
+  - IS ↑ (sincérité / gouvernance)
+  - Vulnérabilité aux événements "Audit régulateur" ↓
+- *Coût* : effectifs conformité + outils
+
+**LEV-CONF-03 — Audit délégataires & affinitaires** (Expert)
+- Options : Pas d'audit / Audit annuel / Audit continu + reporting
+- Prérequis : Utilisation de canaux délégataires/affinitaires
+- Effets :
+  - Fraud_Procedural_Robustness ↑
+  - Qualité portefeuille délégataires ↑
+  - Réduction des "mauvaises surprises" sinistralité
+
+**LEV-FRAUD-PROC-01 — Anti-fraude procédurale** (Intermédiaire, Progressif)
+- Niveaux : N1 contrôles basiques / N2 process outillés / N3 IA + audit continu
+- Complémentaire à la fraude "détection" (LEV-SIN-02) : ici on sécurise les process internes
+- Effets :
+  - Fraud_Procedural_Robustness ↑
+  - Réduction fraude interne et montages avec prestataires
+  - Mitigation de l'événement "Pic fraude opportuniste post-CatNat"
+
+**Pseudo-formule** :
+```
+Compliance_Control_Maturity(t) = f(
+    Investment_Controle_Interne,
+    Audit_Delegataires_Level,
+    Fraud_Procedural_Level
+)
+
+Vulnerabilite_Sanction = 100 - Compliance_Control_Maturity
+```
+
+### 7.15 Distribution : Qualité vs Volume & Concentration (NOUVEAU)
+
+**Objectif pédagogique** : Tous les canaux ne se valent pas en qualité de portefeuille. Une dépendance excessive à un gros apporteur crée un risque stratégique (pouvoir de négociation, rupture).
+
+#### Décisions jouables
+
+**LEV-DIS-02 — Exigences qualité canal** (Intermédiaire)
+- Options : Pas d'exigence / Suivi S/P par canal / Bonus-malus qualité / Sélection active
+- Effets :
+  - Channel_Portfolio_Quality ↑ (meilleur S/P par canal)
+  - Adverse_Selection_Risk ↓ (canaux les moins qualitatifs réduits)
+  - Possible tension avec distributeurs (commissions, volumes)
+
+**LEV-DIS-03 — Gestion concentration apporteurs** (Expert)
+- Options : Pas de suivi / Monitoring / Diversification active / Plafond par apporteur
+- Effets :
+  - Distributor_Concentration_Risk ↓
+  - Pouvoir de négociation ↑ (moins de dépendance)
+  - Résilience si rupture d'un apporteur
+- *Arbitrage* : diversifier coûte (acquisition nouveaux canaux) mais réduit le risque
+
+**Pseudo-formule** :
+```
+Channel_Portfolio_Quality(t) = Σ(Part_Canal × SP_Canal) / Total
+  où SP_Canal = ratio S/P historique par canal
+
+Distributor_Concentration_Risk = Part_CA_Top3_Apporteurs
+  Seuil d'alerte : > 50% → risque élevé
+  Seuil critique : > 70% → très vulnérable
+```
 
 ---
 
