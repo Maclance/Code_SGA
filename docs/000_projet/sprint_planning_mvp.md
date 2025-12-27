@@ -64,17 +64,18 @@
 ### Sprint 1 — Foundations (2 sem)
 
 > **Objectif** : Multi-tenant, auth, audit, stockage état
+> **Statut** : 🟢 EN COURS
 
-| US | Titre | Taille | Points |
-|----|-------|:------:|:------:|
-| US-001 | Créer et gérer des tenants | L | 8 |
-| US-002 | Inviter utilisateurs et attribuer rôles | L | 8 |
-| US-003 | Authentification sécurisée | M | 5 |
-| US-004 | Journal d'audit | M | 5 |
-| **Total** | | | **26** |
+| US | Titre | Taille | Points | Statut | Temps réel |
+|----|-------|:------:|:------:|:------:|:----------:|
+| US-001 | Créer et gérer des tenants | L | 8 | ✅ Done | **0h30** |
+| US-002 | Inviter utilisateurs et attribuer rôles | L | 8 | ⏳ À faire | - |
+| US-003 | Authentification sécurisée | M | 5 | ⏳ À faire | - |
+| US-004 | Journal d'audit | M | 5 | ⏳ À faire | - |
+| **Total** | | | **26** | | |
 
 **Livrables Sprint 1 :**
-- [ ] Table `tenants` + RLS
+- [x] Table `tenants` + RLS
 - [ ] Table `users` + rôles RBAC
 - [ ] Auth Supabase configurée
 - [ ] Table `audit_logs`
