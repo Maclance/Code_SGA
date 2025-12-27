@@ -1,0 +1,218 @@
+/* Users List Styles */
+
+.table {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 100px;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.headerCell {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 100px;
+    gap: var(--spacing-md);
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    transition: background var(--transition-base);
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.row:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.userCell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: white;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.name {
+    font-weight: 500;
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.youBadge {
+    font-size: 0.65rem;
+    padding: 1px 6px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+}
+
+.email {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.cell {
+    display: flex;
+    align-items: center;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-admin_tenant {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    color: white;
+}
+
+.badge-formateur {
+    background: var(--color-primary);
+    color: white;
+}
+
+.badge-joueur {
+    background: var(--color-success);
+    color: white;
+}
+
+.badge-observateur {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.status {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-active {
+    color: var(--color-success);
+}
+
+.status-pending {
+    color: var(--color-warning);
+}
+
+.status-suspended {
+    color: var(--color-danger);
+}
+
+.date {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.actionsCell {
+    display: flex;
+    gap: var(--spacing-xs);
+    justify-content: flex-end;
+}
+
+.roleSelect {
+    padding: 4px 8px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.75rem;
+}
+
+.editButton,
+.saveButton,
+.cancelButton {
+    padding: 4px 10px;
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.editButton {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.editButton:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.saveButton {
+    background: var(--color-success);
+    border: none;
+    color: white;
+}
+
+.cancelButton {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+}
+
+.cancelButton:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        display: none;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .cell::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        color: var(--color-text-muted);
+        margin-right: var(--spacing-sm);
+    }
+}

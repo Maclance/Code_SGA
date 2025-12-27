@@ -1,0 +1,24 @@
+/* Dashboard Layout Styles */
+
+.layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main {
+    flex: 1;
+    padding: var(--spacing-xl);
+    background: var(--color-bg-primary);
+}
+
+@media (min-width: 768px) {
+    .layout {
+        flex-direction: row;
+    }
+
+    .main {
+        margin-left: 260px;
+        padding: var(--spacing-2xl);
+    }
+}

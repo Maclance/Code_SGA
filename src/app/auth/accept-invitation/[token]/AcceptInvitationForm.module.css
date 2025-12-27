@@ -1,0 +1,168 @@
+/* Accept Invitation Form Styles */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.input {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    transition: all var(--transition-base);
+}
+
+.input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.input:hover:not(:focus):not(:disabled) {
+    border-color: var(--color-border-hover);
+}
+
+.inputDisabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: var(--color-bg-tertiary);
+}
+
+.hint {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: var(--spacing-xs);
+}
+
+/* Password Strength */
+.passwordStrength {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.strengthBar {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--color-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.strengthBar::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width var(--transition-base), background var(--transition-base);
+}
+
+.strengthBar.weak::before {
+    width: 33%;
+    background: var(--color-danger);
+}
+
+.strengthBar.medium::before {
+    width: 66%;
+    background: var(--color-warning);
+}
+
+.strengthBar.strong::before {
+    width: 100%;
+    background: var(--color-success);
+}
+
+.strengthLabel {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    min-width: 50px;
+}
+
+/* Error Message */
+.error {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-lg);
+    color: var(--color-danger);
+    font-size: 0.875rem;
+}
+
+.errorIcon {
+    flex-shrink: 0;
+}
+
+/* Submit Button */
+.submitButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.submitButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.submitButton:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submitButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.buttonSpinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,114 @@
+/* Invitations List Styles */
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: border-color var(--transition-base);
+}
+
+.item:hover {
+    border-color: var(--color-border-hover);
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.email {
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-admin_tenant {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    color: white;
+}
+
+.badge-formateur {
+    background: var(--color-primary);
+    color: white;
+}
+
+.badge-joueur {
+    background: var(--color-success);
+    color: white;
+}
+
+.badge-observateur {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.expires {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.resendButton,
+.deleteButton {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.resendButton {
+    background: transparent;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+}
+
+.resendButton:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.deleteButton {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+}
+
+.deleteButton:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.deleteButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

@@ -69,17 +69,17 @@
 | US | Titre | Taille | Points | Statut | Temps réel |
 |----|-------|:------:|:------:|:------:|:----------:|
 | US-001 | Créer et gérer des tenants | L | 8 | ✅ Done | **0h30** |
-| US-002 | Inviter utilisateurs et attribuer rôles | L | 8 | ⏳ À faire | - |
+| US-002 | Inviter utilisateurs et attribuer rôles | L | 8 | ✅ Done | **2h30** |
 | US-003 | Authentification sécurisée | M | 5 | ⏳ À faire | - |
 | US-004 | Journal d'audit | M | 5 | ⏳ À faire | - |
 | **Total** | | | **26** | | |
 
 **Livrables Sprint 1 :**
 - [x] Table `tenants` + RLS
-- [ ] Table `users` + rôles RBAC
-- [ ] Auth Supabase configurée
+- [x] Table `users` + rôles RBAC
+- [x] Auth Supabase configurée
 - [ ] Table `audit_logs`
-- [ ] Tests manuels multi-tenant
+- [x] Tests manuels multi-tenant
 
 **Dépendances :** US-000 ✓
 
