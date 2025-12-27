@@ -38,19 +38,26 @@
 ### Sprint 0 — Bootstrap (2 sem)
 
 > **Objectif** : Infrastructure technique opérationnelle
+> **Statut** : 🟢 EN COURS
 
-| US | Titre | Taille | Points |
-|----|-------|:------:|:------:|
-| US-000 | Initialiser Supabase & connecter l'app | M | 5 |
+| US | Titre | Taille | Points | Statut | Temps réel |
+|----|-------|:------:|:------:|:------:|:----------:|
+| US-000 | Initialiser Supabase & connecter l'app | M | 5 | ✅ Done | **1h00** |
 
 **Livrables Sprint 0 :**
-- [ ] Projet Supabase créé et configuré
-- [ ] App Next.js connectée
-- [ ] Variables d'environnement configurées
+- [x] Projet Supabase créé et configuré
+- [x] App Next.js connectée
+- [x] Variables d'environnement configurées
 - [ ] CI/CD minimal (Vercel preview)
-- [ ] Structure projet initiale
+- [x] Structure projet initiale
 
-**Critère de sortie :** `npm run dev` démarre, connexion Supabase OK
+**Critère de sortie :** `npm run dev` démarre, connexion Supabase OK ✅
+
+**Métriques Sprint 0 :**
+| Métrique | Estimé | Réel |
+|----------|:------:|:----:|
+| Points | 5 | 5 |
+| Temps | ~4h | 1h00 |
 
 ---
 
