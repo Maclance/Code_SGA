@@ -1,9 +1,12 @@
 # screens_spec.md — Spécifications Écran par Écran
 
-**Version** : 1.0  
+**Version** : 1.1  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-25  
+**Dernière MAJ** : 2025-12-27  
 **Auteur** : UX/UI Designer
+
+> **CHANGELOG**
+> - **2025-12-27** : Ajout indices secondaires (PRD §8.5), Score Pédagogique, variantes Observateur, notation (r:X-YT).
 
 ---
 
@@ -274,6 +277,18 @@
 - Alertes : `role="alert"` + `aria-live="polite"`
 - Navigation clavier entre sections (Tab)
 
+### Indicateurs secondaires (Intermédiaire/Expert)
+
+> Ces indices apparaissent selon le niveau de difficulté (PRD §8.5).
+
+| Indice | Affichage | Seuil alerte | Seuil critique | Difficulté min |
+|--------|-----------|:------------:|:--------------:|:--------------:|
+| `REG_HEAT` | Jauge + tooltip | > 60 | > 80 | Expert |
+| `BACKLOG_DAYS` | Badge + tendance | > 30j | > 45j | Intermédiaire |
+| `ADVERSE_SEL_RISK` | Indicateur discret | > 40 | > 60 | Expert |
+| `COMPLAINTS_RATE` | % + comparaison marché | > 5% | > 10% | Intermédiaire |
+| `DISTRIB_CONC_RISK` | % Top 3 apporteurs | > 50% | > 70% | Expert |
+
 ---
 
 ## 7) S06 — News Flash (Événements)
@@ -497,7 +512,10 @@
 │                                                             │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  TOP 3 DRIVERS                                              │
+│  TOP 3 DRIVERS ⓘ                                            │
+│  ───────────────────────────────────────────────────────    │
+│  ⓘ Driver : Facteur principal expliquant une variation     │
+│     d'indice (voir glossary.md)                             │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐    │
 │  │ 🎯 Votre décision: Hausse tarif Auto +5%            │    │
@@ -508,7 +526,7 @@
 │  │    → IRF ↓3 (sinistres exceptionnels)               │    │
 │  └─────────────────────────────────────────────────────┘    │
 │  ┌─────────────────────────────────────────────────────┐    │
-│  │ ⏳ Effet retard: Recrutement (Tour 1)               │    │
+│  │ ⏳ Effet retard (r:2T): Recrutement (Tour 1)        │    │
 │  │    → IPQO ↑2 (capacité augmentée)                   │    │
 │  └─────────────────────────────────────────────────────┘    │
 │                                                             │
@@ -521,8 +539,8 @@
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  EFFETS À VENIR (Preview)                                   │
-│  • Tour 5: Investissement IT (Tour 2) → IMD ↑ attendu       │
-│  • Tour 6: Programme prévention actif                       │
+│  • Tour 5: Investissement IT (Tour 2) → IMD ↑ (r:3-6T)      │
+│  • Tour 6: Programme prévention → IRF ↑ (r:4-8T)            │
 │                                                             │
 │              [   Tour suivant   →   ]                       │
 │                                                             │
@@ -556,14 +574,13 @@
 │  🏆 FIN DE PARTIE — DEBRIEF                                 │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  SCORE FINAL                                                │
+│  SCORE FINAL                    SCORE PÉDAGOGIQUE           │
 │                                                             │
-│       ┌─────────────────────────────┐                       │
-│       │                             │                       │
-│       │          72/100             │                       │
-│       │        TRÈS BIEN            │                       │
-│       │                             │                       │
-│       └─────────────────────────────┘                       │
+│  ┌───────────────────┐          ┌───────────────────┐       │
+│  │      72/100       │          │      68/100       │       │
+│  │    TRÈS BIEN      │          │   Compétences :   │       │
+│  └───────────────────┘          │ Arbitrage, Vision │       │
+│                                 └───────────────────┘       │
 │                                                             │
 │  Détail: IAC 15pts | IPQO 12pts | IRF 10pts | ...          │
 │                                                             │
@@ -669,3 +686,28 @@ Accessible via menu ou raccourcis :
 - [x] Layout ASCII pour visualisation
 - [x] Micro-interactions documentées
 - [x] Accessibilité mentionnée par écran
+- [x] Indices secondaires documentés
+- [x] Variantes par rôle (Observateur)
+
+---
+
+## 14) Variantes par rôle — Observateur
+
+> Le rôle Observateur (PRD §6.4, mode séminaire) a un accès **lecture seule**.
+
+| Écran | Différences Observateur |
+|-------|------------------------|
+| S05 Cockpit | Lecture seule, pas de CTA "Voir les événements" |
+| S06 Événements | Visible, mais pas de bouton "Compris" individuel |
+| S07 Décisions | **Masqué** — remplacé par "Décisions en cours..." |
+| S08 Vue Marché | Identique (lecture seule) |
+| S09 Feedback | Synthèse équipe, pas de détail personnel |
+| S10 Debrief | Score équipe/global, pas de score individuel |
+
+### Mode projection (grand écran)
+
+| Ajustement | Valeur |
+|------------|--------|
+| Taille texte | ×1.5 minimum |
+| Ratio d'aspect | 16:9 recommandé |
+| Contenu priorisé | Indices + événements majeurs + score |

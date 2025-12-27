@@ -1,9 +1,12 @@
 # user_flows.md — Parcours utilisateur AssurManager
 
-**Version** : 1.0  
+**Version** : 1.1  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-25  
+**Dernière MAJ** : 2025-12-27  
 **Auteur** : UX/UI Designer
+
+> **CHANGELOG**
+> - **2025-12-27** : Ajout référence `gameplay_core.md`, section UX par difficulté, notation (r:X-YT) pour effets retard.
 
 ---
 
@@ -122,6 +125,8 @@ flowchart TD
 ---
 
 ## 5) F4 — Flux Boucle de Jeu (1 tour)
+
+> **Référence** : Voir [`10_game_design/gameplay_core.md`](../10_game_design/gameplay_core.md) pour la mécanique détaillée des 5 phases. Cette section se concentre sur les **aspects UX/transitions/micro-interactions**.
 
 ### Diagramme principal
 
@@ -303,7 +308,19 @@ flowchart TD
 
 ---
 
-## 10) Décisions / Risques / Checklist
+## 10) UX par niveau de difficulté
+
+> Conformément au PRD §6.5, la difficulté gouverne la "surface de décision".
+
+| Difficulté | Leviers visibles | Explainability | Complexité cockpit |
+|------------|-----------------|----------------|-------------------|
+| Novice | 8-10 macro | Guidée (tooltips, messages) | Indicateurs agrégés uniquement |
+| Intermédiaire | 15-18 | Standard | + détail par produit |
+| Expert | 22-28 | Complète (drivers, historique) | Tous indicateurs + indices secondaires |
+
+---
+
+## 11) Décisions / Risques / Checklist
 
 ### Décisions UX
 

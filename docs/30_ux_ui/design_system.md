@@ -1,9 +1,12 @@
 # design_system.md — Design System AssurManager
 
-**Version** : 1.0  
+**Version** : 1.1  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-25  
+**Dernière MAJ** : 2025-12-27  
 **Auteur** : UX/UI Designer
+
+> **CHANGELOG**
+> - **2025-12-27** : Ajout tokens pour indices secondaires, alignement PRD §8.5.
 
 ---
 

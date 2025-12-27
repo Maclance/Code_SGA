@@ -1,9 +1,12 @@
 # accessibilite.md — Accessibilité AssurManager
 
-**Version** : 1.0  
+**Version** : 1.1  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-25  
+**Dernière MAJ** : 2025-12-27  
 **Auteur** : UX/UI Designer
+
+> **CHANGELOG**
+> - **2025-12-27** : Clarification template de test, version bump.
 
 ---
 
@@ -306,7 +309,9 @@ document.querySelector('main').inert = true;
 | Zoom 200% | Test navigateur | Pas de perte d'information |
 | Contraste | Inspection visuelle | Textes lisibles |
 
-### 8.3 Checklist par écran
+### 8.3 Checklist par écran (template de test)
+
+> Cette checklist est un **template de test** à compléter lors du développement et de la QA. Les cases ☐ seront cochées ☑ après validation de chaque critère.
 
 | Écran | Clavier | Focus | ARIA | Contraste |
 |-------|---------|-------|------|-----------|
