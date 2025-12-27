@@ -12,7 +12,7 @@ export default function Home() {
                 <p className={styles.subtitle}>Le Défi IARD</p>
 
                 <p className={styles.description}>
-                    Prenez les commandes d'une compagnie d'assurance IARD et naviguez
+                    Prenez les commandes d&apos;une compagnie d&apos;assurance IARD et naviguez
                     dans un marché en constante évolution. Gérez vos produits, anticipez
                     les risques climatiques et faites face à la concurrence.
                 </p>
