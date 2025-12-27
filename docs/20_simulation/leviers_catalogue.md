@@ -16,6 +16,11 @@
 
 ## 1) Structure de Données d'un Levier
 
+> **Convention délais** : Les valeurs `delay` sont exprimées en tours à vitesse **Moyenne (Intermediate)**. Le facteur multiplicatif par difficulté est appliqué selon `config/defaults_by_difficulty.yaml` :
+> - **Novice** : delay × 0.5
+> - **Intermediate** : delay × 1.0 (référence)
+> - **Expert** : delay × 1.5
+
 ### 1.1 Schema TypeScript
 
 ```typescript

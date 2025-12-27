@@ -431,6 +431,9 @@ Qualité portefeuille par canal de distribution (S/P pondéré).
 #### DISTRIB_CONC_RISK
 Risque concentration distributeurs. > 70% = vulnérabilité rupture apporteur.
 
+#### LEGAL_COST_RATIO
+Ratio coûts juridiques / primes. Mesure le poids des frais contentieux dans les primes. Baseline 0.2-0.5%, seuil alerte > 1%. Piloté par `LITIGATION_RISK` et la politique de médiation.
+
 ---
 
 ## 7) Rôles & permissions (référence)

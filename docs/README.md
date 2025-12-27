@@ -44,6 +44,7 @@ Chaque domaine a une **source unique** qui fait autorité. Les autres documents 
 | [`20_simulation/effets_retard.md`](./20_simulation/effets_retard.md) | Système d'effets retard/persistance |
 | [`20_simulation/aleatoire_seeds.md`](./20_simulation/aleatoire_seeds.md) | Gestion aléatoire reproductible |
 | [`20_simulation/invariants.md`](./20_simulation/invariants.md) | **Consolidation** des invariants (INV-*) |
+| [`20_simulation/test_vectors.json`](./20_simulation/test_vectors.json) | Cas de test Given/When/Then pour validation formules |
 | [`20_simulation/config/`](./20_simulation/config/) | Fichiers YAML de configuration |
 
 ### Game Design (mécaniques de jeu)

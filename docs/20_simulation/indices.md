@@ -591,6 +591,8 @@ Résultat: IPP = 78 (très bonne performance)
 | IPP | 20% | 10% | 30% | 9% |
 | **Total** | 100% | 100% | 100% | 100% |
 
+> **Note** : Les pondérations ci-dessus sont indicatives. La **source de vérité** pour l'implémentation est [`20_simulation/config/defaults_by_difficulty.yaml`](./config/defaults_by_difficulty.yaml).
+
 ### 3.2 Formule scoring final
 
 ```
