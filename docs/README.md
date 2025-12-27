@@ -37,12 +37,13 @@ Chaque domaine a une **source unique** qui fait autorité. Les autres documents 
 | Document | Description |
 |----------|-------------|
 | [`20_simulation/overview.md`](./20_simulation/overview.md) | Architecture du moteur, flux de données |
-| [`20_simulation/indices.md`](./20_simulation/indices.md) | **Spécification technique** des 7 indices, formules, invariants |
+| [`20_simulation/indices.md`](./20_simulation/indices.md) | **Spécification technique** des 7 indices + 13 secondaires, formules, invariants |
 | [`20_simulation/leviers_catalogue.md`](./20_simulation/leviers_catalogue.md) | **Implémentation technique** des leviers, schémas TS |
 | [`20_simulation/events_catalogue.md`](./20_simulation/events_catalogue.md) | Catalogue d'événements marché/compagnie |
 | [`20_simulation/formules.md`](./20_simulation/formules.md) | Formules mathématiques détaillées |
 | [`20_simulation/effets_retard.md`](./20_simulation/effets_retard.md) | Système d'effets retard/persistance |
 | [`20_simulation/aleatoire_seeds.md`](./20_simulation/aleatoire_seeds.md) | Gestion aléatoire reproductible |
+| [`20_simulation/invariants.md`](./20_simulation/invariants.md) | **Consolidation** des invariants (INV-*) |
 | [`20_simulation/config/`](./20_simulation/config/) | Fichiers YAML de configuration |
 
 ### Game Design (mécaniques de jeu)
@@ -186,14 +187,15 @@ docs/
 │   ├── roles_multijoueur.md       # Rôles MVP et V1
 │   └── audit_alignement_pedagogique.md  # Audit pédagogique
 │
-├── 20_simulation/                 # 🔧 SIMULATION — 8 fichiers + config/
+├── 20_simulation/                 # 🔧 SIMULATION — 9 fichiers + config/
 │   ├── overview.md                # Architecture du moteur
-│   ├── indices.md                 # Spécification technique (1151 lignes)
-│   ├── leviers_catalogue.md       # Implémentation technique (1684 lignes)
+│   ├── indices.md                 # Spécification technique (1350 lignes)
+│   ├── leviers_catalogue.md       # Implémentation technique (1820 lignes)
 │   ├── events_catalogue.md        # Catalogue d'événements
 │   ├── formules.md                # Formules mathématiques
 │   ├── effets_retard.md           # Système de persistance
 │   ├── aleatoire_seeds.md         # Gestion aléatoire
+│   ├── invariants.md              # Consolidation invariants (INV-*)
 │   ├── test_vectors.json          # Cas de test (Given/When/Then)
 │   └── config/
 │       ├── defaults_by_difficulty.yaml  # Paramètres par difficulté

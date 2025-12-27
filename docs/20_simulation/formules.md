@@ -1,9 +1,12 @@
 # formules.md — Formules de Calcul du Moteur
 
-**Version** : 1.0  
+**Version** : 1.3  
 **Statut** : Draft  
-**Dernière MAJ** : 2025-12-25  
+**Dernière MAJ** : 2025-12-27  
 **Auteur** : Simulation Engineer
+
+> **CHANGELOG**
+> - **2025-12-27** : Audit cohérence — Alignement taux réassurance avec leviers_catalogue.md (10-40% au lieu de 2-18%). Bump version 1.3.
 
 ---
 
@@ -317,18 +320,20 @@ Résultat: Profitable (ratio < 100%), marge technique faible
 | Variable | Description | Unité | Borne |
 |----------|-------------|-------|-------|
 | `niveau_protection` | Niveau choisi | enum | {Minimal, Standard, Fort, Maximum} |
-| `taux_cession` | % primes cédées | % | [2, 18] |
+| `taux_cession` | % primes cédées | % | [10, 40] |
 | `primes_cedees` | Montant cédé au réassureur | € | [0, ∞[ |
+
+> **Note** : Taux alignés sur `leviers_catalogue.md` (marché IARD français réaliste).
 
 **Formule**
 
 ```
-# Mapping niveau → taux
+# Mapping niveau → taux (aligné leviers_catalogue.md)
 taux_cession = {
-  Minimal:  0.02,   # 2%
-  Standard: 0.05,   # 5%
-  Fort:     0.10,   # 10%
-  Maximum:  0.18    # 18%
+  Minimal:  0.10,   # 10%
+  Standard: 0.20,   # 20%
+  Fort:     0.30,   # 30%
+  Maximum:  0.40    # 40% (cf. INV-BIZ-10)
 }[niveau_protection]
 
 primes_cedees = primes_brutes × taux_cession

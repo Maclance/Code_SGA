@@ -391,6 +391,46 @@ Mesure le « boni/mali » lié à la sincérité des choix (ex. provisionnement 
 ### IPP — Indice Performance P&L
 Mesure la performance économique globale (pédagogique). Résulte d’un équilibre primes, sinistres, frais, réassurance, placements… et des arbitrages multi-produits.
 
+### Indices secondaires (Expert / V1+)
+
+> Indices complémentaires activés selon difficulté. Voir `20_simulation/indices.md` §7 pour les formules détaillées.
+
+#### UND_STRICTNESS
+Posture de souscription (0=permissive, 100=très sélective). Impact volume vs qualité portefeuille.
+
+#### ADVERSE_SEL_RISK
+Risque d'anti-sélection. Monte si prix bas + posture permissive. Decay naturel 20%/tour.
+
+#### OPS_SURGE_CAP
+Capacité d'absorption afflux exceptionnel (CatNat). Piloté par plan de crise et effectifs.
+
+#### BACKLOG_DAYS
+Retard moyen traitement sinistres en jours. Seuil crise > 60j → REG_HEAT ↑.
+
+#### REP_TEMP
+Température réputationnelle (0=sérénité, 100=crise). Agrège backlog, réclamations, événements médiatiques.
+
+#### REG_HEAT
+Intensité relation régulateur (ACPR). Seuil > 70 → risque audit/injonction.
+
+#### COMPLAINTS_RATE
+Taux réclamations (‰). Baseline 5‰ marché français.
+
+#### LITIGATION_RISK
+Risque contentieux. Lié au taux de réclamations et politique d'indemnisation.
+
+#### CTRL_MATURITY
+Maturité dispositif contrôle interne et conformité. Réduit REG_HEAT, améliore IS.
+
+#### FRAUD_PROC_ROB
+Robustesse anti-fraude procédurale. Mitigation événement "Pic fraude post-CatNat".
+
+#### CHAN_QUALITY
+Qualité portefeuille par canal de distribution (S/P pondéré).
+
+#### DISTRIB_CONC_RISK
+Risque concentration distributeurs. > 70% = vulnérabilité rupture apporteur.
+
 ---
 
 ## 7) Rôles & permissions (référence)

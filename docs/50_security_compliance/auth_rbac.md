@@ -296,18 +296,20 @@ const rbacMiddleware = (requiredAction: Action) => {
 
 ### 7.4 Base de Données
 
+> **Note** : Noms de tables alignés sur `80_api_data/data_model.md` (source of truth).
+
 | Table | Champ obligatoire | Contrainte |
 |-------|-------------------|------------|
 | `users` | `tenant_id` | FK + NOT NULL |
-| `sessions` | `tenant_id` | FK + NOT NULL |
-| `game_states` | `tenant_id` | FK + NOT NULL (via session) |
+| `game_sessions` | `tenant_id` | FK + NOT NULL |
+| `turns` | `tenant_id` | FK + NOT NULL (via session) |
 | `audit_logs` | `tenant_id` | FK + NOT NULL |
 
 **Row-Level Security (RLS)** recommandée sur PostgreSQL/Supabase :
 
 ```sql
 -- Exemple politique RLS
-CREATE POLICY tenant_isolation ON sessions
+CREATE POLICY tenant_isolation ON game_sessions
   USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
 ```
 

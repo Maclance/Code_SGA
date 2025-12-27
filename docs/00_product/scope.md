@@ -41,15 +41,16 @@ Valeur cœur : **acculturer** et **entraîner** aux arbitrages (croissance, P\&L
 - Boucle de tour complète : dashboard → événements → décisions → résolution → feedback
 
 **C. Moteur de simulation (pédagogique, stable)**
-- 7 indices (IAC, IPQO, IERH, IRF, IMD, IS, IPP) + P\&L macro
+- 7 indices principaux (IAC, IPQO, IERH, IRF, IMD, IS, IPP) + P\&L macro
+- 13 indices secondaires calculés (UND_STRICTNESS, ADVERSE_SEL_RISK, OPS_SURGE_CAP, BACKLOG_DAYS, REP_TEMP, REG_HEAT, COMPLAINTS_RATE, LITIGATION_RISK, CTRL_MATURITY, FRAUD_PROC_ROB, CHAN_QUALITY, DISTRIB_CONC_RISK, LEGAL_COST_RATIO) : **calculés dès MVP**, affichage selon difficulté (Expert = tous)
 - Multi-produits **supporté dès MVP**, avec **Auto + MRH jouables** (calculs dédiés + agrégation)
 - Ressources communes (budget, effectifs, IT/Data) qui « compétitionnent » entre produits
 - Effets retard (RH/IT/Prévention/Réputation) paramétrés par vitesse
 - Leviers progressifs : Fraude **N1** en MVP (N2/N3 en V1)
-- **[NOUVEAU]** Levier Posture de Souscription (Permissive → Sélective) — impact sur volume et qualité portefeuille
-- **[NOUVEAU]** Levier Politique d'Indemnisation (Généreuse/Restrictive) — arbitrage coût/satisfaction
-- **[V1]** Leviers Gestion de Crise (Plan de crise, Surge capacity) — résilience opérationnelle CatNat
-- **[V1]** Leviers Conformité (Contrôle interne, Audit délégataires) — gouvernance et risque régulateur
+- **[MVP]** Levier Posture de Souscription (LEV-UND-01) — impact sur volume et qualité portefeuille
+- **[MVP]** Levier Politique d'Indemnisation (LEV-CLI-01) — arbitrage coût/satisfaction
+- **[V1]** Leviers Gestion de Crise (LEV-CRISE-01 Plan de crise) — résilience opérationnelle CatNat
+- **[V1]** Leviers Conformité (LEV-CONF-02/03 Contrôle interne, Audit délégataires) — gouvernance et risque régulateur
 - **[V1]** Leviers Qualité Distribution (Exigences canal, Concentration apporteurs) — qualité portefeuille par canal
 - Concurrence IA **simple** (réagit prix/parts) pour dynamiser le marché
 

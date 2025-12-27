@@ -110,16 +110,17 @@ const tenantMiddleware = async (req, res, next) => {
 
 ### 3.1 Entités Scopées par Tenant
 
+> **Note** : Noms de tables alignés sur `80_api_data/data_model.md` (source of truth).
+
 | Table | Contient `tenant_id` | RLS Activée | Notes |
 |-------|:--------------------:|:-----------:|-------|
 | `users` | ✓ | ✓ | Utilisateurs du tenant |
-| `sessions` | ✓ | ✓ | Sessions de jeu |
-| `session_participants` | ✓ | ✓ | Participants aux sessions |
-| `game_states` | ✓ | ✓ | États de jeu |
-| `decisions` | ✓ | ✓ | Décisions des joueurs |
-| `debriefs` | ✓ | ✓ | Rapports de fin de partie |
+| `game_sessions` | ✓ | ✓ | Sessions de jeu |
+| `participants` | ✓ | ✓ | Participants aux sessions |
+| `turns` | ✓ | ✓ | États de jeu par tour |
+| `turn_decisions` | ✓ | ✓ | Décisions des joueurs |
+| `scoreboards` | ✓ | ✓ | Rapports de fin de partie |
 | `audit_logs` | ✓ | ✓ | Journal d'audit |
-| `exports` | ✓ | ✓ | Fichiers exportés |
 
 ### 3.2 Entités Globales (Super Admin)
 

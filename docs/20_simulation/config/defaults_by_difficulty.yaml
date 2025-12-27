@@ -363,8 +363,17 @@ Expert:
     # Provisions (2)
     - LEV-PROV-01
     - LEV-PLAC-01
-    # Conformité (1)
+    # Conformité (3) — cf. scope.md [V1]
     - LEV-CONF-01
+    - LEV-CONF-02                 # Contrôle interne
+    - LEV-CONF-03                 # Audit délégataires
+    # Souscription (1) — cf. scope.md [NOUVEAU]
+    - LEV-UND-01                  # Posture souscription
+    # Expérience Client (2)
+    - LEV-CLI-01                  # Politique indemnisation
+    - LEV-CLI-02                  # Médiation
+    # Gestion de Crise (1) — cf. scope.md [V1]
+    - LEV-CRISE-01                # Plan de crise
   
   # --- Explainability ---
   explainability:

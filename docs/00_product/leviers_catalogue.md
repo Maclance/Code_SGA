@@ -1,8 +1,10 @@
 # leviers_catalogue.md — Catalogue des Leviers Actionnables
 
-**Version** : 1.0  
+**Version** : 1.1  
 **Statut** : Draft  
-**Dernière MAJ** : 2024-12-25
+**Dernière MAJ** : 2025-12-27
+
+> **Changelog 1.1** : Enrichissement des leviers progressifs (LEV-IT-02, LEV-IT-03, LEV-IT-06, LEV-RH-04, LEV-DIS-03, LEV-PRES-02, LEV-CONF-01)
 
 ---
 
@@ -85,7 +87,7 @@ interactions:
 |----|--------|------------|------|-------|------|------------------|
 | LEV-DIS-01 | Mix canaux | Novice | Persistant | Global | Moyen | IAC / Coûts acquisition |
 | LEV-DIS-02 | Niveau commissions | Intermédiaire | Persistant | Global | Variable | Animation réseau |
-| LEV-DIS-03 | Formation réseau | Intermédiaire | Persistant | Global | Moyen | Qualité vente |
+| LEV-DIS-03 | Formation réseau | Novice→Expert | **Progressif** | Global | Variable | Qualité vente / IPQO |
 | LEV-DIS-04 | Schéma incentive | Expert | Persistant | Global | Élevé | Motivation / Mix produit |
 
 **Détail LEV-DIS-01 — Mix canaux**
@@ -116,6 +118,48 @@ options:
     effet_ipqo: Dépend partenaire
 contrainte: Total = 100%
 délai: 2 tours (inertie réseau)
+```
+
+**Détail LEV-DIS-03 — Formation réseau (Progressif)**
+
+```yaml
+id: LEV-DIS-03
+nom: Formation réseau de distribution
+disponibilité: Novice (N1), Intermédiaire (N2), Expert (N3)
+type: Progressif
+scope: Global
+niveaux:
+  N1_fondamentaux:
+    disponibilité: Novice
+    coût: 1 unité
+    effet:
+      ipqo: +3 (meilleure qualification besoins)
+      iac: +2 (professionnalisme)
+    délai: 2 tours
+    description: "Formation produits de base, process de souscription"
+  N2_expertise_métier:
+    disponibilité: Intermédiaire
+    coût: 2 unités (additionnel)
+    effet:
+      ipqo: +8 (sélection risques)
+      iac: +5 (conseil personnalisé)
+      fraude_détection: +5% (vigilance)
+    délai: 3 tours
+    prérequis: N1 actif
+    description: "Techniques de vente conseil, détection risques aggravés"
+  N3_excellence_commerciale:
+    disponibilité: Expert
+    coût: 3 unités (additionnel)
+    effet:
+      ipqo: +12 (excellence souscription)
+      iac: +10 (fidélisation)
+      multi_équipement: +15%
+    délai: 4 tours
+    prérequis: N2 actif + IERH ≥ 50
+    description: "Certification, mentorat, incentives qualité"
+interactions:
+  - Si LEV-DIS-02 (commissions) élevé : effet N2/N3 amplifié +20%
+  - Impact sur tous les canaux non-digital
 ```
 
 ---
@@ -154,7 +198,7 @@ note: "Court terme, ROI difficile à mesurer"
 | LEV-RH-01 | Recrutement sinistres | Novice | Persistant | Global | Moyen | Capacité → IPQO |
 | LEV-RH-02 | Recrutement IT/Data | Intermédiaire | Persistant | Global | Élevé | IMD |
 | LEV-RH-03 | Recrutement distribution | Novice | Persistant | Global | Moyen | IAC |
-| LEV-RH-04 | Formation | Intermédiaire | Persistant | Global | Moyen | Compétences → IERH |
+| LEV-RH-04 | Formation interne | Novice→Expert | **Progressif** | Global | Variable | Compétences → IERH / IMD |
 | LEV-RH-05 | Rémunération | Intermédiaire | Persistant | Global | Élevé | Turnover → IERH |
 | LEV-RH-06 | QVT | Expert | Persistant | Global | Moyen | Climat social → IERH |
 
@@ -176,6 +220,49 @@ délai: 2 tours (recrutement + montée en compétence)
 contrainte: "Marché tendu si IERH < 40 → coût +50%"
 ```
 
+**Détail LEV-RH-04 — Formation interne (Progressif)**
+
+```yaml
+id: LEV-RH-04
+nom: Programme de formation interne
+disponibilité: Novice (N1), Intermédiaire (N2), Expert (N3)
+type: Progressif
+scope: Global
+niveaux:
+  N1_formation_continue:
+    disponibilité: Novice
+    coût: 1 unité
+    effet:
+      ierh: +5 (développement personnel)
+      compétence_métier: +5%
+    délai: 2 tours
+    description: "Formations réglementaires, e-learning basique"
+  N2_parcours_certifiants:
+    disponibilité: Intermédiaire
+    coût: 2 unités (additionnel)
+    effet:
+      ierh: +10 (perspectives carrière)
+      compétence_métier: +15%
+      imd: +3 (culture data)
+    délai: 4 tours
+    prérequis: N1 actif
+    description: "Certifications métier, parcours managers, digital academy"
+  N3_université_entreprise:
+    disponibilité: Expert
+    coût: 4 unités (additionnel)
+    effet:
+      ierh: +15 (fierté appartenance)
+      compétence_métier: +25%
+      imd: +8 (transformation digitale)
+      turnover: -20%
+    délai: 6 tours
+    prérequis: N2 actif + IERH ≥ 55
+    description: "Campus formation, partenariats écoles, learning organization"
+interactions:
+  - Amplifie effet de LEV-RH-01/02/03 (nouveaux collaborateurs formés)
+  - Prérequis souple pour LEV-IT-05 (adoption IA facilitée)
+```
+
 ---
 
 ### 2.5 IT & DATA
@@ -183,11 +270,11 @@ contrainte: "Marché tendu si IERH < 40 → coût +50%"
 | ID | Levier | Difficulté | Type | Scope | Coût | Effet Principal |
 |----|--------|------------|------|-------|------|------------------|
 | LEV-IT-01 | Stabilité SI | Novice | Persistant | Global | Moyen | Dette technique − |
-| LEV-IT-02 | Automatisation | Intermédiaire | Persistant | Global | Élevé | IPQO + / Capacité + |
-| LEV-IT-03 | Qualité données | Intermédiaire | Persistant | Global | Moyen | IMD + |
+| LEV-IT-02 | Automatisation | Novice→Expert | **Progressif** | Global | Variable | IPQO + / Capacité + / Coûts − |
+| LEV-IT-03 | Qualité données | Novice→Expert | **Progressif** | Global | Variable | IMD + |
 | LEV-IT-04 | Gouvernance data | Expert | Persistant | Global | Moyen | IMD + / Prérequis IA |
 | LEV-IT-05 | Cas d'usage IA | Expert | Progressif | Global | Très élevé | Variable selon use case |
-| LEV-IT-06 | Sécurité SI | Intermédiaire | Persistant | Global | Moyen | Réduction impact cyber / Prérequis conformité |
+| LEV-IT-06 | Sécurité SI | Novice→Expert | **Progressif** | Global | Variable | Réduction impact cyber / IS + |
 
 **Détail LEV-IT-05 — Cas d'usage IA (Fraude)**
 
@@ -217,6 +304,138 @@ niveaux:
 impact_ipp: +2% à +5% selon niveau (économies fraude)
 ```
 
+**Détail LEV-IT-02 — Automatisation (Progressif)**
+
+```yaml
+id: LEV-IT-02
+nom: Automatisation des processus
+disponibilité: Novice (N1), Intermédiaire (N2), Expert (N3)
+type: Progressif
+scope: Global
+niveaux:
+  N1_quick_wins:
+    disponibilité: Novice
+    coût: 1 unité
+    effet:
+      ipqo: +3 (rapidité traitement)
+      capacité_gestion: +10%
+      coûts_exploitation: -3%
+    délai: 2 tours
+    description: "Automatisation tâches répétitives, OCR documents, workflows simples"
+  N2_industrialisation:
+    disponibilité: Intermédiaire
+    coût: 3 unités (additionnel)
+    effet:
+      ipqo: +8 (zéro ressaisie)
+      capacité_gestion: +25%
+      coûts_exploitation: -8%
+      délai_traitement: -30%
+    délai: 4 tours
+    prérequis: N1 actif + IMD ≥ 40
+    description: "RPA processus métier, intégration SI, straight-through processing"
+  N3_automatisation_intelligente:
+    disponibilité: Expert
+    coût: 5 unités (additionnel)
+    effet:
+      ipqo: +15 (excellence opérationnelle)
+      capacité_gestion: +50%
+      coûts_exploitation: -15%
+      délai_traitement: -50%
+    délai: 6 tours
+    prérequis: N2 actif + IMD ≥ 60 + LEV-IT-04
+    description: "IA décisionnelle, traitement auto sinistres simples, chatbots avancés"
+interactions:
+  - Réduit besoin en LEV-RH-01 (recrutement) à capacité égale
+  - Amplifie effet de LEV-SIN-02 (fraude) si N2+ actif
+```
+
+**Détail LEV-IT-03 — Qualité données (Progressif)**
+
+```yaml
+id: LEV-IT-03
+nom: Qualité et gouvernance des données
+disponibilité: Novice (N1), Intermédiaire (N2), Expert (N3)
+type: Progressif
+scope: Global
+niveaux:
+  N1_nettoyage:
+    disponibilité: Novice
+    coût: 1 unité
+    effet:
+      imd: +5
+      erreurs_données: -20%
+    délai: 2 tours
+    description: "Nettoyage données clients, déduplication, corrections basiques"
+  N2_qualité_continue:
+    disponibilité: Intermédiaire
+    coût: 2 unités (additionnel)
+    effet:
+      imd: +12
+      erreurs_données: -50%
+      ipqo: +3 (données fiables)
+    délai: 4 tours
+    prérequis: N1 actif
+    description: "Référentiels qualité, contrôles automatiques, data stewards"
+  N3_master_data:
+    disponibilité: Expert
+    coût: 4 unités (additionnel)
+    effet:
+      imd: +20
+      erreurs_données: -80%
+      ipqo: +8
+      temps_réponse_data: -60%
+    délai: 6 tours
+    prérequis: N2 actif + LEV-IT-04
+    description: "MDM complet, data catalog, lineage, temps réel"
+interactions:
+  - Prérequis critique pour LEV-IT-05 (IA)
+  - Amplifie effet de LEV-PREV-03 (prévention data-driven)
+```
+
+**Détail LEV-IT-06 — Sécurité SI (Progressif)**
+
+```yaml
+id: LEV-IT-06
+nom: Sécurité des systèmes d'information
+disponibilité: Novice (N1), Intermédiaire (N2), Expert (N3)
+type: Progressif
+scope: Global
+niveaux:
+  N1_hygiène_sécurité:
+    disponibilité: Novice
+    coût: 1 unité
+    effet:
+      is: +3
+      risque_cyber: -20%
+    délai: 1 tour
+    description: "Patch management, sensibilisation, antivirus/EDR"
+  N2_défense_active:
+    disponibilité: Intermédiaire
+    coût: 2 unités (additionnel)
+    effet:
+      is: +8
+      risque_cyber: -50%
+      impact_incident: -30%
+    délai: 3 tours
+    prérequis: N1 actif
+    description: "SOC, SIEM, plan de continuité, tests intrusion"
+  N3_cyber_résilience:
+    disponibilité: Expert
+    coût: 4 unités (additionnel)
+    effet:
+      is: +15
+      risque_cyber: -75%
+      impact_incident: -60%
+      temps_recovery: -80%
+    délai: 5 tours
+    prérequis: N2 actif + LEV-CONF-01 ≥ N2
+    description: "Zero trust, red team, cyber assurance, certifications ISO27001"
+interactions:
+  - Prérequis pour LEV-CONF-01 N3
+  - Réduit impact événement "Cyberattaque"
+  - Bonus IS si combiné avec LEV-IT-03 N2+
+```
+
 ---
 
 ### 2.6 PRESTATAIRES & PARTENAIRES
@@ -224,7 +443,7 @@ impact_ipp: +2% à +5% selon niveau (économies fraude)
 | ID | Levier | Difficulté | Type | Scope | Coût | Effet Principal |
 |----|--------|------------|------|-------|------|------------------|
 | LEV-PRES-01 | Niveau externalisation | Novice | Persistant | Global | Variable | Capacité / Coûts |
-| LEV-PRES-02 | Exigences SLA | Intermédiaire | Persistant | Global | Élevé | IPQO + |
+| LEV-PRES-02 | Exigences SLA | Novice→Expert | **Progressif** | Global | Variable | IPQO + / Qualité service |
 | LEV-PRES-03 | Réseau agréé | Intermédiaire | Persistant | Produit | Moyen | Coût sinistres − |
 
 ---
@@ -380,37 +599,51 @@ délai: Effet IS immédiat, conséquences IRF/IPP différées
 
 | ID | Levier | Difficulté | Type | Scope | Coût | Effet Principal |
 |----|--------|------------|------|-------|------|------------------|
-| LEV-CONF-01 | Investissement conformité | Intermédiaire | Persistant | Global | Moyen | Réduction risque sanction / IS + |
+| LEV-CONF-01 | Investissement conformité | Novice→Expert | **Progressif** | Global | Variable | Réduction risque sanction / IS + |
 
-**Détail LEV-CONF-01 — Investissement conformité**
+**Détail LEV-CONF-01 — Investissement conformité (Progressif)**
 
 ```yaml
 id: LEV-CONF-01
 nom: Investissement conformité
-disponibilité: Intermédiaire
-type: Persistant (défensif)
+disponibilité: Novice (N1), Intermédiaire (N2), Expert (N3)
+type: Progressif (défensif)
 scope: Global
-coût_budget: 1-2 unités selon niveau
 niveaux:
-  Minimal:
-    coût: 0 unité
-    effet: Vulnérabilité aux événements "Sanction réglementaire"
-    risque: "Probabilité sanction +20% si IS < 50"
-  Standard:
-    coût: 1 unité
-    effet: Risque sanction baseline
-    is: +2
-  Renforcé:
-    coût: 2 unités
-    effet: Probabilité sanction −50%
-    is: +5
-    ipp: −1 (coût structure)
-    bonus: "Accès prioritaire nouveaux produits réglementés"
+  N1_conformité_minimale:
+    disponibilité: Novice
+    coût: 0.5 unité
+    effet:
+      is: +2
+      risque_sanction: baseline
+    délai: 1 tour
+    description: "Veille réglementaire, process de base, formations obligatoires"
+  N2_conformité_maîtrisée:
+    disponibilité: Intermédiaire
+    coût: 1.5 unités (additionnel)
+    effet:
+      is: +6
+      risque_sanction: -40%
+      ipp: -1 (coût structure)
+    délai: 2 tours
+    prérequis: N1 actif
+    description: "Équipe dédiée, cartographie risques, audits internes, RGPD+DDA"
+  N3_excellence_réglementaire:
+    disponibilité: Expert
+    coût: 2.5 unités (additionnel)
+    effet:
+      is: +12
+      risque_sanction: -70%
+      ipp: -2 (coût structure)
+      bonus_innovation: true
+    délai: 4 tours
+    prérequis: N2 actif + LEV-IT-06 ≥ N2
+    description: "RegTech, conformité proactive, dialogue régulateur, certifications"
 interactions:
-  - Prérequis pour LEV-IT-05 (IA) : conformité ≥ Standard (RGPD/IA Act)
-  - Si LEV-IT-06 (Sécurité SI) actif : bonus conformité +2
-  - Événement "Choc réglementaire" : impact réduit si conformité Renforcé
-délai: Effet IS immédiat, protection événements à partir du tour suivant
+  - Prérequis pour LEV-IT-05 (IA) : N2 minimum (RGPD/IA Act)
+  - Si LEV-IT-06 N2+ actif : bonus IS +3
+  - Événements "Choc réglementaire" / "Sanction ACPR" : impact réduit proportionnel au niveau
+  - N3 donne accès prioritaire aux nouveaux produits réglementés
 note: "Levier défensif : ne génère pas de croissance mais protège des pertes"
 ```
 
@@ -445,16 +678,20 @@ délai: Effet IS immédiat, conséquences IRF/IPP différées
 | Catégorie | Novice | Intermédiaire | Expert |
 |-----------|--------|---------------|--------|
 | Tarification | 2 leviers | 3 leviers | 3 leviers + granularité |
-| Distribution | 1 levier (mix) | 3 leviers | 4 leviers |
+| Distribution | 1 levier (mix) + FormationN1 | 3 leviers + FormationN2 | 4 leviers + FormationN3 |
 | Marketing | 1 levier | 3 leviers | 3 leviers + ciblage |
-| RH | 3 leviers macro | 5 leviers | 6 leviers |
-| IT/Data | 1 levier | 3 leviers | 5 leviers + IA |
+| RH | 3 leviers + FormationN1 | 5 leviers + FormationN2 | 6 leviers + FormationN3 |
+| IT/Data | 1 levier + AutoN1 + DataN1 + SecuN1 | 3 leviers + AutoN2 + DataN2 + SecuN2 | 5 leviers + IA + Auto/Data/SecuN3 |
 | Sinistres | 2 leviers + FraudeN1 | 3 leviers + FraudeN2 | 4 leviers + FraudeN3 |
+| Prestataires | 1 levier + SLAN1 | 2 leviers + SLAN2 | 3 leviers + SLAN3 |
 | Réassurance | 1 levier (niveau) | 1 levier | 2 leviers |
 | Prévention | 0 | 2 leviers N1 | 3 leviers N1-N3 |
 | Provisions | 1 levier | 1 levier | 2 leviers |
+| Conformité | ConformitéN1 | ConformitéN2 | ConformitéN3 |
 
-**Total** : ~12 leviers (Novice) → ~22 leviers (Intermédiaire) → ~30+ leviers (Expert)
+**Total leviers progressifs** : 12 leviers avec niveaux N1/N2/N3
+
+**Total général** : ~18 leviers accessibles (Novice) → ~28 leviers (Intermédiaire) → ~38+ leviers (Expert)
 
 ---
 
