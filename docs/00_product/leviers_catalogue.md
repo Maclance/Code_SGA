@@ -446,6 +446,49 @@ interactions:
 | LEV-PRES-02 | Exigences SLA | Novice→Expert | **Progressif** | Global | Variable | IPQO + / Qualité service |
 | LEV-PRES-03 | Réseau agréé | Intermédiaire | Persistant | Produit | Moyen | Coût sinistres − |
 
+**Détail LEV-PRES-02 — Exigences SLA (Progressif)**
+
+```yaml
+id: LEV-PRES-02
+nom: Exigences SLA prestataires
+disponibilité: Novice (N1), Intermédiaire (N2), Expert (N3)
+type: Progressif
+scope: Global
+niveaux:
+  N1_sla_basiques:
+    disponibilité: Novice
+    coût: 0.5 unité
+    effet:
+      ipqo: +2
+      délai_prestataire: -10%
+    délai: 1 tour
+    description: "Contrats formalisés, SLA délais basiques, reporting mensuel"
+  N2_pilotage_qualité:
+    disponibilité: Intermédiaire
+    coût: 1 unité (additionnel)
+    effet:
+      ipqo: +6
+      délai_prestataire: -25%
+      coût_prestataire: -5% (négociation)
+    délai: 2 tours
+    prérequis: N1 actif
+    description: "Pénalités/bonus, audits réguliers, comités de pilotage"
+  N3_partenariat_stratégique:
+    disponibilité: Expert
+    coût: 2 unités (additionnel)
+    effet:
+      ipqo: +12
+      délai_prestataire: -40%
+      coût_prestataire: -10%
+      innovation: +5 (co-développement)
+    délai: 4 tours
+    prérequis: N2 actif + volume suffisant
+    description: "Intégration SI, co-investissement, exclusivité zones, innovation partagée"
+interactions:
+  - Amplifie effet de LEV-PRES-01 (externalisation) et LEV-PRES-03 (réseau agréé)
+  - Impact IPQO plus fort si LEV-SIN-01 (organisation) optimisé
+```
+
 ---
 
 ### 2.7 GESTION DES SINISTRES
