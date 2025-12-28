@@ -64,7 +64,7 @@
 ### Sprint 1 — Foundations (2 sem)
 
 > **Objectif** : Multi-tenant, auth, audit, stockage état
-> **Statut** : 🟢 EN COURS
+> **Statut** : ✅ TERMINÉ
 
 | US | Titre | Taille | Points | Statut | Temps réel |
 |----|-------|:------:|:------:|:------:|:----------:|
@@ -72,7 +72,7 @@
 | US-002 | Inviter utilisateurs et attribuer rôles | L | 8 | ✅ Done | **2h30** |
 | US-003 | Authentification sécurisée | M | 5 | ✅ Done | **0h45** |
 | US-004 | Journal d'audit | M | 5 | ✅ Done | **0h50** |
-| **Total** | | | **26** | | |
+| **Total** | | | **26** | | **4h35** |
 
 **Livrables Sprint 1 :**
 - [x] Table `tenants` + RLS
@@ -82,6 +82,13 @@
 - [x] Tests manuels multi-tenant
 
 **Dépendances :** US-000 ✓
+
+**Métriques Sprint 1 :**
+| Métrique | Estimé | Réel |
+|----------|:------:|:----:|
+| Points | 26 | 26 |
+| Temps | ~16h | 4h35 |
+| Vélocité | - | Excellente |
 
 ---
 
