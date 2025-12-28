@@ -67,8 +67,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
             );
         }
 
-        // Update user role
-        const updatedUser = await updateUserRole(userId, tenantId, validation.data);
+        // Update user role - pass current user as actor for audit
+        const updatedUser = await updateUserRole(userId, tenantId, user.id, validation.data);
 
         return NextResponse.json({ user: updatedUser });
     } catch (error) {

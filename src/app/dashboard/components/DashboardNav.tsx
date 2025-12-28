@@ -30,6 +30,7 @@ const navItems = [
     { href: '/dashboard', label: 'Tableau de bord', icon: '📊' },
     { href: '/dashboard/users', label: 'Utilisateurs', icon: '👥', roles: ['admin_tenant'] },
     { href: '/dashboard/sessions', label: 'Sessions', icon: '🎮', roles: ['admin_tenant', 'formateur'] },
+    { href: '/dashboard/audit-logs', label: 'Journal d\'audit', icon: '📋', roles: ['admin_tenant'] },
 ];
 
 export default function DashboardNav({ user }: DashboardNavProps) {

@@ -18,6 +18,7 @@ import {
     INVITATION_EXPIRATION_HOURS,
 } from '@/types/user';
 import { getServerAppUrl } from '@/lib/utils/app-url';
+import { logAuditEvent, AuditAction } from '@/lib/services/audit.service';
 
 // ============================================
 // Error Classes
@@ -192,6 +193,16 @@ export async function createInvitation(
         await supabase.from('invitations').delete().eq('id', invitation.id);
         throw new UserError(`Failed to send invitation email: ${authError.message}`, 'EMAIL_ERROR');
     }
+
+    // Log audit event (async, non-blocking)
+    logAuditEvent({
+        tenantId,
+        userId: invitedBy,
+        action: AuditAction.USER_INVITE,
+        resourceType: 'invitation',
+        resourceId: invitation.id,
+        payload: { role, invitedEmail: '[REDACTED]' },
+    });
 
     return {
         invitation: invitation as Invitation,
@@ -471,10 +482,16 @@ export async function getUserById(userId: string): Promise<User> {
 /**
  * Update a user's role
  * Effect is immediate (AC: role change = effet immédiat)
+ *
+ * @param userId - Target user ID to update
+ * @param tenantId - Tenant ID for verification
+ * @param actorUserId - User ID of admin performing the action (for audit)
+ * @param input - New role data
  */
 export async function updateUserRole(
     userId: string,
     tenantId: string,
+    actorUserId: string,
     input: UpdateUserRoleInput
 ): Promise<User> {
     // Validate input
@@ -505,6 +522,16 @@ export async function updateUserRole(
     if (error) {
         throw new UserError(`Failed to update user role: ${error.message}`, 'DB_ERROR');
     }
+
+    // Log audit event (async, non-blocking)
+    logAuditEvent({
+        tenantId,
+        userId: actorUserId, // Admin performing the action
+        action: AuditAction.USER_ROLE_CHANGE,
+        resourceType: 'user',
+        resourceId: userId, // Target user whose role was changed
+        payload: { oldRole: existingUser.role, newRole: validation.data.role },
+    });
 
     return data as User;
 }
