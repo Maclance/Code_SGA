@@ -19,6 +19,10 @@ import {
     TurnStateInputSchema,
 } from '@/types/game-state';
 
+// Re-export engine version error for consolidated error handling
+export { EngineVersionMismatchError } from '@/lib/engine';
+
+
 // ============================================
 // Error Classes
 // ============================================

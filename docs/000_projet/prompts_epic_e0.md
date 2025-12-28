@@ -441,261 +441,7 @@ CHECKLIST AVANT COMMIT
 
 ---
 
-## US-005 — Stocker l'état complet par tour
-
-```markdown
-📖 CONTEXTE
-Lis d'abord :
-- docs/README.md
-- docs/80_api_data/data_model.md (sections sessions, game_states)
-- docs/20_simulation/overview.md
-- docs/000_projet/specs_fonctionnelles_mvp.md (section US-005)
-
-🎭 RÔLE
-Endosse le rôle : Database Engineer + Simulation Engineer
-
-🎯 OBJECTIF
-Implémenter US-005 : Stocker l'état complet d'une partie par tour
-
-Livrables :
-1. Migration SQL : tables `sessions`, `game_states`
-2. Types : Session, GameState, TurnState, Decision, Event
-3. Service : lib/services/game-state.service.ts
-4. API : /api/sessions/[sessionId]/turns/[turnNumber]
-5. Fonctions : saveTurnState(), loadTurnState(), replayFromTurn()
-
-📋 CRITÈRES D'ACCEPTATION
-- AC1: Given tour N terminé, When sauvegarde, Then état complet persisté
-- AC2: Given état tour N, When relecture, Then reprise exacte possible
-- AC3: Given état, When contenu, Then inclut : décisions, événements, indices, P&L, métriques
-
-STRUCTURE TurnState
-```typescript
-interface TurnState {
-  session_id: string;
-  turn_number: number;
-  timestamp: string; // ISO8601
-  
-  // Indices (0-100)
-  indices: {
-    IAC: number;
-    IPQO: number;
-    IERH: number;
-    IRF: number;
-    IMD: number;
-    IS: number;
-    IPP: number;
-  };
-  
-  // P&L
-  pnl: {
-    primes: number;
-    sinistres: number;
-    frais: number;
-    produits_financiers: number;
-    resultat: number;
-  };
-  
-  // Décisions du tour
-  decisions: Decision[];
-  
-  // Événements déclenchés
-  events: TriggeredEvent[];
-  
-  // Métriques portefeuille par produit
-  portfolio: {
-    [productId: string]: {
-      contracts: number;
-      premiums: number;
-      claims_stock: number;
-      claims_flow_in: number;
-      claims_flow_out: number;
-    };
-  };
-  
-  // Checksum pour validation intégrité
-  checksum: string;
-}
-```
-
-⚠️ CONTRAINTES
-- Stockage JSONB pour flexibilité (évolution schéma)
-- Checksum SHA256 du state pour détecter corruption
-- Pas de modification d'un état passé (append-only)
-- Compression optionnelle si state > 100KB
-
-📤 SORTIE ATTENDUE
-
-1. **Migration SQL**
-```sql
-CREATE TABLE sessions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id UUID NOT NULL REFERENCES tenants(id),
-  code VARCHAR(6) NOT NULL UNIQUE,
-  status session_status NOT NULL DEFAULT 'draft',
-  config JSONB NOT NULL, -- vitesse, difficulté, produits
-  engine_version VARCHAR(20) NOT NULL,
-  current_turn INTEGER DEFAULT 0,
-  max_turns INTEGER NOT NULL,
-  created_by UUID REFERENCES users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  started_at TIMESTAMPTZ,
-  ended_at TIMESTAMPTZ
-);
-
-CREATE TABLE game_states (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id UUID NOT NULL REFERENCES sessions(id),
-  turn_number INTEGER NOT NULL,
-  state JSONB NOT NULL,
-  checksum VARCHAR(64) NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(session_id, turn_number)
-);
-```
-
-2. **Service**
-```typescript
-// lib/services/game-state.service.ts
-export async function saveTurnState(
-  sessionId: string, 
-  turnNumber: number, 
-  state: TurnState
-): Promise<void>;
-
-export async function loadTurnState(
-  sessionId: string, 
-  turnNumber: number
-): Promise<TurnState | null>;
-
-export async function getLatestState(
-  sessionId: string
-): Promise<TurnState | null>;
-```
-
-3. **Checksum**
-```typescript
-function computeChecksum(state: TurnState): string {
-  const normalized = JSON.stringify(state, Object.keys(state).sort());
-  return crypto.createHash('sha256').update(normalized).digest('hex');
-}
-```
-
-CHECKLIST AVANT COMMIT
-- [ ] Sauvegarde/lecture état fonctionne
-- [ ] Checksum validé au chargement
-- [ ] Pas de modification état passé (test)
-- [ ] Types TurnState complets et stricts
-- [ ] Commit: feat(game): store complete turn state [US-005]
-```
-
----
-
-## US-006 — Gestion version moteur
-
-```markdown
-📖 CONTEXTE
-Lis d'abord :
-- docs/README.md
-- docs/20_simulation/overview.md
-- docs/000_projet/specs_fonctionnelles_mvp.md (section US-006)
-
-🎭 RÔLE
-Endosse le rôle : Simulation Engineer + Lead Dev
-
-🎯 OBJECTIF
-Implémenter US-006 : Gestion version moteur (engine_version)
-
-Livrables :
-1. Constante ENGINE_VERSION dans lib/engine/version.ts
-2. Stockage engine_version dans chaque session
-3. Validation : interdire recalcul si version différente
-4. Affichage version dans exports PDF et UI
-5. Documentation du versioning
-
-📋 CRITÈRES D'ACCEPTATION
-- AC1: Given nouvelle partie, When création, Then engine_version stockée
-- AC2: Given partie existante, When tentative recalcul avec autre version, Then erreur
-- AC3: Given export PDF, When génération, Then engine_version incluse
-
-SCHÉMA DE VERSION
-```
-Format: MAJOR.MINOR.PATCH
-- MAJOR: changement breaking (formules, indices)
-- MINOR: ajout features rétrocompatibles
-- PATCH: bugfixes
-
-Exemple: 1.0.0 (MVP)
-```
-
-⚠️ CONTRAINTES
-- Version = source unique (pas de déduction)
-- Pas de migration automatique entre versions
-- Warning UI si comparaison scores versions différentes
-- Changelog maintenu dans lib/engine/CHANGELOG.md
-
-📤 SORTIE ATTENDUE
-
-1. **Version constante**
-```typescript
-// lib/engine/version.ts
-export const ENGINE_VERSION = '1.0.0' as const;
-
-export interface EngineMetadata {
-  version: typeof ENGINE_VERSION;
-  releaseDate: string;
-  breaking: boolean;
-}
-
-export const ENGINE_METADATA: EngineMetadata = {
-  version: ENGINE_VERSION,
-  releaseDate: '2025-01-15',
-  breaking: false,
-};
-```
-
-2. **Validation**
-```typescript
-// lib/engine/validation.ts
-export function validateEngineVersion(
-  sessionVersion: string,
-  currentVersion: string = ENGINE_VERSION
-): void {
-  if (sessionVersion !== currentVersion) {
-    throw new EngineVersionMismatchError(
-      `Session uses engine ${sessionVersion}, current is ${currentVersion}. ` +
-      `Recalculation not allowed.`
-    );
-  }
-}
-```
-
-3. **Intégration session**
-- À la création : `session.engine_version = ENGINE_VERSION`
-- Au chargement : valider version avant calcul
-
-4. **Changelog**
-```markdown
-# Engine Changelog
-
-## 1.0.0 (2025-01-15) - MVP
-- Initial release
-- 7 indices: IAC, IPQO, IERH, IRF, IMD, IS, IPP
-- 2 products: Auto, MRH
-- Basic delay effects
-```
-
-CHECKLIST AVANT COMMIT
-- [ ] ENGINE_VERSION exportée et utilisée partout
-- [ ] Recalcul bloqué si version différente
-- [ ] Export PDF inclut version
-- [ ] CHANGELOG.md créé
-- [ ] Commit: feat(engine): engine version management [US-006]
-```
-
----
-
-## Ordre d'exécution recommandé
+## Ordre d'exécution recommandé (Sprint 0+1)
 
 ```mermaid
 flowchart LR
@@ -703,21 +449,19 @@ flowchart LR
     US001 --> US002[US-002<br>Users/RBAC]
     US002 --> US003[US-003<br>Auth]
     US001 --> US004[US-004<br>Audit]
-    US001 --> US005[US-005<br>Game State]
-    US005 --> US006[US-006<br>Engine Version]
 ```
 
-| Ordre | US | Dépend de | Durée estimée |
-|:-----:|:---|-----------|:-------------:|
-| 1 | US-000 | - | 0.5 jour |
-| 2 | US-001 | US-000 | 1 jour |
-| 3 | US-002 | US-001 | 1.5 jours |
-| 4 | US-003 | US-002 | 1 jour |
-| 5 | US-004 | US-001 | 0.5 jour |
-| 6 | US-005 | US-001 | 1 jour |
-| 7 | US-006 | US-005 | 0.5 jour |
+| Ordre | US | Dépend de | Durée estimée | Statut |
+|:-----:|:---|-----------|:-------------:|:------:|
+| 1 | US-000 | - | 0.5 jour | ✅ Done |
+| 2 | US-001 | US-000 | 1 jour | ✅ Done |
+| 3 | US-002 | US-001 | 1.5 jours | ✅ Done |
+| 4 | US-003 | US-002 | 1 jour | ✅ Done |
+| 5 | US-004 | US-001 | 0.5 jour | ✅ Done |
 
-**Total Sprint 0+1 : ~6 jours**
+**Total Sprint 0+1 : ~4.5 jours** ✅ Terminé
+
+> 📌 **Note** : US-005 et US-006 ont été déplacées vers `prompts_epic_e1.md` (Sprint 2)
 
 ---
 
@@ -725,15 +469,13 @@ flowchart LR
 
 ```
 ╔═══════════════════════════════════════════════════════════════════╗
-║                 EPIC E0 — FOUNDATIONS SAAS                        ║
+║          EPIC E0 — FOUNDATIONS SAAS (Sprint 0+1) ✅               ║
 ╠═══════════════════════════════════════════════════════════════════╣
-║  US-000 → Supabase init      │ feat(supabase): ...  [US-000]     ║
-║  US-001 → Tenants + RLS      │ feat(tenants): ...   [US-001]     ║
-║  US-002 → Users + RBAC       │ feat(auth): ...      [US-002]     ║
-║  US-003 → Login/Logout       │ feat(auth): ...      [US-003]     ║
-║  US-004 → Audit logs         │ feat(audit): ...     [US-004]     ║
-║  US-005 → Game state storage │ feat(game): ...      [US-005]     ║
-║  US-006 → Engine version     │ feat(engine): ...    [US-006]     ║
+║  US-000 → Supabase init      │ feat(supabase): ...  [US-000] ✅   ║
+║  US-001 → Tenants + RLS      │ feat(tenants): ...   [US-001] ✅   ║
+║  US-002 → Users + RBAC       │ feat(auth): ...      [US-002] ✅   ║
+║  US-003 → Login/Logout       │ feat(auth): ...      [US-003] ✅   ║
+║  US-004 → Audit logs         │ feat(audit): ...     [US-004] ✅   ║
 ╠═══════════════════════════════════════════════════════════════════╣
 ║  CHECKLIST UNIVERSELLE :                                          ║
 ║  ☐ npm run build      → OK                                        ║
