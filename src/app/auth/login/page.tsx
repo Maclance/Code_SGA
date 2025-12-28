@@ -7,12 +7,12 @@
  * @description Login page with email/password authentication (US-002/US-003)
  */
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 import styles from './page.module.css';
 
-export default function LoginPage() {
+function LoginPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get('redirect') || '/dashboard';
@@ -129,12 +129,33 @@ export default function LoginPage() {
 
                     {/* Footer */}
                     <div className={styles.footer}>
-                        <a href="/auth/forgot-password" className={styles.link}>
+                        <a href="/auth/reset-password" className={styles.link}>
                             Mot de passe oublié ?
                         </a>
                     </div>
                 </div>
             </div>
         </main>
+    );
+}
+
+/**
+ * Default export with Suspense boundary (required for useSearchParams in Next.js 15)
+ */
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <main className={styles.main}>
+                <div className={styles.container}>
+                    <div className={styles.card}>
+                        <div style={{ textAlign: 'center', padding: '2rem' }}>
+                            <span className={styles.spinner}></span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        }>
+            <LoginPageContent />
+        </Suspense>
     );
 }

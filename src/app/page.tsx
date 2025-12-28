@@ -1,8 +1,16 @@
+import Link from 'next/link'
 import styles from './page.module.css'
 
 export default function Home() {
     return (
         <main className={styles.main}>
+            {/* Header with login link */}
+            <header className={styles.header}>
+                <Link href="/auth/login" className={styles.loginLink}>
+                    Se connecter
+                </Link>
+            </header>
+
             <div className={styles.hero}>
                 <div className={styles.glowOrb} />
 
@@ -37,9 +45,9 @@ export default function Home() {
                     </div>
                 </div>
 
-                <button className={styles.ctaButton}>
+                <Link href="/auth/login" className={styles.ctaButton}>
                     Commencer une partie
-                </button>
+                </Link>
             </div>
         </main>
     )

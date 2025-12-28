@@ -7,11 +7,11 @@
  * @description Handles Supabase auth callbacks (email confirmations, magic links, etc.)
  */
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<'loading' | 'error' | 'success'>('loading');
@@ -163,5 +163,33 @@ export default function AuthCallbackPage() {
                 )}
             </div>
         </main>
+    );
+}
+
+/**
+ * Default export with Suspense boundary (required for useSearchParams in Next.js 15)
+ */
+export default function AuthCallbackPage() {
+    return (
+        <Suspense fallback={
+            <main style={{
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--color-bg-primary)',
+            }}>
+                <div style={{
+                    width: '40px',
+                    height: '40px',
+                    border: '3px solid var(--color-border)',
+                    borderTopColor: 'var(--color-primary)',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                }} />
+            </main>
+        }>
+            <AuthCallbackContent />
+        </Suspense>
     );
 }

@@ -70,7 +70,7 @@
 |----|-------|:------:|:------:|:------:|:----------:|
 | US-001 | Créer et gérer des tenants | L | 8 | ✅ Done | **0h30** |
 | US-002 | Inviter utilisateurs et attribuer rôles | L | 8 | ✅ Done | **2h30** |
-| US-003 | Authentification sécurisée | M | 5 | ⏳ À faire | - |
+| US-003 | Authentification sécurisée | M | 5 | ✅ Done | **0h45** |
 | US-004 | Journal d'audit | M | 5 | ⏳ À faire | - |
 | **Total** | | | **26** | | |
 
