@@ -95,21 +95,22 @@
 ### Sprint 2 — Core Loop (2 sem)
 
 > **Objectif** : Boucle de tour jouable + base moteur
+> **Statut** : 🟢 EN COURS
 
-| US | Titre | Taille | Points |
-|----|-------|:------:|:------:|
-| US-005 | Stocker état par tour | L | 8 |
-| US-006 | Gestion version moteur | M | 5 |
-| US-010 | Créer une session | M | 5 |
-| US-011 | Générer code session | M | 5 |
-| US-012 | Rejoindre session | M | 5 |
-| US-013 | Confirmer scope produits | M | 5 |
-| **Total** | | | **33** |
+| US | Titre | Taille | Points | Statut | Temps réel |
+|----|-------|:------:|:------:|:------:|:----------:|
+| US-005 | Stocker état par tour | L | 8 | ✅ Done | **0h25** |
+| US-006 | Gestion version moteur | M | 5 | 🔲 À faire | - |
+| US-010 | Créer une session | M | 5 | 🔲 À faire | - |
+| US-011 | Générer code session | M | 5 | 🔲 À faire | - |
+| US-012 | Rejoindre session | M | 5 | 🔲 À faire | - |
+| US-013 | Confirmer scope produits | M | 5 | 🔲 À faire | - |
+| **Total** | | | **33** | | **0h25** |
 
 > ⚠️ Sprint chargé → US-012/013 peuvent glisser en S3 si nécessaire
 
 **Livrables Sprint 2 :**
-- [ ] Schema `game_states`
+- [x] Schema `game_states`
 - [ ] API création/rejointe session
 - [ ] UI création session (formateur)
 - [ ] UI sélection compagnie (joueur)
