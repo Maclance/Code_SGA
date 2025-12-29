@@ -38,7 +38,7 @@
 ### Sprint 0 — Bootstrap (2 sem)
 
 > **Objectif** : Infrastructure technique opérationnelle
-> **Statut** : 🟢 EN COURS
+> **Statut** : ✅ TERMINÉ
 
 | US | Titre | Taille | Points | Statut | Temps réel |
 |----|-------|:------:|:------:|:------:|:----------:|
@@ -48,16 +48,18 @@
 - [x] Projet Supabase créé et configuré
 - [x] App Next.js connectée
 - [x] Variables d'environnement configurées
-- [ ] CI/CD minimal (Vercel preview)
+- [x] CI/CD minimal (Vercel preview)
 - [x] Structure projet initiale
 
-**Critère de sortie :** `npm run dev` démarre, connexion Supabase OK ✅
+**Critère de sortie :** `npm run dev` démarre, connexion Supabase OK ✅  
+**CI/CD :** Vercel configuré, build production validé ✅
 
 **Métriques Sprint 0 :**
 | Métrique | Estimé | Réel |
 |----------|:------:|:----:|
 | Points | 5 | 5 |
-| Temps | ~4h | 1h00 |
+| Temps | ~4h | 1h30 |
+| Vélocité | - | Excellente |
 
 ---
 
