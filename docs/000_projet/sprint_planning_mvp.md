@@ -105,15 +105,15 @@
 | US-006 | Gestion version moteur | M | 5 | ✅ Done | **0h20** |
 | US-010 | Créer une session | M | 5 | ✅ Done | **0h30** |
 | US-011 | Générer code session | M | 5 | ✅ Done | **0h30** |
-| US-012 | Rejoindre session | M | 5 | 🔲 À faire | - |
+| US-012 | Rejoindre session | M | 5 | ✅ Done | **0h35** |
 | US-013 | Confirmer scope produits | M | 5 | 🔲 À faire | - |
-| **Total** | | | **33** | | **1h45** |
+| **Total** | | | **33** | | **2h20** |
 
 > ⚠️ Sprint chargé → US-012/013 peuvent glisser en S3 si nécessaire
 
 **Livrables Sprint 2 :**
 - [x] Schema `game_states`
-- [ ] API création/rejointe session
+- [x] API création/rejointe session
 - [ ] UI création session (formateur)
 - [ ] UI sélection compagnie (joueur)
 - [ ] Flux onboarding minimal

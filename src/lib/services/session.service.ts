@@ -58,6 +58,24 @@ export class UnauthorizedError extends SessionError {
     }
 }
 
+export class SessionFullError extends SessionError {
+    constructor() {
+        super('Session complète', 'SESSION_FULL', 409);
+    }
+}
+
+export class SessionInactiveError extends SessionError {
+    constructor(status: string) {
+        super(`Session non accessible (status: ${status})`, 'SESSION_INACTIVE', 403);
+    }
+}
+
+export class AlreadyJoinedError extends SessionError {
+    constructor() {
+        super('Vous avez déjà rejoint cette session', 'ALREADY_JOINED', 409);
+    }
+}
+
 // ============================================
 // Admin Client (for bypassing RLS)
 // ============================================
@@ -383,3 +401,163 @@ export async function getSessionByCode(code: string): Promise<Session> {
 
     return mapSessionFromDb(data as SessionDbRow);
 }
+
+// ============================================
+// Join Session Functions (US-012)
+// ============================================
+
+/**
+ * Get the count of participants in a session
+ *
+ * @param sessionId - Session UUID
+ * @returns Number of participants
+ */
+export async function getSessionParticipantCount(sessionId: string): Promise<number> {
+    const supabase = getAdminClient();
+
+    const { count, error } = await supabase
+        .from('session_participants')
+        .select('*', { count: 'exact', head: true })
+        .eq('session_id', sessionId);
+
+    if (error) {
+        console.error('Error counting participants:', error);
+        return 0;
+    }
+
+    return count || 0;
+}
+
+/**
+ * Check if a user is already a participant in a session
+ *
+ * @param sessionId - Session UUID
+ * @param userId - User UUID
+ * @returns True if user is already in session
+ */
+export async function isUserInSession(
+    sessionId: string,
+    userId: string
+): Promise<boolean> {
+    const supabase = getAdminClient();
+
+    const { data, error } = await supabase
+        .from('session_participants')
+        .select('id')
+        .eq('session_id', sessionId)
+        .eq('user_id', userId)
+        .single();
+
+    // No error and data found means user is in session
+    return !error && !!data;
+}
+
+/**
+ * Session with max_participants for join validation
+ */
+interface SessionWithCapacity extends Session {
+    maxParticipants: number;
+}
+
+/**
+ * Get a session by code with capacity info
+ */
+async function getSessionByCodeWithCapacity(code: string): Promise<SessionWithCapacity> {
+    const supabase = getAdminClient();
+
+    const { data, error } = await supabase
+        .from('sessions')
+        .select('*, max_participants')
+        .eq('code', code.toUpperCase())
+        .single();
+
+    if (error || !data) {
+        throw new SessionNotFoundError(code);
+    }
+
+    const session = mapSessionFromDb(data as SessionDbRow);
+    return {
+        ...session,
+        maxParticipants: data.max_participants || 50,
+    };
+}
+
+/**
+ * Join result type
+ */
+export interface JoinSessionResult {
+    sessionId: string;
+    session: Session;
+    participantId: string;
+}
+
+/**
+ * Join a session by code
+ *
+ * @param code - Session join code (6 chars, case-insensitive)
+ * @param userId - User ID of the player joining
+ * @returns Session data if successful
+ * @throws {SessionNotFoundError} If code doesn't exist
+ * @throws {SessionInactiveError} If session is not ready or running
+ * @throws {SessionFullError} If session has reached max participants
+ * @throws {AlreadyJoinedError} If user is already in session
+ */
+export async function joinSession(
+    code: string,
+    userId: string
+): Promise<JoinSessionResult> {
+    const supabase = getAdminClient();
+
+    // Normalize code (uppercase, remove separators)
+    const normalizedCode = code.replace(/-/g, '').toUpperCase();
+
+    // Get session with capacity info
+    const session = await getSessionByCodeWithCapacity(normalizedCode);
+
+    // Validate session status (AC1: only active sessions)
+    if (!['ready', 'running'].includes(session.status)) {
+        throw new SessionInactiveError(session.status);
+    }
+
+    // Check if user already joined (US-012 constraint: no duplicate joins)
+    const alreadyJoined = await isUserInSession(session.id, userId);
+    if (alreadyJoined) {
+        throw new AlreadyJoinedError();
+    }
+
+    // Check capacity (AC3: session full)
+    const currentCount = await getSessionParticipantCount(session.id);
+    if (currentCount >= session.maxParticipants) {
+        throw new SessionFullError();
+    }
+
+    // Insert participant
+    const { data, error } = await supabase
+        .from('session_participants')
+        .insert({
+            session_id: session.id,
+            user_id: userId,
+            role: 'player',
+        })
+        .select()
+        .single();
+
+    if (error) {
+        // Handle unique constraint violation (race condition)
+        if (error.code === '23505') {
+            throw new AlreadyJoinedError();
+        }
+        throw new SessionError(
+            `Failed to join session: ${error.message}`,
+            'DB_ERROR',
+            500
+        );
+    }
+
+    return {
+        sessionId: session.id,
+        session: session,
+        participantId: data.id,
+    };
+}
+

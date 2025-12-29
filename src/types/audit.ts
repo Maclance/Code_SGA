@@ -20,6 +20,7 @@ export const AuditAction = {
     SESSION_CREATE: 'session.create',
     SESSION_UPDATE: 'session.update',
     SESSION_DELETE: 'session.delete',
+    SESSION_JOIN: 'session.join',
 
     // User management
     USER_INVITE: 'user.invite',
