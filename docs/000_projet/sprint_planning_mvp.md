@@ -101,7 +101,7 @@
 |----|-------|:------:|:------:|:------:|:----------:|
 | US-005 | Stocker état par tour | L | 8 | ✅ Done | **0h25** |
 | US-006 | Gestion version moteur | M | 5 | ✅ Done | **0h20** |
-| US-010 | Créer une session | M | 5 | 🔲 À faire | - |
+| US-010 | Créer une session | M | 5 | ✅ Done | **0h30** |
 | US-011 | Générer code session | M | 5 | 🔲 À faire | - |
 | US-012 | Rejoindre session | M | 5 | 🔲 À faire | - |
 | US-013 | Confirmer scope produits | M | 5 | 🔲 À faire | - |
