@@ -9,6 +9,12 @@ import { createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { ENGINE_VERSION } from '@/lib/engine';
 import {
+    generateSessionCode as generateCode,
+    generateUniqueCode as generateUnique,
+    formatCodeForDisplay,
+    CodeGenerationError,
+} from '@/lib/utils/session-code';
+import {
     type Session,
     type CreateSessionInput,
     CreateSessionInputSchema,
@@ -80,57 +86,39 @@ function getAdminClient() {
 }
 
 // ============================================
-// Helper Functions
+// Helper Functions (delegating to session-code.ts)
 // ============================================
 
 /**
  * Generate a unique 6-character alphanumeric session code
- * Format: ABC123 (3 uppercase letters + 3 digits)
+ * @deprecated Use generateSessionCode from @/lib/utils/session-code directly
  */
-export function generateSessionCode(): string {
-    const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Excluding I and O to avoid confusion
-    const digits = '0123456789';
+export const generateSessionCode = generateCode;
 
-    let code = '';
-
-    // 3 random letters
-    for (let i = 0; i < 3; i++) {
-        code += letters.charAt(Math.floor(Math.random() * letters.length));
-    }
-
-    // 3 random digits
-    for (let i = 0; i < 3; i++) {
-        code += digits.charAt(Math.floor(Math.random() * digits.length));
-    }
-
-    return code;
-}
+/**
+ * Re-export formatCodeForDisplay for convenience
+ */
+export { formatCodeForDisplay };
 
 /**
  * Generate a unique code that doesn't exist in the database
+ * Wraps the helper to use admin client and convert errors
  */
 async function generateUniqueCode(maxAttempts: number = 10): Promise<string> {
     const supabase = getAdminClient();
 
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const code = generateSessionCode();
-
-        const { data: existing } = await supabase
-            .from('sessions')
-            .select('id')
-            .eq('code', code)
-            .single();
-
-        if (!existing) {
-            return code;
+    try {
+        return await generateUnique(supabase, maxAttempts);
+    } catch (error) {
+        if (error instanceof CodeGenerationError) {
+            throw new SessionError(
+                'Unable to generate unique session code',
+                'CODE_GENERATION_FAILED',
+                500
+            );
         }
+        throw error;
     }
-
-    throw new SessionError(
-        'Unable to generate unique session code',
-        'CODE_GENERATION_FAILED',
-        500
-    );
 }
 
 /**

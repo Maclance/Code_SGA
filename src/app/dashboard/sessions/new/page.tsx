@@ -142,8 +142,8 @@ export default function NewSessionPage() {
                 return;
             }
 
-            // Redirect to session page
-            router.push(`/dashboard/sessions/${data.session.id}`);
+            // Redirect to sessions list (session detail page not implemented yet)
+            router.push('/dashboard/sessions');
         } catch (error) {
             console.error('Error creating session:', error);
             setErrors({
