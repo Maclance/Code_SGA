@@ -106,8 +106,8 @@
 | US-010 | Créer une session | M | 5 | ✅ Done | **0h30** |
 | US-011 | Générer code session | M | 5 | ✅ Done | **0h30** |
 | US-012 | Rejoindre session | M | 5 | ✅ Done | **0h35** |
-| US-013 | Confirmer scope produits | M | 5 | 🔲 À faire | - |
-| **Total** | | | **33** | | **2h20** |
+| US-013 | Confirmer scope produits | M | 5 | ✅ Done | **0h55** |
+| **Total** | | | **33** | | **3h15** |
 
 > ⚠️ Sprint chargé → US-012/013 peuvent glisser en S3 si nécessaire
 

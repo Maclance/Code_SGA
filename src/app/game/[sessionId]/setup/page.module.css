@@ -1,0 +1,40 @@
+/**
+ * Game Setup Page Styles
+ */
+
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    padding: 2rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.pageTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 0.5rem;
+}
+
+.sessionInfo {
+    color: #666;
+    font-size: 0.9375rem;
+    margin: 0;
+}
+
+.sessionInfo strong {
+    color: #4361ee;
+}
+
+.main {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}

@@ -561,3 +561,108 @@ export async function joinSession(
     };
 }
 
+// ============================================
+// Confirm Product Scope Functions (US-013)
+// ============================================
+
+/**
+ * Error for invalid session status transitions
+ */
+export class InvalidStatusTransitionError extends SessionError {
+    constructor(currentStatus: string, targetStatus: string) {
+        super(
+            `Cannot transition from '${currentStatus}' to '${targetStatus}'`,
+            'INVALID_STATUS_TRANSITION',
+            403
+        );
+    }
+}
+
+/**
+ * Confirm product scope result
+ */
+export interface ConfirmScopeResult {
+    session: Session;
+}
+
+/**
+ * Confirm the product scope for a session and transition to 'active' status
+ * 
+ * This is an IRREVERSIBLE transition per specs.
+ * 
+ * @param sessionId - Session UUID
+ * @param products - Array of product IDs (at least 1 required)
+ * @param userId - User ID performing the confirmation
+ * @param tenantId - Tenant ID for authentication
+ * @returns Updated session
+ * @throws {ValidationError} If no products selected
+ * @throws {SessionNotFoundError} If session doesn't exist
+ * @throws {InvalidStatusTransitionError} If session is not in 'draft' status
+ */
+export async function confirmProductScope(
+    sessionId: string,
+    products: ProductId[],
+    userId: string,
+    tenantId: string
+): Promise<ConfirmScopeResult> {
+    // Validate products (AC2: at least 1 required)
+    if (!products || products.length === 0) {
+        throw new ValidationError('Sélectionnez au moins un produit');
+    }
+
+    // Validate product IDs
+    const validProducts: ProductId[] = ['auto', 'mrh'];
+    for (const product of products) {
+        if (!validProducts.includes(product)) {
+            throw new ValidationError(`Produit invalide: ${product}`);
+        }
+    }
+
+    const supabase = getAdminClient();
+
+    // Get current session
+    const { data: currentSession, error: fetchError } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('id', sessionId)
+        .eq('tenant_id', tenantId)
+        .single();
+
+    if (fetchError || !currentSession) {
+        throw new SessionNotFoundError(sessionId);
+    }
+
+    // Validate status transition (AC3: only from 'draft')
+    if (currentSession.status !== 'draft') {
+        throw new InvalidStatusTransitionError(currentSession.status, 'ready');
+    }
+
+    // Update session: products + status = 'ready'
+    const updatedConfig = {
+        ...currentSession.config,
+        products: products,
+    };
+
+    const { data, error } = await supabase
+        .from('sessions')
+        .update({
+            config: updatedConfig,
+            status: 'ready',
+            started_at: new Date().toISOString(),
+        })
+        .eq('id', sessionId)
+        .select()
+        .single();
+
+    if (error) {
+        throw new SessionError(
+            `Failed to confirm product scope: ${error.message}`,
+            'DB_ERROR',
+            500
+        );
+    }
+
+    return {
+        session: mapSessionFromDb(data as SessionDbRow),
+    };
+}
