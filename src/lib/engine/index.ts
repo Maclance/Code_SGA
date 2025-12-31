@@ -175,7 +175,22 @@ export {
 } from './resources';
 
 // ============================================
-// PRODUCT ENGINE (US-022)
+// PRODUCT TYPES (US-023)
+// ============================================
+
+export type {
+    ProductDecision,
+    DecisionApplicationResult,
+    DecisionDomain,
+} from './product-types';
+
+export {
+    SHARED_DOMAINS,
+    isSharedDomain,
+} from './product-types';
+
+// ============================================
+// PRODUCT ENGINE (US-022, US-023)
 // ============================================
 
 export type { ProductInputs } from './product-engine';
@@ -187,6 +202,8 @@ export {
     calculateProductMetrics,
     isProductAffected,
     applyRateChange,
+    applyDecisionToProduct,
+    applyDecisionsToProduct,
     DEFAULT_AUTO_INPUTS,
     DEFAULT_MRH_INPUTS,
 } from './product-engine';

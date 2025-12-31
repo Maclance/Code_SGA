@@ -2,15 +2,25 @@
  * Product Engine Module
  *
  * @module lib/engine/product-engine
- * @description Per-product calculations and metrics (US-022)
+ * @description Per-product calculations, metrics, and decision application (US-022, US-023)
  *
  * References:
- * - docs/000_projet/specs_fonctionnelles_mvp.md (US-022)
+ * - docs/000_projet/specs_fonctionnelles_mvp.md (US-022, US-023)
  * - docs/20_simulation/indices.md (formulas)
+ *
+ * Acceptance Criteria:
+ * - AC1: Shared decisions (RH/IT) affect all products (capacity/quality)
+ * - AC2: Product-specific decisions only affect targeted product
+ * - AC3: Aggregation uses weighted average by premium share
  */
 
 import { type ProductId, type ProductMetrics } from './resource-types';
-import { type IndicesState, type CompanyVariables } from './types';
+import { type IndicesState, type CompanyVariables, INDEX_IDS } from './types';
+import {
+    type ProductDecision,
+    type DecisionApplicationResult,
+    isSharedDomain,
+} from './product-types';
 import { calculateAllIndices } from './indices';
 import { clamp, safeDiv } from './utils';
 
@@ -198,3 +208,148 @@ export const DEFAULT_MRH_INPUTS: ProductInputs = {
     stock_sinistres: 4000,
     companyVariables: {} as CompanyVariables, // To be provided
 };
+
+// ============================================
+// DECISION APPLICATION (US-023)
+// ============================================
+
+/**
+ * Apply a decision to a product's metrics
+ *
+ * Handles both shared and product-specific decisions:
+ * - AC1: Shared decisions (RH/IT) affect all products
+ * - AC2: Product-specific decisions only affect targeted product
+ *
+ * @param metrics - Current product metrics
+ * @param decision - Decision to apply
+ * @param currentTurn - Current game turn (for delay check)
+ * @returns Application result with updated metrics if applied
+ *
+ * @example
+ * // Apply tariff change to Auto only
+ * const result = applyDecisionToProduct(autoMetrics, {
+ *   id: 'dec-001',
+ *   domain: 'tarif',
+ *   targetProduct: 'auto',
+ *   effectType: 'relative',
+ *   targetIndex: 'primes',
+ *   value: -0.05, // -5%
+ *   turn: 1,
+ *   delay: 0
+ * }, 1);
+ */
+export function applyDecisionToProduct(
+    metrics: ProductMetrics,
+    decision: ProductDecision,
+    currentTurn: number
+): DecisionApplicationResult {
+    // Check if effect is delayed
+    if (currentTurn < decision.turn + decision.delay) {
+        console.log(
+            `[product-engine] Decision ${decision.id} delayed until turn ${decision.turn + decision.delay}`
+        );
+        return { applied: false, reason: 'delayed' };
+    }
+
+    // Check if this product is affected
+    const isShared = isSharedDomain(decision.domain);
+    const isTargeted = decision.targetProduct === metrics.productId;
+
+    if (!isShared && !isTargeted) {
+        console.log(
+            `[product-engine] Decision ${decision.id} not applied to ${metrics.productId} (targets ${decision.targetProduct})`
+        );
+        return { applied: false, reason: 'not_targeted' };
+    }
+
+    // Clone metrics to avoid mutation
+    const updated: ProductMetrics = {
+        ...metrics,
+        indices: { ...metrics.indices },
+    };
+
+    // Apply the effect based on target
+    if (decision.targetIndex === 'primes') {
+        updated.primes = applyEffect(
+            metrics.primes,
+            decision.value,
+            decision.effectType
+        );
+        // Recalculate S/P ratio
+        updated.ratio_sp = calculateRatioSP(updated.sinistres, updated.primes);
+    } else if (decision.targetIndex === 'sinistres') {
+        updated.sinistres = applyEffect(
+            metrics.sinistres,
+            decision.value,
+            decision.effectType
+        );
+        // Recalculate S/P ratio
+        updated.ratio_sp = calculateRatioSP(updated.sinistres, updated.primes);
+    } else {
+        // Target is an index
+        const indexId = decision.targetIndex as keyof typeof updated.indices;
+        if (INDEX_IDS.includes(indexId)) {
+            updated.indices[indexId] = clamp(
+                applyEffect(
+                    metrics.indices[indexId],
+                    decision.value,
+                    decision.effectType
+                ),
+                0,
+                100
+            );
+        }
+    }
+
+    console.log(
+        `[product-engine] Decision ${decision.id} applied to ${metrics.productId}: ` +
+        `${decision.targetIndex} ${decision.effectType} ${decision.value}`
+    );
+
+    return { applied: true, updatedMetrics: updated };
+}
+
+/**
+ * Apply an effect value to a base value
+ *
+ * @param base - Base value
+ * @param effectValue - Effect to apply
+ * @param effectType - 'absolute' or 'relative'
+ * @returns Updated value
+ */
+function applyEffect(
+    base: number,
+    effectValue: number,
+    effectType: 'absolute' | 'relative'
+): number {
+    if (effectType === 'absolute') {
+        return base + effectValue;
+    }
+    // Relative: effectValue is a percentage (e.g., -0.05 = -5%)
+    return base * (1 + effectValue);
+}
+
+/**
+ * Apply multiple decisions to a product
+ *
+ * @param metrics - Current product metrics
+ * @param decisions - List of decisions to apply
+ * @param currentTurn - Current game turn
+ * @returns Final updated metrics after all applicable decisions
+ */
+export function applyDecisionsToProduct(
+    metrics: ProductMetrics,
+    decisions: ProductDecision[],
+    currentTurn: number
+): ProductMetrics {
+    let current = metrics;
+
+    for (const decision of decisions) {
+        const result = applyDecisionToProduct(current, decision, currentTurn);
+        if (result.applied && result.updatedMetrics) {
+            current = result.updatedMetrics;
+        }
+    }
+
+    return current;
+}
