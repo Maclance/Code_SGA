@@ -1,0 +1,146 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.intro {
+    text-align: center;
+    color: #aaa;
+    padding: 0.5rem;
+}
+
+.intro p {
+    margin: 0;
+}
+
+/* No Events */
+.noEvents {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(74, 222, 128, 0.1);
+    border-radius: 12px;
+}
+
+.noEventsEmoji {
+    font-size: 3rem;
+}
+
+.noEvents h3 {
+    color: #4ade80;
+    margin: 1rem 0 0.5rem;
+}
+
+.noEvents p {
+    color: #aaa;
+    margin: 0;
+}
+
+/* Events List */
+.eventsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.eventCard {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border-left: 4px solid #facc15;
+    transition: transform 0.2s;
+}
+
+.eventCard:hover {
+    transform: translateX(4px);
+}
+
+.eventHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.eventEmoji {
+    font-size: 1.5rem;
+}
+
+.eventMeta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.eventType {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.severity {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    color: #000;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.eventName {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.eventDesc {
+    margin: 0 0 1rem;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.eventDetails {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.impacts {
+    display: flex;
+    gap: 1rem;
+}
+
+.impact {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.duration {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+}
+
+.continueBtn {
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.continueBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}

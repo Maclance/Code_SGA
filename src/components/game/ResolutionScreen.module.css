@@ -1,0 +1,129 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+}
+
+/* Resolving State */
+.resolving {
+    text-align: center;
+    padding: 3rem;
+}
+
+.animation {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.circle {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.circle:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.circle:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+    }
+
+    40% {
+        transform: scale(1);
+    }
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: #aaa;
+    margin: 0 0 2rem;
+}
+
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: left;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    color: #aaa;
+}
+
+.stepCheck {
+    color: #4ade80;
+    font-size: 1.1rem;
+}
+
+.stepSpinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.stepPending {
+    color: #555;
+    font-size: 1rem;
+}
+
+/* Error State */
+.error {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(248, 113, 113, 0.1);
+    border-radius: 12px;
+}
+
+.errorIcon {
+    font-size: 3rem;
+}
+
+.error h2 {
+    color: #f87171;
+    margin: 1rem 0 0.5rem;
+}
+
+.error p {
+    color: #aaa;
+    margin: 0;
+}

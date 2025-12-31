@@ -133,7 +133,7 @@
 ### Sprint 3 — Moteur (2 sem)
 
 > **Objectif** : 7 indices, P&L, effets retard, UI dashboard
-> **Statut** : 🔄 EN COURS
+> **Statut** : ✅ TERMINÉ
 
 | US | Titre | Taille | Points | Statut | Temps réel |
 |----|-------|:------:|:------:|:------:|:----------:|
@@ -141,8 +141,8 @@
 | US-021 | Effets retard / Empilement / Caps | L | 8 | ✅ Done | **0h20** |
 | US-022 | Ressources communes | M | 5 | ✅ Done | **0h40** |
 | US-023 | Calculs par produit + Agrégation | L | 8 | ✅ Done | **0h35** |
-| US-014 | Boucle de tour complète | L | 8 | ⬜ À faire | - |
-| **Total** | | | **37** | | **2h05** |
+| US-014 | Boucle de tour complète | L | 8 | ✅ Done | **1h15** |
+| **Total** | | | **37** | | **3h20** |
 
 **Livrables Sprint 3 :**
 - [x] Module `lib/engine/` avec calculs indices (US-020)
@@ -150,7 +150,7 @@
 - [x] Système effets retard avec caps ±50% (US-021)
 - [x] Agrégation multi-produits (US-022)
 - [x] Calculs par produit + types décisions (US-023)
-- [ ] Boucle dashboard→décisions→résolution→feedback (US-014)
+- [x] Boucle dashboard→décisions→résolution→feedback (US-014)
 
 **Dépendances :** Sprint 2 ✓
 
