@@ -80,3 +80,60 @@ export {
     isProfitable,
     getCombinedRatioZone,
 } from './pnl';
+
+// ============================================
+// EFFECTS SYSTEM (US-021)
+// ============================================
+
+export type {
+    DelayedEffect,
+    EffectStack,
+    EffectConfig,
+    EffectDomain,
+    EffectType,
+    GameSpeed,
+    DelayedEffectsQueue,
+} from './effects-types';
+
+export {
+    DEFAULT_EFFECT_CONFIGS,
+    RELATIVE_EFFECT_CAP,
+    SPEED_MULTIPLIERS,
+    DELAYED_INDICES,
+    createEmptyEffectsQueue,
+} from './effects-types';
+
+export type { CreateEffectParams } from './delayed-effects';
+
+export {
+    createDelayedEffect,
+    generateEffectId,
+    resetEffectCounter,
+    seededRandom,
+    calculateDelay,
+    applyDecay,
+    getEffectiveValue,
+    getActiveEffects,
+    getEffectsByTarget,
+    getEffectsByDomain,
+    getUpcomingEffects,
+    addEffectToQueue,
+    markEffectsApplied,
+    cleanupEffectHistory,
+} from './delayed-effects';
+
+export type { EffectResult } from './effect-stacking';
+
+export {
+    stackEffects,
+    stackEffectsFromQueue,
+    applyCap,
+    applyCaps,
+    calculateStackResult,
+    calculateNetEffects,
+    calculateNetEffect,
+    hasCapTriggered,
+    getCappedStacks,
+    summarizeEffects,
+} from './effect-stacking';
+

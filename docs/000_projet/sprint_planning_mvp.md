@@ -138,14 +138,15 @@
 | US | Titre | Taille | Points | Statut | Temps réel |
 |----|-------|:------:|:------:|:------:|:----------:|
 | US-020 | Calcul 7 indices + P&L | L | 8 | ✅ Done | **0h30** |
-| US-021 | Calculs par produit | L | 8 | ⬜ À faire | - |
+| US-021 | Effets retard / Empilement / Caps | L | 8 | ✅ Done | **0h20** |
 | US-022 | Ressources communes | M | 5 | ⬜ À faire | - |
 | US-014 | Boucle de tour complète | L | 8 | ⬜ À faire | - |
-| **Total** | | | **29** | | **0h30** |
+| **Total** | | | **29** | | **0h50** |
 
 **Livrables Sprint 3 :**
 - [x] Module `lib/engine/` avec calculs indices (US-020)
 - [x] Tests unitaires moteur (coverage 99%+)
+- [x] Système effets retard avec caps ±50% (US-021)
 - [ ] Agrégation multi-produits
 - [ ] Boucle dashboard→décisions→résolution→feedback
 
