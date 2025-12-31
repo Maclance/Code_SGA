@@ -10,7 +10,7 @@
  */
 
 import type { IndicesState, PnLState } from './types';
-import type { DelayedEffect } from './effects-types';
+import type { DelayedEffect as _DelayedEffect } from './effects-types';
 
 // ============================================
 // PRODUCT IDENTIFIER

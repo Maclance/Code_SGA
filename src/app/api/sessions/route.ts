@@ -20,15 +20,6 @@ import {
 import { formatCodeForDisplay } from '@/lib/utils/session-code';
 
 // ============================================
-// Types
-// ============================================
-
-interface ErrorResponse {
-    error: string;
-    code: string;
-}
-
-// ============================================
 // GET - List sessions
 // ============================================
 
@@ -36,7 +27,7 @@ interface ErrorResponse {
  * Get all sessions for the current user's tenant
  */
 export async function GET(
-    request: NextRequest
+    _request: NextRequest
 ): Promise<NextResponse> {
     try {
         // Auth check

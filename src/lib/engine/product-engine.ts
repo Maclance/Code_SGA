@@ -15,7 +15,7 @@
  */
 
 import { type ProductId, type ProductMetrics } from './resource-types';
-import { type IndicesState, type CompanyVariables, INDEX_IDS } from './types';
+import { type CompanyVariables, INDEX_IDS } from './types';
 import {
     type ProductDecision,
     type DecisionApplicationResult,

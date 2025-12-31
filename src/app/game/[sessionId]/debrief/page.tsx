@@ -88,7 +88,7 @@ export default async function DebriefPage({ params }: PageProps) {
                 )}
 
                 <section className={styles.placeholder}>
-                    <p>📋 L'analyse détaillée (top 5 décisions, graphiques d'évolution) sera disponible dans US-052.</p>
+                    <p>📋 L&apos;analyse détaillée (top 5 décisions, graphiques d&apos;évolution) sera disponible dans US-052.</p>
                 </section>
 
                 <div className={styles.actions}>

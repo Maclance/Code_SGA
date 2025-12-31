@@ -62,7 +62,7 @@ const SAMPLE_EVENTS: ActiveEvent[] = [
     },
 ];
 
-export function EventsPanel({ events, turnNumber, onContinue }: EventsPanelProps) {
+export function EventsPanel({ events, turnNumber: _turnNumber, onContinue }: EventsPanelProps) {
     // Use sample events if no events provided
     const displayEvents = events.length > 0 ? events : SAMPLE_EVENTS;
 
@@ -78,7 +78,7 @@ export function EventsPanel({ events, turnNumber, onContinue }: EventsPanelProps
             {displayEvents.length === 0 ? (
                 <div className={styles.noEvents}>
                     <span className={styles.noEventsEmoji}>☀️</span>
-                    <h3>Pas d'événement majeur</h3>
+                    <h3>Pas d&apos;événement majeur</h3>
                     <p>Ce trimestre se présente sous de bons auspices.</p>
                 </div>
             ) : (

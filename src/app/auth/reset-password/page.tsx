@@ -15,7 +15,7 @@ import styles from './page.module.css';
 type Mode = 'request' | 'reset';
 
 function ResetPasswordContent() {
-    const searchParams = useSearchParams();
+    const _searchParams = useSearchParams();
     const [mode, setMode] = useState<Mode>('request');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');

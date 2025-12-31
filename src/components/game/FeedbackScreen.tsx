@@ -70,8 +70,8 @@ function formatCurrency(value: number): string {
 
 export function FeedbackScreen({
     feedback,
-    currentState,
-    previousState,
+    currentState: _currentState,
+    previousState: _previousState,
     isFinalTurn,
     onNextTurn,
 }: FeedbackScreenProps) {

@@ -12,12 +12,12 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { TurnState, TurnStateInput, Decision, IndicesSnapshot, PnLSnapshot } from '@/types/game-state';
+import type { TurnState, TurnStateInput, IndicesSnapshot, PnLSnapshot } from '@/types/game-state';
 import type { CompanyVariables, IndicesState, PnLState } from '@/lib/engine';
 import { calculateAllIndices, calculatePnL, DEFAULT_INDICES } from '@/lib/engine';
 import { saveTurnState, loadTurnState, getLatestState } from './game-state.service';
 import { logAuditEvent } from './audit.service';
-import { TurnPhase, type PendingDecision, type TurnStateSnapshot } from '@/lib/game/turn-machine';
+import { type PendingDecision, type TurnStateSnapshot } from '@/lib/game/turn-machine';
 
 // ============================================
 // TYPES
@@ -236,7 +236,7 @@ export async function resolveTurn(
     tenantId: string,
     userId: string
 ): Promise<ResolveTurnResult> {
-    const { sessionId, turnNumber, decisions, seed } = input;
+    const { sessionId, turnNumber, decisions, seed: _seed } = input;
 
     // Log turn start
     await logAuditEvent({

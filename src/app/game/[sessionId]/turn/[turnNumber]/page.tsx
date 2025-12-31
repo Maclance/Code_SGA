@@ -10,7 +10,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
-import { TurnPhase, nextPhase, isLastPhase, PHASE_CONFIGS } from '@/lib/game/turn-machine';
+import { TurnPhase, nextPhase, PHASE_CONFIGS } from '@/lib/game/turn-machine';
 import { TurnDashboard } from '@/components/game/TurnDashboard';
 import { EventsPanel } from '@/components/game/EventsPanel';
 import { DecisionsPanel } from '@/components/game/DecisionsPanel';
