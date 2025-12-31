@@ -137,3 +137,72 @@ export {
     summarizeEffects,
 } from './effect-stacking';
 
+// ============================================
+// RESOURCE MANAGEMENT (US-022)
+// ============================================
+
+export type {
+    ProductId,
+    ResourcePool,
+    BudgetTour,
+    EffectifsPool,
+    PendingInvestmentEffect,
+    InvestissementsPool,
+    CapitalPool,
+    ProductMetrics,
+    AggregatedState,
+    BudgetConsumeResult,
+    EffectifDepartment,
+    EffectifAllocateResult,
+    ResourcePoolConfig,
+} from './resource-types';
+
+export {
+    PRODUCT_IDS,
+    DEFAULT_RESOURCE_CONFIG,
+} from './resource-types';
+
+export {
+    initializeResourcePool,
+    consumeBudget,
+    getRemainingBudget,
+    resetBudgetForTurn,
+    allocateEffectifs,
+    getProductEffectifs,
+    getDepartmentTotal,
+    addDataITInvestment,
+    getActiveInvestmentEffects,
+} from './resources';
+
+// ============================================
+// PRODUCT ENGINE (US-022)
+// ============================================
+
+export type { ProductInputs } from './product-engine';
+
+export {
+    calculateRatioSP,
+    calculateFrequence,
+    calculateCoutMoyen,
+    calculateProductMetrics,
+    isProductAffected,
+    applyRateChange,
+    DEFAULT_AUTO_INPUTS,
+    DEFAULT_MRH_INPUTS,
+} from './product-engine';
+
+// ============================================
+// AGGREGATION (US-022)
+// ============================================
+
+export {
+    calculateWeights,
+    validateWeightsSum,
+    aggregateIndices,
+    aggregatePnL,
+    calculateAggregatedState,
+    getDominantProduct,
+    isBalancedPortfolio,
+    createEmptyAggregatedState,
+} from './aggregation';
+

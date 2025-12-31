@@ -1,7 +1,7 @@
 # Prompts Antigravity — Sprint 3 (Moteur)
 
 > **Prompts d'implémentation** pour les User Stories du Sprint 3  
-> Ordre d'exécution : US-020 → US-021 → US-022 → US-014  
+> Ordre d'exécution : US-020 → US-021 → US-022 → US-023 → US-014  
 > À utiliser avec Claude Opus 4.5 / Antigravity  
 > Date : 2025-12-31
 
@@ -487,6 +487,119 @@ Commit : feat(engine): shared resources and multi-product aggregation [US-022]
 
 ---
 
+## US-023 — Calculs par produit + Agrégation
+
+```markdown
+📖 CONTEXTE
+Lis d'abord :
+- docs/README.md
+- docs/000_projet/specs_fonctionnelles_mvp.md (section US-021 originale)
+- docs/20_simulation/indices.md
+- lib/engine/ (modules US-020, US-021, US-022)
+
+🎭 RÔLE
+Endosse le rôle : Simulation Engineer + Actuaire
+
+🎯 OBJECTIF
+Implémenter US-023 : Calculs par produit + Agrégation multi-produits
+
+Livrables :
+1. Types : lib/engine/product-types.ts
+2. Module : lib/engine/product-engine.ts (calculs par produit)
+3. Module : lib/engine/aggregation.ts (agrégation multi-produits)
+4. Tests unitaires : tests/engine/product-engine.test.ts
+5. Tests unitaires : tests/engine/aggregation.test.ts
+
+📋 CRITÈRES D'ACCEPTATION
+- AC1: Given Auto+MRH, When décision RH/IT, Then impact partagé (capacité/qualité)
+- AC2: Given tarif Auto modifié, When résolution, Then métriques Auto évoluent, MRH inchangé
+- AC3: Given indices, When calcul, Then agrégation pondérée par produit
+
+RÈGLES D'AGRÉGATION
+```
+Indice_Global = Σ(Poids_Produit × Indice_Produit) / Σ(Poids_Produit)
+Poids_Produit = Primes_Produit / Primes_Totales
+```
+
+TYPES REQUIS
+```typescript
+export type ProductId = 'auto' | 'mrh';
+
+export interface ProductMetrics {
+  productId: ProductId;
+  primes: number;
+  sinistres: number;
+  stock_sinistres: number;
+  frequence: number;
+  cout_moyen: number;
+  ratio_sp: number;
+  nbContrats: number;
+  indices: IndicesState;
+}
+
+export interface AggregatedState {
+  products: Record<ProductId, ProductMetrics>;
+  global: { indices: IndicesState; pnl: PnLState };
+  weights: Record<ProductId, number>;
+}
+```
+
+⚠️ CONTRAINTES
+- Produit sans primes → poids = 0 dans agrégation
+- Un seul produit → pas d'agrégation (retour direct)
+- Décisions partagées (RH, IT) affectent tous les produits
+- Décisions produit-spécifiques n'affectent qu'un produit
+- Σ(weights) = 1.0 (ou proche à epsilon près)
+
+📋 DoD US-023
+- [ ] lib/engine/product-types.ts créé avec ProductId, ProductMetrics, AggregatedState
+- [ ] lib/engine/product-engine.ts implémente calculateProductMetrics, applyDecisionToProduct
+- [ ] lib/engine/aggregation.ts implémente calculateWeights, aggregateIndices, calculateAggregatedState
+- [ ] Cas mono-produit géré (pas d'agrégation)
+- [ ] tests/engine/product-engine.test.ts couvre calculs par produit
+- [ ] tests/engine/aggregation.test.ts couvre pondération + agrégation
+- [ ] Logs : agrégation effectuée, poids calculés
+- [ ] Doc : commentaires JSDoc
+
+🧪 QA US-023
+
+Tests Unitaires (≥3) :
+1. test_calculateWeights : Auto 70M€, MRH 30M€ → weights.auto=0.7, weights.mrh=0.3
+2. test_aggregateIndices : IAC_auto=80, IAC_mrh=60, weights 0.7/0.3 → IAC_global=74
+3. test_singleProduct : 1 produit → global === product (pas de calcul)
+
+Tests Intégration (≥2) :
+1. test_aggregation_multi_products : 2 produits → indices globaux = moyenne pondérée
+2. test_decision_isolation : modifier tarif Auto → metrics MRH inchangées
+
+Propriétés Moteur (3) :
+1. Bornes : Σ(weights) = 1.0 (epsilon 0.001)
+2. Isolation : modifier un produit ne change pas l'autre
+3. Stabilité : calculateAggregatedState(products) 2× → même résultat
+
+Scénario Manuel E2E :
+1. Initialiser session avec Auto + MRH
+2. Vérifier que weights correspond au ratio de primes
+3. Modifier tarif Auto (-5%)
+4. Résoudre le tour
+5. Vérifier que metrics.auto a changé
+6. Vérifier que metrics.mrh est inchangé
+7. Vérifier indices globaux = moyenne pondérée
+
+📤 SORTIE ATTENDUE
+
+Fichiers créés :
+- lib/engine/product-types.ts
+- lib/engine/product-engine.ts
+- lib/engine/aggregation.ts
+- tests/engine/product-engine.test.ts
+- tests/engine/aggregation.test.ts
+
+Commit : feat(engine): multi-product calculations and aggregation [US-023]
+```
+
+---
+
 ## US-014 — Boucle de tour complète (Orchestration)
 
 ```markdown
@@ -654,17 +767,19 @@ Commit : feat(game): complete turn loop with orchestration [US-014]
 flowchart LR
     US020[US-020<br>7 Indices + P&L] --> US021[US-021<br>Effets retard]
     US021 --> US022[US-022<br>Ressources communes]
-    US022 --> US014[US-014<br>Boucle tour]
+    US022 --> US023[US-023<br>Calculs produit]
+    US023 --> US014[US-014<br>Boucle tour]
 ```
 
 | Ordre | US | Dépend de | Durée estimée | Statut |
 |:-----:|:---|-----------|:-------------:|:------:|
-| 1 | US-020 | Sprint 2 complet | 1.5 jours | 🔲 À faire |
-| 2 | US-021 | US-020 | 1.5 jours | 🔲 À faire |
+| 1 | US-020 | Sprint 2 complet | 1.5 jours | ✅ Fait |
+| 2 | US-021 | US-020 | 1.5 jours | ✅ Fait |
 | 3 | US-022 | US-021 | 1 jour | 🔲 À faire |
-| 4 | US-014 | US-020, US-021, US-022 | 1.5 jours | 🔲 À faire |
+| 4 | US-023 | US-022 | 1 jour | 🔲 À faire |
+| 5 | US-014 | US-020, US-021, US-022, US-023 | 1.5 jours | 🔲 À faire |
 
-**Total Sprint 3 : ~5.5 jours**
+**Total Sprint 3 : ~6.5 jours**
 
 ---
 
@@ -677,6 +792,7 @@ flowchart LR
 ║  US-020 → 7 indices + P&L         │ feat(engine): ... [US-020]    ║
 ║  US-021 → Effets retard + caps    │ feat(engine): ... [US-021]    ║
 ║  US-022 → Ressources communes     │ feat(engine): ... [US-022]    ║
+║  US-023 → Calculs produit/agrég   │ feat(engine): ... [US-023]    ║
 ║  US-014 → Boucle tour             │ feat(game): ...  [US-014]     ║
 ╠═══════════════════════════════════════════════════════════════════╣
 ║  INVARIANTS CRITIQUES :                                           ║
