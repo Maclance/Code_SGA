@@ -97,7 +97,7 @@
 ### Sprint 2 — Core Loop (2 sem)
 
 > **Objectif** : Boucle de tour jouable + base moteur
-> **Statut** : 🟢 EN COURS
+> **Statut** : ✅ TERMINÉ
 
 | US | Titre | Taille | Points | Statut | Temps réel |
 |----|-------|:------:|:------:|:------:|:----------:|
@@ -109,14 +109,22 @@
 | US-013 | Confirmer scope produits | M | 5 | ✅ Done | **0h55** |
 | **Total** | | | **33** | | **3h15** |
 
-> ⚠️ Sprint chargé → US-012/013 peuvent glisser en S3 si nécessaire
+**Métriques Sprint 2 :**
+| Métrique | Estimé | Réel |
+|----------|:------:|:----:|
+| Points | 33 | 33 |
+| Temps | ~20h | 3h15 |
+| Vélocité | - | Excellente |
 
 **Livrables Sprint 2 :**
-- [x] Schema `game_states`
-- [x] API création/rejointe session
-- [ ] UI création session (formateur)
-- [ ] UI sélection compagnie (joueur)
-- [ ] Flux onboarding minimal
+- [x] Schema `game_states` + service stockage état
+- [x] Gestion version moteur (`ENGINE_VERSION`)
+- [x] API création/rejointe session (`/api/sessions`)
+- [x] UI liste sessions (`/dashboard/sessions`)
+- [x] UI création session (formateur) - bouton + redirection setup
+- [x] Page rejoindre session (`/sessions/join`)
+- [x] API sélection produits (`POST /api/game/[sessionId]/products`)
+- [x] Navigation session draft → setup page
 
 **Dépendances :** Sprint 1 ✓
 
@@ -125,18 +133,19 @@
 ### Sprint 3 — Moteur (2 sem)
 
 > **Objectif** : 7 indices, P&L, effets retard, UI dashboard
+> **Statut** : 🔄 EN COURS
 
-| US | Titre | Taille | Points |
-|----|-------|:------:|:------:|
-| US-014 | Boucle de tour complète | L | 8 |
-| US-020 | Calcul 7 indices + P&L | L | 8 |
-| US-021 | Calculs par produit | L | 8 |
-| US-022 | Ressources communes | M | 5 |
-| **Total** | | | **29** |
+| US | Titre | Taille | Points | Statut | Temps réel |
+|----|-------|:------:|:------:|:------:|:----------:|
+| US-020 | Calcul 7 indices + P&L | L | 8 | ✅ Done | **0h30** |
+| US-021 | Calculs par produit | L | 8 | ⬜ À faire | - |
+| US-022 | Ressources communes | M | 5 | ⬜ À faire | - |
+| US-014 | Boucle de tour complète | L | 8 | ⬜ À faire | - |
+| **Total** | | | **29** | | **0h30** |
 
 **Livrables Sprint 3 :**
-- [ ] Module `lib/engine/` avec calculs indices
-- [ ] Tests unitaires moteur (coverage ≥80%)
+- [x] Module `lib/engine/` avec calculs indices (US-020)
+- [x] Tests unitaires moteur (coverage 99%+)
 - [ ] Agrégation multi-produits
 - [ ] Boucle dashboard→décisions→résolution→feedback
 
