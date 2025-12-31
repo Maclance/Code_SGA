@@ -2,12 +2,14 @@
  * Game Dashboard Page
  *
  * @module app/game/[sessionId]/page
- * @description Main game dashboard (placeholder for US-014+)
+ * @description Main game dashboard with start button and turn access
  */
 
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import styles from './page.module.css';
+import { StartGameButton } from '@/components/game/StartGameButton';
 
 interface PageProps {
     params: Promise<{
@@ -44,6 +46,11 @@ export default async function GamePage({ params }: PageProps) {
     // Extract products from config
     const products = session.config?.products || [];
 
+    // Determine current turn (at least 1 when running)
+    const displayTurn = session.status === 'running'
+        ? Math.max(session.current_turn, 1)
+        : session.current_turn;
+
     return (
         <div className={styles.container}>
             <header className={styles.header}>
@@ -78,7 +85,7 @@ export default async function GamePage({ params }: PageProps) {
                     <h2>Informations partie</h2>
                     <dl className={styles.infoList}>
                         <dt>Tour actuel</dt>
-                        <dd>{session.current_turn} / {session.max_turns}</dd>
+                        <dd>{displayTurn} / {session.max_turns}</dd>
                         <dt>Difficulté</dt>
                         <dd>{session.config?.difficulty === 'novice' ? 'Novice' : 'Intermédiaire'}</dd>
                         <dt>Vitesse</dt>
@@ -89,10 +96,32 @@ export default async function GamePage({ params }: PageProps) {
                     </dl>
                 </section>
 
-                <p className={styles.placeholder}>
-                    📋 Le tableau de bord complet sera implémenté dans US-030+
-                </p>
+                {/* Action buttons based on session status */}
+                <section className={styles.actions}>
+                    {session.status === 'ready' && (
+                        <StartGameButton sessionId={sessionId} />
+                    )}
+
+                    {session.status === 'running' && (
+                        <Link
+                            href={`/game/${sessionId}/turn/${displayTurn}`}
+                            className={styles.playButton}
+                        >
+                            ▶️ Jouer Tour {displayTurn}
+                        </Link>
+                    )}
+
+                    {session.status === 'ended' && (
+                        <Link
+                            href={`/game/${sessionId}/debrief`}
+                            className={styles.debriefButton}
+                        >
+                            📋 Voir le Débrief
+                        </Link>
+                    )}
+                </section>
             </main>
         </div>
     );
 }
+

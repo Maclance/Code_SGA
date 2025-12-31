@@ -205,13 +205,24 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             );
         }
 
-        // Get turn state if exists
-        const { data: gameState } = await supabase
-            .from('game_states')
-            .select('*')
-            .eq('session_id', sessionId)
-            .eq('turn_number', turnNumber)
-            .single();
+        // Get previous turn state (to show current indices at start of this turn)
+        // For turn N, we load the state saved after turn N-1
+        const previousTurnNumber = turnNumber - 1;
+
+        let turnState = null;
+
+        if (previousTurnNumber >= 1) {
+            const { data: gameState } = await supabase
+                .from('game_states')
+                .select('*')
+                .eq('session_id', sessionId)
+                .eq('turn_number', previousTurnNumber)
+                .single();
+
+            if (gameState?.state) {
+                turnState = gameState.state;
+            }
+        }
 
         return NextResponse.json({
             session: {
@@ -222,7 +233,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                 maxTurns: session.max_turns,
                 config: session.config,
             },
-            turnState: gameState?.state || null,
+            turnState,
         });
 
     } catch (error) {

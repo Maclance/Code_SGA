@@ -128,7 +128,7 @@ export function ProductScopeSelector({
             <div className={styles.header}>
                 <h2 className={styles.title}>Choisissez vos produits</h2>
                 <p className={styles.subtitle}>
-                    Sélectionnez les branches d'assurance que vous souhaitez gérer dans cette partie.
+                    Sélectionnez les branches d&apos;assurance que vous souhaitez gérer dans cette partie.
                 </p>
             </div>
 
