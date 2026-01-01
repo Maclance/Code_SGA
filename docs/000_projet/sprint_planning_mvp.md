@@ -159,17 +159,18 @@
 ### Sprint 4 — UI & Contenu (2 sem)
 
 > **Objectif** : Cockpit complet, alertes, événements, compagnies
+> **Statut** : 🔄 EN COURS
 
-| US | Titre | Taille | Points |
-|----|-------|:------:|:------:|
-| US-023 | Effets retard | L | 8 |
-| US-024 | Persistance/compensation | L | 8 |
-| US-025 | Fraude N1 | M | 5 |
-| US-030 | Dashboard enrichi | L | 8 |
-| **Total** | | | **29** |
+| US | Titre | Taille | Points | Statut | Temps réel |
+|----|-------|:------:|:------:|:------:|:----------:|
+| US-023 | Effets retard paramétrés | L | 8 | ✅ Done | **0h20** |
+| US-024 | Persistance/compensation | L | 8 | 📋 TODO | - |
+| US-025 | Fraude N1 | M | 5 | 📋 TODO | - |
+| US-030 | Dashboard enrichi | L | 8 | 📋 TODO | - |
+| **Total** | | | **29** | | **0h20** |
 
 **Livrables Sprint 4 :**
-- [ ] Système effets retard paramétré
+- [x] Système effets retard paramétré (delay-config.ts, DelayedEffectIndicator, EffectTimeline)
 - [ ] Compensation avec coût croissant
 - [ ] Levier fraude N1
 - [ ] Dashboard avec grille produits
