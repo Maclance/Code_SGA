@@ -318,3 +318,34 @@ export interface DelayedEffectDisplay {
     /** Decision ID that created this effect */
     decisionId?: string;
 }
+
+// ============================================
+// EFFECT HISTORY (US-024)
+// ============================================
+
+/**
+ * Status of an effect in history
+ */
+export type EffectHistoryStatus = 'active' | 'depleted' | 'compensated';
+
+/**
+ * Entry in the effect history for UI display
+ */
+export interface EffectHistoryEntry {
+    /** Turn when the decision was made */
+    turnNumber: number;
+    /** ID of the decision */
+    decisionId: string;
+    /** Human-readable description */
+    decisionDescription: string;
+    /** Target index affected */
+    targetIndex: IndexId;
+    /** Initial effect value */
+    initialEffect: number;
+    /** Current effect value after decay */
+    currentEffect: number;
+    /** Current status */
+    status: EffectHistoryStatus;
+    /** Whether compensation is available */
+    canCompensate?: boolean;
+}
