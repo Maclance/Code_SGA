@@ -1,7 +1,7 @@
 # Prompt Templates — Antigravity × AssurManager
 
 > **Bibliothèque de prompts** réutilisables pour les tâches courantes.
-> Dernière mise à jour : 2025-12-26
+> Dernière mise à jour : 2026-01-01
 
 ---
 
@@ -467,7 +467,135 @@ Sortie attendue :
 
 ---
 
-## 6) Quick Reference
+## 7) Génération de fichier prompts pour une Epic
+
+### 🚀 Méta-prompt : Génération prompts_epic_eX.md
+
+```markdown
+📖 CONTEXTE
+Lis d'abord :
+- docs/README.md
+- docs/000_projet/sprint_planning_mvp.md (Sprint concerné)
+- docs/000_projet/specs_fonctionnelles_mvp.md (US concernées)
+- docs/70_ai/prompt_templates.md (conventions)
+- docs/40_engineering/definition_of_done.md
+
+🎭 RÔLE
+Endosse le rôle : Tech Writer / DocOps + PM Senior
+
+🎯 OBJECTIF
+Générer le fichier docs/000_projet/prompts_epic_e<X>.md pour le Sprint <N>
+
+Contenu requis :
+1. En-tête avec titre Epic, liste des US, date
+2. Section "Conventions d'utilisation"
+3. Section "DoD Global Sprint <N>"
+4. Section "QA Global Sprint <N>"
+5. UN PROMPT PAR US (dans l'ordre d'exécution)
+6. Diagramme mermaid de l'ordre d'exécution
+7. Tableau récapitulatif avec statut
+8. Quick Reference ASCII
+
+📋 STRUCTURE DE CHAQUE PROMPT US
+Chaque prompt doit inclure TOUTES les sections suivantes :
+
+```
+📖 CONTEXTE    → Docs à lire en premier
+🎭 RÔLE        → Persona à endosser
+🎯 OBJECTIF    → US + livrables attendus
+📋 AC          → Critères d'acceptation
+⚠️ CONTRAINTES → Garde-fous
+📋 DoD         → Definition of Done spécifique (checklist)
+🧪 QA          → Tests et validation (3+ unitaires, 2+ intégration, 3 propriétés moteur, 1 scénario E2E)
+📤 SORTIE      → Fichiers créés + commit message
+```
+
+⚠️ CONTRAINTES
+- Pas de placeholders : tous les champs doivent être remplis
+- Cohérence DoD : aligné avec docs/40_engineering/definition_of_done.md
+- Types explicites : interfaces TypeScript complètes si applicable
+- Exemples de code : snippets fonctionnels (pas de "...")
+- Tests minimaux :
+  - Tests unitaires : ≥3 par module
+  - Tests intégration : ≥2 par US
+  - Propriétés vérifiées : 3 par module moteur
+  - Scénario E2E : 1 par US (étapes numérotées)
+- Format commit : feat(<scope>): <description> [US-XXX]
+- Encodage : UTF-8 sans BOM
+
+📤 SORTIE ATTENDUE
+
+1. **En-tête fichier**
+```markdown
+# Prompts Antigravity — <Epic Name> (<Sprint Name>)
+
+> **Prompts d'implémentation** pour les User Stories US-XXX à US-YYY
+> Ordre d'exécution : US-XXX → US-YYY → ...
+> À utiliser avec Claude Opus 4.5 / Antigravity
+> Date : YYYY-MM-DD
+```
+
+2. **DoD Global** (checklist commune à toutes les US du sprint)
+
+3. **QA Global** (exigences tests minimales)
+
+4. **Prompts individuels** (1 par US, format complet)
+
+5. **Ordre d'exécution** (diagramme mermaid + tableau)
+```mermaid
+flowchart LR
+    USXXX[US-XXX<br>Description] --> USYYY[US-YYY<br>Description]
+```
+
+| Ordre | US | Dépend de | Durée estimée | Statut |
+|:-----:|:---|-----------|:-------------:|:------:|
+| 1 | US-XXX | Sprint précédent | X jours | 🔲 À faire |
+
+6. **Quick Reference** (récapitulatif ASCII)
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║               EPIC EX — <EPIC NAME>                               ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  US-XXX → Description      │ feat(<scope>): ... [US-XXX]          ║
+╚═══════════════════════════════════════════════════════════════════╝
+```
+
+CHECKLIST AVANT LIVRAISON
+- [ ] Toutes les US du sprint couvertes
+- [ ] Aucun placeholder (rechercher TODO, TBD, ...)
+- [ ] Types TypeScript complets (pas de `any`)
+- [ ] Tests QA détaillés pour chaque US
+- [ ] DoD spécifique à chaque US
+- [ ] Diagramme mermaid syntaxiquement correct
+- [ ] Commit messages formatés
+- [ ] Encodage UTF-8 vérifié
+- [ ] Date mise à jour
+```
+
+---
+
+### 📋 Checklist de validation prompts_epic_eX.md
+
+| Critère | Vérifié |
+|---------|:-------:|
+| En-tête complet (titre, date, liste US) | ☐ |
+| DoD Global présent | ☐ |
+| QA Global présent | ☐ |
+| Chaque US a toutes les sections (📖🎭🎯📋⚠️📋🧪📤) | ☐ |
+| Types TypeScript inclus si applicable | ☐ |
+| Exemples de code fonctionnels | ☐ |
+| Tests unitaires ≥3 par module | ☐ |
+| Tests intégration ≥2 par US | ☐ |
+| Scénario E2E documenté par US | ☐ |
+| Diagramme mermaid valide | ☐ |
+| Tableau récapitulatif avec statuts | ☐ |
+| Quick Reference ASCII | ☐ |
+| Pas de placeholders | ☐ |
+| Encodage UTF-8 | ☐ |
+
+---
+
+## 8) Quick Reference
 
 ```
 ╔═══════════════════════════════════════════════════════════════════╗
