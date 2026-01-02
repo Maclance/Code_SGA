@@ -159,7 +159,7 @@
 ### Sprint 4 — UI & Contenu (2 sem)
 
 > **Objectif** : Cockpit complet, alertes, événements, compagnies
-> **Statut** : 🔄 EN COURS
+> **Statut** : ✅ TERMINÉ
 
 | US | Titre | Taille | Points | Statut | Temps réel |
 |----|-------|:------:|:------:|:------:|:----------:|
@@ -175,6 +175,13 @@
 - [x] Levier fraude N1 avec cap 5% S/P, prérequis, 68 tests
 - [x] Dashboard enrichi avec grille produits (ProductGrid, IndexGauge, PnLChart, EffectifRepartition, AlertBadges)
 - [x] Indicateurs par difficulté (Novice vs Intermédiaire)
+
+**Métriques Sprint 4 :**
+| Métrique | Estimé | Réel |
+|----------|:------:|:----:|
+| Points | 29 | 29 |
+| Temps | ~16h | 1h40 |
+| Vélocité | - | Excellente |
 
 **Dépendances :** Sprint 3 ✓
 
