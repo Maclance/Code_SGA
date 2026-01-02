@@ -9,6 +9,8 @@
 
 import React, { useState, useCallback } from 'react';
 import styles from './DecisionsPanel.module.css';
+import { DelayedEffectIndicator } from './DelayedEffectIndicator';
+import type { GameSpeed } from '@/lib/engine/config/delay-config';
 
 interface PendingDecision {
     leverId: string;
@@ -20,6 +22,8 @@ interface DecisionsPanelProps {
     decisions: PendingDecision[];
     onDecisionsChange: (decisions: PendingDecision[]) => void;
     onValidate: () => void;
+    gameSpeed?: GameSpeed;
+    currentTurn?: number;
 }
 
 interface LeverOption {
@@ -122,6 +126,8 @@ export function DecisionsPanel({
     decisions,
     onDecisionsChange,
     onValidate,
+    gameSpeed = 'medium',
+    currentTurn = 1,
 }: DecisionsPanelProps) {
     const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
 
@@ -219,6 +225,18 @@ export function DecisionsPanel({
                                                 )}
                                             </div>
                                             <p className={styles.leverDesc}>{lever.description}</p>
+
+                                            {/* Show delay indicator for relevant categories */}
+                                            {['rh', 'it', 'prevention', 'marketing', 'reputation'].includes(lever.category) && (
+                                                <div style={{ marginBottom: '8px' }}>
+                                                    <DelayedEffectIndicator
+                                                        domain={lever.category}
+                                                        currentTurn={currentTurn}
+                                                        gameSpeed={gameSpeed}
+                                                        intensity="medium" // Placeholder as it's a decision preview
+                                                    />
+                                                </div>
+                                            )}
 
                                             {lever.valueType === 'slider' && (
                                                 <div className={styles.sliderControl}>

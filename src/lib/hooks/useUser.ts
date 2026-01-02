@@ -94,7 +94,8 @@ export function useUser(): UseUserReturn {
         } finally {
             setLoading(false);
         }
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // supabase is stable
 
     useEffect(() => {
         fetchUser();
@@ -107,7 +108,8 @@ export function useUser(): UseUserReturn {
         return () => {
             subscription.unsubscribe();
         };
-    }, [fetchUser]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchUser]); // supabase.auth is stable
 
     return {
         user,

@@ -60,7 +60,6 @@ export function TurnDashboard({
     indices,
     pnl,
     previousIndices,
-    turnNumber: _turnNumber,
     onContinue,
 }: TurnDashboardProps) {
     return (

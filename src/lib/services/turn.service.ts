@@ -236,7 +236,7 @@ export async function resolveTurn(
     tenantId: string,
     userId: string
 ): Promise<ResolveTurnResult> {
-    const { sessionId, turnNumber, decisions, seed: _seed } = input;
+    const { sessionId, turnNumber, decisions } = input;
 
     // Log turn start
     await logAuditEvent({

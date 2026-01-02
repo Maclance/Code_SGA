@@ -99,7 +99,8 @@ export default function AuditLogsPage() {
 
     useEffect(() => {
         fetchLogs(pagination.page, actionFilter);
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Intentional: only run on mount, page changes handled by handlePageChange
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pagination.totalPages) {

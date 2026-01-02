@@ -95,6 +95,7 @@ export function computeChecksum(state: TurnStateInput): string {
         decisions: state.decisions,
         events: state.events,
         portfolio: state.portfolio,
+        delayed_effects: state.delayed_effects,
     });
 
     // Stringify the pre-sorted object (no replacer needed)

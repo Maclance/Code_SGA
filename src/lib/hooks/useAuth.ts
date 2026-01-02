@@ -73,7 +73,8 @@ export function useAuth(): UseAuthReturn {
         return () => {
             subscription.unsubscribe();
         };
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // supabase is stable, no need to add to deps
 
     /**
      * Sign in with email and password
@@ -85,14 +86,16 @@ export function useAuth(): UseAuthReturn {
         });
 
         return { error: error ? new Error(error.message) : null };
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // supabase is stable
 
     /**
      * Sign out the current user
      */
     const signOut = useCallback(async () => {
         await supabase.auth.signOut();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // supabase is stable
 
     /**
      * Request password reset email
@@ -103,7 +106,8 @@ export function useAuth(): UseAuthReturn {
         });
 
         return { error: error ? new Error(error.message) : null };
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // supabase is stable
 
     return {
         ...state,
