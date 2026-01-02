@@ -165,14 +165,14 @@
 |----|-------|:------:|:------:|:------:|:----------:|
 | US-023 | Effets retard paramétrés | L | 8 | ✅ Done | **0h20** |
 | US-024 | Persistance/compensation | L | 8 | ✅ Done | **0h20** |
-| US-025 | Fraude N1 | M | 5 | 📋 TODO | - |
+| US-025 | Fraude N1 | M | 5 | ✅ Done | **0h30** |
 | US-030 | Dashboard enrichi | L | 8 | 📋 TODO | - |
-| **Total** | | | **29** | | **0h40** |
+| **Total** | | | **29** | | **1h10** |
 
 **Livrables Sprint 4 :**
 - [x] Système effets retard paramétré (delay-config.ts, DelayedEffectIndicator, EffectTimeline)
 - [x] Persistance effets avec décroissance + compensation avec coût croissant
-- [ ] Levier fraude N1
+- [x] Levier fraude N1 avec cap 5% S/P, prérequis, 68 tests
 - [ ] Dashboard avec grille produits
 - [ ] Indicateurs par difficulté
 
