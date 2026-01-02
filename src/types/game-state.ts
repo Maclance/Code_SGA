@@ -148,12 +148,14 @@ export interface TurnState {
     events: TriggeredEvent[];
     portfolio: PortfolioByProduct;
     /**
-     * Delayed effects queue - uses unknown[] to avoid circular imports.
+     * Delayed effects queue - uses any[] to avoid circular imports.
      * Service layer should cast to DelayedEffect[] from effects-types.ts
      */
     delayed_effects?: {
-        pending: unknown[];
-        applied: unknown[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        pending: any[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        applied: any[];
     };
 
     // Integrity

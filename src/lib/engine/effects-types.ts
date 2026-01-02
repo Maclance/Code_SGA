@@ -11,6 +11,9 @@
 
 import type { IndexId } from './types';
 
+// Re-export IndexId for convenience
+export type { IndexId };
+
 // ============================================
 // DOMAIN & EFFECT TYPES
 // ============================================

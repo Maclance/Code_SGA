@@ -388,7 +388,7 @@ export default function TurnPage({ params }: PageProps) {
 
                     // Generate alerts
                     const alerts: DashboardAlert[] = generateAlerts(
-                        currentState.indices as import('@/types/game-state').IndicesSnapshot,
+                        currentState.indices as unknown as import('@/types/game-state').IndicesSnapshot,
                         3000,
                         3300,
                         DEFAULT_ALERT_THRESHOLDS

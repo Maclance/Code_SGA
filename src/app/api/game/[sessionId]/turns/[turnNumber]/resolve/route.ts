@@ -336,7 +336,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             session_id: sessionId,
             turn_number: nextTurnNumber,
             timestamp: new Date().toISOString(),
-            indices: nextIndices as import('@/types/game-state').IndicesSnapshot,
+            indices: nextIndices as unknown as import('@/types/game-state').IndicesSnapshot,
             pnl: nextPnl,
             decisions: decisions.map((d: { leverId: string; value: number | string | boolean; productId?: string }) => ({
                 lever_id: d.leverId,
