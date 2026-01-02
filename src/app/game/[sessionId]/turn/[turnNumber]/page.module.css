@@ -92,7 +92,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Error State */
@@ -125,4 +127,81 @@
 .retryBtn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Enriched Dashboard (US-030) */
+.enrichedDashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.dashboardSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.dashboardSectionTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0;
+}
+
+.indicesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+    .indicesGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .indicesGrid {
+        grid-template-columns: repeat(7, 1fr);
+    }
+}
+
+.bottomRow {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 1023px) {
+    .bottomRow {
+        grid-template-columns: 1fr;
+    }
+}
+
+.halfSection {
+    min-width: 0;
+}
+
+.continueActions {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+}
+
+.continueBtn {
+    padding: 0.875rem 2.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.continueBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
 }

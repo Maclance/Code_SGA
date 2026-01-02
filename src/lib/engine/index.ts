@@ -257,3 +257,31 @@ export {
     getTotalFraudCost,
 } from './fraud-n1';
 
+// ============================================
+// DASHBOARD TYPES (US-030)
+// ============================================
+
+export type {
+    DashboardConfig,
+    ProductDisplayMetrics,
+    IndexStatus,
+    IndexDisplay,
+    IndexThresholds,
+    AlertType,
+    AlertThresholds,
+    DashboardAlert,
+    EffectifSegment,
+} from './dashboard-types';
+
+export {
+    getDashboardConfig,
+    PRODUCT_NAMES,
+    DEFAULT_INDEX_THRESHOLDS,
+    getIndexStatus,
+    INDEX_LABELS,
+    INDEX_ICONS,
+    DEFAULT_ALERT_THRESHOLDS,
+    generateAlerts,
+    EFFECTIF_COLORS,
+} from './dashboard-types';
+

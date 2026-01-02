@@ -11,7 +11,25 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { TurnPhase, nextPhase, PHASE_CONFIGS } from '@/lib/game/turn-machine';
-import { TurnDashboard } from '@/components/game/TurnDashboard';
+// Enriched Dashboard Components (US-030)
+import {
+    ProductGrid,
+    IndexGauge,
+    PnLChart,
+    EffectifRepartition,
+    AlertBadges,
+    createEffectifSegments,
+} from '@/components/game/dashboard';
+import {
+    INDEX_IDS,
+    INDEX_LABELS,
+    getDashboardConfig,
+    generateAlerts,
+    DEFAULT_ALERT_THRESHOLDS,
+    PRODUCT_NAMES,
+    type ProductDisplayMetrics,
+    type DashboardAlert,
+} from '@/lib/engine';
 import { EventsPanel } from '@/components/game/EventsPanel';
 import { DecisionsPanel } from '@/components/game/DecisionsPanel';
 import { ResolutionScreen } from '@/components/game/ResolutionScreen';
@@ -337,15 +355,121 @@ export default function TurnPage({ params }: PageProps) {
 
             {/* Main content based on phase */}
             <main className={styles.main}>
-                {phase === TurnPhase.DASHBOARD && currentState && (
-                    <TurnDashboard
-                        indices={currentState.indices}
-                        pnl={currentState.pnl}
-                        previousIndices={previousState?.indices}
-                        turnNumber={turnNumber}
-                        onContinue={handleNextPhase}
-                    />
-                )}
+                {phase === TurnPhase.DASHBOARD && currentState && (() => {
+                    // Prepare data for enriched dashboard
+                    const difficulty = 'intermediaire' as const;
+                    const config = getDashboardConfig(difficulty);
+
+                    // Mock product metrics (would come from game state)
+                    const productMetrics: ProductDisplayMetrics[] = [
+                        {
+                            productId: 'auto',
+                            productName: PRODUCT_NAMES.auto,
+                            nbContrats: 45000,
+                            primesCollectees: currentState.pnl.primes * 0.65,
+                            stockSinistres: 2100,
+                            fluxEntrees: 180,
+                            fluxSorties: 165,
+                            frequence: 7.2,
+                            coutMoyen: 2800,
+                        },
+                        {
+                            productId: 'mrh',
+                            productName: PRODUCT_NAMES.mrh,
+                            nbContrats: 32000,
+                            primesCollectees: currentState.pnl.primes * 0.35,
+                            stockSinistres: 1200,
+                            fluxEntrees: 95,
+                            fluxSorties: 88,
+                            frequence: 4.8,
+                            coutMoyen: 3500,
+                        },
+                    ];
+
+                    // Generate alerts
+                    const alerts: DashboardAlert[] = generateAlerts(
+                        currentState.indices as any,
+                        3000,
+                        3300,
+                        DEFAULT_ALERT_THRESHOLDS
+                    );
+
+                    // Effectifs
+                    const effectifSegments = createEffectifSegments(100, 80, 30, 40);
+                    const totalEffectifs = 250;
+
+                    // P&L delta
+                    const previousResultat = previousState?.pnl.resultat ?? currentState.pnl.resultat;
+                    const pnlDeltaPercent = previousResultat !== 0
+                        ? ((currentState.pnl.resultat - previousResultat) / Math.abs(previousResultat)) * 100
+                        : 0;
+
+                    return (
+                        <div className={styles.enrichedDashboard}>
+                            {/* Alerts Section */}
+                            {config.showAlerts && alerts.length > 0 && (
+                                <section className={styles.dashboardSection}>
+                                    <h3 className={styles.dashboardSectionTitle}>🚨 Alertes</h3>
+                                    <AlertBadges alerts={alerts} maxVisible={3} />
+                                </section>
+                            )}
+
+                            {/* Indices Grid */}
+                            <section className={styles.dashboardSection}>
+                                <h3 className={styles.dashboardSectionTitle}>📈 Indices Stratégiques</h3>
+                                <div className={styles.indicesGrid}>
+                                    {INDEX_IDS.map((indexId) => (
+                                        <IndexGauge
+                                            key={indexId}
+                                            indexId={indexId}
+                                            label={INDEX_LABELS[indexId]}
+                                            value={currentState.indices[indexId] ?? 50}
+                                            previousValue={previousState?.indices[indexId]}
+                                            variant="bar"
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* Product Grid */}
+                            <section className={styles.dashboardSection}>
+                                <h3 className={styles.dashboardSectionTitle}>📦 Indicateurs par Produit</h3>
+                                <ProductGrid
+                                    products={productMetrics}
+                                    difficulty={difficulty}
+                                />
+                            </section>
+
+                            {/* Bottom Row: P&L + Effectifs */}
+                            <div className={styles.bottomRow}>
+                                <section className={styles.halfSection}>
+                                    <PnLChart
+                                        primes={currentState.pnl.primes}
+                                        sinistres={currentState.pnl.sinistres}
+                                        frais={currentState.pnl.frais}
+                                        produits_financiers={currentState.pnl.produits_financiers}
+                                        resultat={currentState.pnl.resultat}
+                                        deltaPercent={pnlDeltaPercent}
+                                    />
+                                </section>
+
+                                <section className={styles.halfSection}>
+                                    <EffectifRepartition
+                                        segments={effectifSegments}
+                                        total={totalEffectifs}
+                                    />
+                                </section>
+                            </div>
+
+                            {/* Continue Button */}
+                            <div className={styles.continueActions}>
+                                <button className={styles.continueBtn} onClick={handleNextPhase}>
+                                    Voir les événements →
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {phase === TurnPhase.EVENTS && (
                     <EventsPanel
