@@ -7,7 +7,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getLatestState, loadTurnState, StateNotFoundError } from '@/lib/services/game-state.service';
+import { getLatestState, loadTurnState, saveTurnState, StateNotFoundError } from '@/lib/services/game-state.service';
+import { TurnStateInput } from '@/types/game-state';
+import { createEmptyEffectsQueue, GameSpeed, type EffectDomain, type IndexId } from '@/lib/engine/effects-types';
+import { createDelayedEffect } from '@/lib/engine/delayed-effects';
 
 interface RouteParams {
     params: Promise<{
@@ -47,17 +50,23 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         let turnState = null;
         try {
             if (turnNumber === 1) {
-                // For turn 1, first try to get existing state, otherwise use defaults
+                // For turn 1, try to get existing state (if any)
                 turnState = await getLatestState(supabase, sessionId);
             } else {
-                // For other turns, load previous turn's state
-                turnState = await loadTurnState(supabase, sessionId, turnNumber - 1);
+                // For other turns, load the specific state for this turn
+                turnState = await loadTurnState(supabase, sessionId, turnNumber);
             }
         } catch (error) {
             if (!(error instanceof StateNotFoundError)) {
                 throw error;
             }
-            // No state found - will use default state on client
+            // No state found - will use default state on client (or should use previous turn?)
+            // If we are on Turn 2 and State 2 doesn't exist, we might want State 1 to display "previous"?
+            // But TurnPage expects "currentState". 
+
+            // Fallback: If turn > 1 and state missing, try loading previous turn to show SOMETHING?
+            // Actually, if State N is missing, it usually means we shouldn't be here or it needs generation.
+            // For now, returning null lets the client handle defaults.
         }
 
         return NextResponse.json({
@@ -69,6 +78,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                 maxTurns: session.max_turns,
                 engineVersion: session.engine_version,
                 products: session.config?.products || ['auto', 'mrh'],
+                config: session.config, // Send full config including gameSpeed
             },
             turnState: turnState ? {
                 turnNumber: turnState.turn_number,
@@ -77,6 +87,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                 decisions: turnState.decisions,
                 events: turnState.events,
                 portfolio: turnState.portfolio,
+                delayedEffects: turnState.delayed_effects?.pending || [],
             } : null,
         });
     } catch (error) {
@@ -90,6 +101,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  * Resolve turn with decisions and calculate next state
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
+    console.log('[API] POST resolve started');
     const { sessionId, turnNumber: turnNumberStr } = await params;
     const turnNumber = parseInt(turnNumberStr, 10);
     const supabase = await createClient();
@@ -129,7 +141,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             }, { status: 400 });
         }
 
-        // Get previous state or use default for turn 1
+        // Get previous state (Current turn state)
+        // If resolving Turn 1, we need State 1 (or 0/Initial).
         let previousState = null;
         try {
             previousState = await getLatestState(supabase, sessionId);
@@ -154,18 +167,161 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const currentIndices = previousState?.indices || defaultIndices;
         const currentPnl = previousState?.pnl || defaultPnl;
 
-        // Simple simulation: apply a small random variation based on decisions
-        // This is a placeholder - real engine would use full simulation
-        const random = seed ? Math.sin(seed) * 10000 - Math.floor(Math.sin(seed) * 10000) : Math.random();
-        const variation = (random - 0.5) * 5; // -2.5 to +2.5
+        // Handle delayed effects queue
+        const previousEffectsQueue = previousState?.delayed_effects || createEmptyEffectsQueue();
+        const nextEffectsQueue = {
+            pending: [...previousEffectsQueue.pending],
+            applied: [...previousEffectsQueue.applied], // Keep history
+        };
 
-        const nextIndices: Record<string, number> = {};
-        for (const [key, value] of Object.entries(currentIndices)) {
-            const decisionEffect = decisions.length * 0.5; // More decisions = slightly better
-            nextIndices[key] = Math.max(0, Math.min(100, (value as number) + variation + decisionEffect));
+        // 1. Process new decisions to create effects
+        console.log('[API] Processing decisions:', decisions.length);
+
+        // Uses French speed as defined in effects-types
+        const gameSpeed = (session.config?.speed as GameSpeed) || 'moyenne';
+        console.log('[API] Game speed:', gameSpeed);
+
+        // Domain-to-index mappings with impact configuration
+        // Each domain affects specific indices with different impact ranges
+        const domainConfig: Record<string, {
+            targetIndex: string;
+            secondaryIndex?: string;
+            impactMultiplier: number;
+            description: string
+        }> = {
+            rh: { targetIndex: 'IERH', secondaryIndex: 'IPQO', impactMultiplier: 0.15, description: 'Amélioration RH' },
+            it: { targetIndex: 'IMD', secondaryIndex: 'IPQO', impactMultiplier: 0.12, description: 'Maturité Data/IT' },
+            marketing: { targetIndex: 'IAC', impactMultiplier: 0.20, description: 'Attractivité commerciale' },
+            tarif: { targetIndex: 'IAC', secondaryIndex: 'IPP', impactMultiplier: 0.25, description: 'Impact P&L' },
+            reputation: { targetIndex: 'IAC', secondaryIndex: 'IS', impactMultiplier: 0.10, description: 'Image de marque' },
+            prevention: { targetIndex: 'IS', secondaryIndex: 'IRF', impactMultiplier: 0.08, description: 'Sincérité/Conformité' },
+            sinistres: { targetIndex: 'IPQO', secondaryIndex: 'IS', impactMultiplier: 0.18, description: 'Gestion sinistres' },
+        };
+
+        // Lever ID to domain mapping (extended)
+        const getLeverDomain = (leverId: string): string | null => {
+            if (leverId.startsWith('LEV-RH')) return 'rh';
+            if (leverId.startsWith('LEV-IT')) return 'it';
+            if (leverId.startsWith('LEV-DIST') || leverId.startsWith('LEV-MKT')) return 'marketing';
+            if (leverId.startsWith('LEV-TAR')) return 'tarif';
+            if (leverId.startsWith('LEV-REP')) return 'reputation';
+            if (leverId.startsWith('LEV-PREV')) return 'prevention';
+            if (leverId.startsWith('LEV-SIN')) return 'sinistres';
+            return null;
+        };
+
+        // Track immediate effects per index (for non-delayed levers like tarif)
+        const immediateEffects: Record<string, number> = {};
+        Object.keys(currentIndices).forEach(key => { immediateEffects[key] = 0; });
+
+        for (const decision of decisions) {
+            try {
+                const domain = getLeverDomain(decision.leverId);
+                if (domain) {
+                    const config = domainConfig[domain];
+                    const decisionValue = typeof decision.value === 'number' ? decision.value : 0;
+
+                    // Calculate effect value based on lever value and domain multiplier
+                    const effectValue = decisionValue * config.impactMultiplier;
+
+                    console.log(`[API] Processing ${decision.leverId} (domain: ${domain}) -> ${config.targetIndex} effect: ${effectValue.toFixed(2)}`);
+
+                    // Tarif domain has immediate effect (delay 0)
+                    if (domain === 'tarif') {
+                        // Immediate effects on IAC and IPP
+                        immediateEffects[config.targetIndex] = (immediateEffects[config.targetIndex] || 0) + effectValue;
+                        if (config.secondaryIndex) {
+                            immediateEffects[config.secondaryIndex] = (immediateEffects[config.secondaryIndex] || 0) + effectValue * 0.5;
+                        }
+                    } else {
+                        // Create delayed effect for other domains
+                        const newEffect = createDelayedEffect({
+                            decisionId: decision.leverId,
+                            domain: domain as EffectDomain,
+                            targetIndex: config.targetIndex as IndexId,
+                            value: effectValue,
+                            currentTurn: turnNumber,
+                            speed: gameSpeed,
+                            description: config.description,
+                        });
+
+                        if (newEffect) {
+                            nextEffectsQueue.pending.push(newEffect);
+                            console.log(`[API] Created delayed effect: ${newEffect.id} -> ${config.targetIndex} +${effectValue.toFixed(2)} at turn ${newEffect.appliesAtTurn}`);
+                        }
+
+                        // Create secondary effect if applicable (with reduced value)
+                        if (config.secondaryIndex) {
+                            const secondaryEffect = createDelayedEffect({
+                                decisionId: `${decision.leverId}-secondary`,
+                                domain: domain as EffectDomain,
+                                targetIndex: config.secondaryIndex as IndexId,
+                                value: effectValue * 0.4, // Secondary effect is 40% of primary
+                                currentTurn: turnNumber,
+                                speed: gameSpeed,
+                                description: `${config.description} (secondaire)`,
+                            });
+                            if (secondaryEffect) {
+                                nextEffectsQueue.pending.push(secondaryEffect);
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('[API] Error creating effect:', err);
+            }
         }
 
-        const pnlChange = variation * 100_000;
+        console.log('[API] Effects queue size:', nextEffectsQueue.pending.length);
+
+        // 2. Apply effects that are now due (appliesAtTurn === turnNumber + 1, since we're calculating for next turn)
+        const nextTurn = turnNumber + 1;
+        const effectsToApply = nextEffectsQueue.pending.filter(e => e.appliesAtTurn === nextTurn && !e.isApplied);
+        const pendingAfterApplication = nextEffectsQueue.pending.filter(e => e.appliesAtTurn !== nextTurn || e.isApplied);
+
+        // Apply mature delayed effects
+        const delayedEffectsByIndex: Record<string, number> = {};
+        for (const effect of effectsToApply) {
+            const targetIndex = effect.targetIndex;
+            delayedEffectsByIndex[targetIndex] = (delayedEffectsByIndex[targetIndex] || 0) + effect.value;
+            console.log(`[API] Applying delayed effect: ${effect.id} -> ${targetIndex} +${effect.value.toFixed(2)}`);
+        }
+
+        // Mark applied effects
+        const appliedEffects = effectsToApply.map(e => ({ ...e, isApplied: true }));
+        nextEffectsQueue.pending = pendingAfterApplication;
+        nextEffectsQueue.applied = [...nextEffectsQueue.applied, ...appliedEffects];
+
+        // Add small market variation for realism (±1.5 max, not affecting all indices equally)
+        const random = seed ? Math.sin(seed) * 10000 - Math.floor(Math.sin(seed) * 10000) : Math.random();
+        const marketVariations: Record<string, number> = {
+            IAC: (random - 0.5) * 1.5,
+            IPQO: (Math.sin(random * 100) * 0.5) * 1.5,
+            IERH: (Math.cos(random * 50) * 0.5) * 1.5,
+            IRF: (random - 0.5) * 1.0,
+            IMD: (Math.sin(random * 200) * 0.5) * 1.5,
+            IS: (random - 0.5) * 0.8,
+            IPP: (Math.cos(random * 150) * 0.5) * 2.0,
+        };
+
+        // Calculate new indices with differentiated effects
+        const nextIndices: Record<string, number> = {};
+        for (const [key, value] of Object.entries(currentIndices)) {
+            const immediate = immediateEffects[key] || 0;
+            const delayed = delayedEffectsByIndex[key] || 0;
+            const market = marketVariations[key] || 0;
+            const totalEffect = immediate + delayed + market;
+
+            nextIndices[key] = Math.max(0, Math.min(100, (value as number) + totalEffect));
+
+            if (Math.abs(totalEffect) > 0.01) {
+                console.log(`[API] ${key}: ${(value as number).toFixed(1)} -> ${nextIndices[key].toFixed(1)} (imm: ${immediate.toFixed(2)}, del: ${delayed.toFixed(2)}, mkt: ${market.toFixed(2)})`);
+            }
+        }
+
+        // Calculate P&L change based on IPP effect and tarif decisions
+        const ippEffect = (immediateEffects['IPP'] || 0) + (delayedEffectsByIndex['IPP'] || 0);
+        const pnlChange = ippEffect * 50_000 + (random - 0.5) * 100_000; // Effect-based + small market variation
         const nextPnl = {
             primes: currentPnl.primes + pnlChange * 0.5,
             sinistres: currentPnl.sinistres + pnlChange * 0.3,
@@ -173,6 +329,30 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             produits_financiers: currentPnl.produits_financiers + pnlChange * 0.05,
             resultat: currentPnl.resultat + pnlChange * 0.05,
         };
+
+        // Prepare new state
+        const nextTurnNumber = turnNumber + 1;
+        const nextStateInput: TurnStateInput = {
+            session_id: sessionId,
+            turn_number: nextTurnNumber,
+            timestamp: new Date().toISOString(),
+            indices: nextIndices as unknown as import('@/types/game-state').IndicesSnapshot,
+            pnl: nextPnl,
+            decisions: decisions.map((d: { leverId: string; value: number | string | boolean; productId?: string }) => ({
+                lever_id: d.leverId,
+                value: d.value,
+                product_id: d.productId === 'auto' || d.productId === 'mrh' ? d.productId : undefined,
+                timestamp: new Date().toISOString()
+            })),
+            events: [], // No events in this simple sim
+            portfolio: {}, // Empty for now
+            delayed_effects: nextEffectsQueue,
+        };
+
+        // SAVE STATE
+        console.log('[API] Saving turn state:', nextTurnNumber);
+        await saveTurnState(supabase, sessionId, nextTurnNumber, nextStateInput);
+        console.log('[API] State saved successfully');
 
         // Calculate feedback
         const currentIndicesRecord = currentIndices as unknown as Record<string, number>;
@@ -196,15 +376,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         // Update session current_turn
         await supabase
             .from('sessions')
-            .update({ current_turn: turnNumber })
+            .update({ current_turn: nextTurnNumber })
             .eq('id', sessionId);
 
         return NextResponse.json({
             success: true,
             nextState: {
-                turnNumber,
+                turnNumber: nextTurnNumber,
                 indices: nextIndices,
                 pnl: nextPnl,
+                delayedEffects: nextEffectsQueue.pending,
             },
             feedback: {
                 majorVariations,
@@ -218,6 +399,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         });
     } catch (error) {
         console.error('Error resolving turn:', error);
-        return NextResponse.json({ error: 'Erreur lors de la résolution' }, { status: 500 });
+        return NextResponse.json({
+            error: error instanceof Error ? error.message : 'Erreur lors de la résolution'
+        }, { status: 500 });
     }
 }

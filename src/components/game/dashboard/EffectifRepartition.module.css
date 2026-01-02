@@ -1,0 +1,148 @@
+/* EffectifRepartition.module.css - Effectif Donut Chart Styles (US-030) */
+
+.container {
+    background: var(--color-bg-card, rgba(26, 26, 36, 0.8));
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border, rgba(148, 163, 184, 0.1));
+    border-radius: var(--radius-lg, 0.75rem);
+    padding: var(--spacing-lg, 1.5rem);
+}
+
+.title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8fafc);
+    margin: 0 0 var(--spacing-md, 1rem) 0;
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl, 2rem);
+}
+
+/* Donut Chart */
+.donut {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.donutCenter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: var(--color-bg-primary, #0a0a0f);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.totalValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #f8fafc);
+    line-height: 1.2;
+}
+
+.totalLabel {
+    font-size: 0.65rem;
+    color: var(--color-text-muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Legend */
+.legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm, 0.5rem);
+    flex: 1;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.legendColor {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.legendLabel {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary, #94a3b8);
+    flex: 1;
+}
+
+.legendValue {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8fafc);
+    font-variant-numeric: tabular-nums;
+}
+
+.legendPercent {
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #64748b);
+    font-weight: 400;
+}
+
+/* Skeleton */
+.skeleton {
+    height: 140px;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-md, 0.5rem);
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Responsive */
+@media (max-width: 1023px) {
+    .content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .donut {
+        width: 120px;
+        height: 120px;
+    }
+
+    .donutCenter {
+        width: 70px;
+        height: 70px;
+    }
+
+    .totalValue {
+        font-size: 1.25rem;
+    }
+
+    .legend {
+        width: 100%;
+    }
+}

@@ -223,3 +223,65 @@ export {
     createEmptyAggregatedState,
 } from './aggregation';
 
+// ============================================
+// FRAUD N1 SYSTEM (US-025)
+// ============================================
+
+export type {
+    FraudActionN1,
+    FraudCostLevel,
+    FraudN1Config,
+    FraudN1State,
+    FraudActivationResult,
+    FraudLogEntry,
+} from './fraud-types';
+
+export {
+    FRAUD_N1_ACTIONS,
+    FRAUD_N1_CAP,
+    FRAUD_N1_ACTION_IDS,
+} from './fraud-types';
+
+export {
+    initializeFraudN1State,
+    checkPrerequisites,
+    getMissingPrerequisites,
+    checkN1Cap,
+    calculateFraudEffect,
+    activateFraudAction,
+    getAvailableActions,
+    getActionConfig,
+    getFraudLogs,
+    clearFraudLogs,
+    getFraudN1Summary,
+    getTotalFraudCost,
+} from './fraud-n1';
+
+// ============================================
+// DASHBOARD TYPES (US-030)
+// ============================================
+
+export type {
+    DashboardConfig,
+    ProductDisplayMetrics,
+    IndexStatus,
+    IndexDisplay,
+    IndexThresholds,
+    AlertType,
+    AlertThresholds,
+    DashboardAlert,
+    EffectifSegment,
+} from './dashboard-types';
+
+export {
+    getDashboardConfig,
+    PRODUCT_NAMES,
+    DEFAULT_INDEX_THRESHOLDS,
+    getIndexStatus,
+    INDEX_LABELS,
+    INDEX_ICONS,
+    DEFAULT_ALERT_THRESHOLDS,
+    generateAlerts,
+    EFFECTIF_COLORS,
+} from './dashboard-types';
+

@@ -159,21 +159,29 @@
 ### Sprint 4 — UI & Contenu (2 sem)
 
 > **Objectif** : Cockpit complet, alertes, événements, compagnies
+> **Statut** : ✅ TERMINÉ
 
-| US | Titre | Taille | Points |
-|----|-------|:------:|:------:|
-| US-023 | Effets retard | L | 8 |
-| US-024 | Persistance/compensation | L | 8 |
-| US-025 | Fraude N1 | M | 5 |
-| US-030 | Dashboard enrichi | L | 8 |
-| **Total** | | | **29** |
+| US | Titre | Taille | Points | Statut | Temps réel |
+|----|-------|:------:|:------:|:------:|:----------:|
+| US-023 | Effets retard paramétrés | L | 8 | ✅ Done | **0h20** |
+| US-024 | Persistance/compensation | L | 8 | ✅ Done | **0h20** |
+| US-025 | Fraude N1 | M | 5 | ✅ Done | **0h30** |
+| US-030 | Dashboard enrichi | L | 8 | ✅ Done | **0h30** |
+| **Total** | | | **29** | | **1h40** |
 
 **Livrables Sprint 4 :**
-- [ ] Système effets retard paramétré
-- [ ] Compensation avec coût croissant
-- [ ] Levier fraude N1
-- [ ] Dashboard avec grille produits
-- [ ] Indicateurs par difficulté
+- [x] Système effets retard paramétré (delay-config.ts, DelayedEffectIndicator, EffectTimeline)
+- [x] Persistance effets avec décroissance + compensation avec coût croissant
+- [x] Levier fraude N1 avec cap 5% S/P, prérequis, 68 tests
+- [x] Dashboard enrichi avec grille produits (ProductGrid, IndexGauge, PnLChart, EffectifRepartition, AlertBadges)
+- [x] Indicateurs par difficulté (Novice vs Intermédiaire)
+
+**Métriques Sprint 4 :**
+| Métrique | Estimé | Réel |
+|----------|:------:|:----:|
+| Points | 29 | 29 |
+| Temps | ~16h | 1h40 |
+| Vélocité | - | Excellente |
 
 **Dépendances :** Sprint 3 ✓
 

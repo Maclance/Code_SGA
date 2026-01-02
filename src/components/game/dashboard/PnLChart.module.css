@@ -1,0 +1,131 @@
+/* PnLChart.module.css - P&L Chart Component Styles (US-030) */
+
+.container {
+    background: var(--color-bg-card, rgba(26, 26, 36, 0.8));
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border, rgba(148, 163, 184, 0.1));
+    border-radius: var(--radius-lg, 0.75rem);
+    padding: var(--spacing-lg, 1.5rem);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md, 1rem);
+}
+
+.title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8fafc);
+    margin: 0;
+}
+
+.delta {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Chart */
+.chart {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm, 0.5rem);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 100px 1fr 90px;
+    gap: var(--spacing-sm, 0.5rem);
+    align-items: center;
+}
+
+.label {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary, #94a3b8);
+    white-space: nowrap;
+}
+
+.barContainer {
+    height: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-out;
+}
+
+.value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Separator */
+.separator {
+    height: 1px;
+    background: var(--color-border, rgba(148, 163, 184, 0.1));
+    margin: var(--spacing-sm, 0.5rem) 0;
+}
+
+/* Result Row */
+.resultRow {
+    margin-top: var(--spacing-xs, 0.25rem);
+}
+
+.resultRow .label {
+    font-weight: 600;
+    color: var(--color-text-primary, #f8fafc);
+}
+
+.resultBar {
+    box-shadow: 0 0 10px var(--color-success, #22c55e);
+}
+
+.resultValue {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* Skeleton */
+.skeleton {
+    height: 180px;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-md, 0.5rem);
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Responsive */
+@media (max-width: 1023px) {
+    .row {
+        grid-template-columns: 80px 1fr 70px;
+    }
+
+    .label {
+        font-size: 0.75rem;
+    }
+
+    .value {
+        font-size: 0.8rem;
+    }
+}

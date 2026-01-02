@@ -1,0 +1,198 @@
+/* IndexGauge.module.css - Index Gauge Component Styles (US-030) */
+
+/* Base Gauge Container */
+.gauge {
+    background: var(--color-bg-card, rgba(26, 26, 36, 0.8));
+    border: 1px solid var(--color-border, rgba(148, 163, 184, 0.1));
+    border-radius: var(--radius-md, 0.5rem);
+    padding: var(--spacing-md, 1rem);
+    transition: border-color var(--transition-base, 200ms ease);
+}
+
+.gauge:hover {
+    border-color: var(--color-border-hover, rgba(148, 163, 184, 0.2));
+}
+
+.compact {
+    padding: var(--spacing-sm, 0.5rem);
+}
+
+/* Bar Variant */
+.bar .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm, 0.5rem);
+}
+
+.bar .titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs, 0.25rem);
+}
+
+.bar .valueRow {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-xs, 0.25rem);
+}
+
+.icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.label {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary, #94a3b8);
+}
+
+.valueText {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.compact .valueText {
+    font-size: 1.25rem;
+}
+
+.maxValue {
+    font-size: 0.85rem;
+    color: var(--color-text-muted, #64748b);
+}
+
+.delta {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: var(--spacing-xs, 0.25rem);
+}
+
+.deltaPercent {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-left: 2px;
+}
+
+/* Bar Progress */
+.barContainer {
+    position: relative;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm, 0.5rem);
+}
+
+.barFill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-out, background-color 0.3s ease;
+}
+
+/* Threshold Markers */
+.thresholdMarker {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateX(-50%);
+}
+
+/* Status Badge */
+.statusBadge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: var(--radius-sm, 0.375rem);
+}
+
+.statusBadge.critical {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--color-danger, #ef4444);
+}
+
+.statusBadge.warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--color-warning, #f59e0b);
+}
+
+.statusBadge.ok {
+    background: rgba(6, 182, 212, 0.2);
+    color: var(--color-info, #06b6d4);
+}
+
+.statusBadge.good {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--color-success, #22c55e);
+}
+
+/* Circular Variant */
+.circular {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.circularGauge {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.compact .circularGauge {
+    width: 70px;
+    height: 70px;
+}
+
+.circularSvg {
+    width: 100%;
+    height: 100%;
+}
+
+.circularProgress {
+    transition: stroke-dasharray 0.5s ease-out;
+}
+
+.circularValue {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.circular .valueText {
+    font-size: 1.25rem;
+}
+
+.compact.circular .valueText {
+    font-size: 1rem;
+}
+
+.labelContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-top: var(--spacing-sm, 0.5rem);
+}
+
+.circular .label {
+    font-size: 0.75rem;
+}
+
+.circular .delta {
+    font-size: 0.75rem;
+}

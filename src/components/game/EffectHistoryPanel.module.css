@@ -1,0 +1,186 @@
+.panel {
+    background: var(--card-bg, #1a1a2e);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid var(--border-subtle, #2a2a4e);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.icon {
+    font-size: 1.25rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 99px;
+    background: var(--surface-elevated, #2a2a4e);
+    color: var(--text-secondary, #a0a0c0);
+}
+
+/* Effect List */
+.effectList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.effectItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--surface-subtle, rgba(255, 255, 255, 0.03));
+    border-radius: 8px;
+    border-left: 3px solid var(--status-color, #3b82f6);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.effectItem:hover {
+    background: var(--surface-hover, rgba(255, 255, 255, 0.06));
+}
+
+.effectItem.active {
+    --status-color: #22c55e;
+}
+
+.effectItem.depleted {
+    --status-color: #6b7280;
+    opacity: 0.7;
+}
+
+.effectItem.compensated {
+    --status-color: #3b82f6;
+}
+
+/* Item Content */
+.itemContent {
+    flex: 1;
+}
+
+.itemHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.turnBadge {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    background: var(--surface-elevated, #2a2a4e);
+    color: var(--text-tertiary, #808090);
+}
+
+.description {
+    font-size: 0.875rem;
+    color: var(--text-primary, #fff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.targetIndex {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #a0a0c0);
+}
+
+/* Values */
+.values {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.125rem;
+}
+
+.currentValue {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.currentValue.positive {
+    color: #22c55e;
+}
+
+.currentValue.negative {
+    color: #ef4444;
+}
+
+.originalValue {
+    font-size: 0.625rem;
+    color: var(--text-tertiary, #808090);
+}
+
+/* Status Badge */
+.statusBadge {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.statusBadge.active {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.statusBadge.depleted {
+    background: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
+}
+
+.statusBadge.compensated {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+/* Empty State */
+.emptyState {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-tertiary, #808090);
+    font-size: 0.875rem;
+}
+
+/* Compensation Button */
+.compensateButton {
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 4px;
+    color: #3b82f6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.compensateButton:hover {
+    background: rgba(59, 130, 246, 0.25);
+}
+
+.compensateButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

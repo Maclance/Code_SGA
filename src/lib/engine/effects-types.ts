@@ -11,6 +11,9 @@
 
 import type { IndexId } from './types';
 
+// Re-export IndexId for convenience
+export type { IndexId };
+
 // ============================================
 // DOMAIN & EFFECT TYPES
 // ============================================
@@ -252,4 +255,100 @@ export function createEmptyEffectsQueue(): DelayedEffectsQueue {
         pending: [],
         applied: [],
     };
+}
+
+// ============================================
+// RE-EXPORTS FROM DELAY CONFIG (US-023)
+// ============================================
+
+export {
+    type GameSpeed as GameSpeedEN,
+    type GameSpeedFR,
+    DELAY_CONFIGS,
+    getDelayConfig,
+    getDelayForDomain,
+    getDelayRange,
+    getDecayRate,
+    toFrenchSpeed,
+    toEnglishSpeed,
+    isValidGameSpeed,
+    isValidGameSpeedFR,
+    SPEED_EN_TO_FR,
+    SPEED_FR_TO_EN,
+} from './config/delay-config';
+
+// ============================================
+// DELAYED EFFECT DISPLAY (UI - US-023)
+// ============================================
+
+/**
+ * Delayed effect formatted for UI display
+ *
+ * @remarks
+ * Used by DelayedEffectIndicator and EffectTimeline components
+ * to show pending effects to the player.
+ *
+ * @example
+ * ```ts
+ * const display: DelayedEffectDisplay = {
+ *   effectId: 'eff-001',
+ *   description: 'Recrutement sinistres → +8 IPQO',
+ *   expectedTurn: 5,
+ *   turnsRemaining: 2,
+ *   intensity: 'high',
+ *   targetIndex: 'IPQO',
+ *   estimatedImpact: { min: 6, max: 10 },
+ * };
+ * ```
+ */
+export interface DelayedEffectDisplay {
+    /** Unique effect identifier */
+    effectId: string;
+    /** Human-readable description for UI */
+    description: string;
+    /** Turn when effect will be applied */
+    expectedTurn: number;
+    /** Number of turns until application */
+    turnsRemaining: number;
+    /** Current intensity level (decays over time) */
+    intensity: 'low' | 'medium' | 'high';
+    /** Target index that will be affected */
+    targetIndex: IndexId;
+    /** Estimated impact range (after decay) */
+    estimatedImpact: { min: number; max: number };
+    /** Business domain of the effect */
+    domain?: EffectDomain;
+    /** Decision ID that created this effect */
+    decisionId?: string;
+}
+
+// ============================================
+// EFFECT HISTORY (US-024)
+// ============================================
+
+/**
+ * Status of an effect in history
+ */
+export type EffectHistoryStatus = 'active' | 'depleted' | 'compensated';
+
+/**
+ * Entry in the effect history for UI display
+ */
+export interface EffectHistoryEntry {
+    /** Turn when the decision was made */
+    turnNumber: number;
+    /** ID of the decision */
+    decisionId: string;
+    /** Human-readable description */
+    decisionDescription: string;
+    /** Target index affected */
+    targetIndex: IndexId;
+    /** Initial effect value */
+    initialEffect: number;
+    /** Current effect value after decay */
+    currentEffect: number;
+    /** Current status */
+    status: EffectHistoryStatus;
+    /** Whether compensation is available */
+    canCompensate?: boolean;
 }
