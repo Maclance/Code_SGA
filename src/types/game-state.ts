@@ -147,6 +147,10 @@ export interface TurnState {
     decisions: Decision[];
     events: TriggeredEvent[];
     portfolio: PortfolioByProduct;
+    delayed_effects?: {
+        pending: any[];
+        applied: any[];
+    }; // using any[] to avoid import cycles, but ideally use DelayedEffectsQueue
 
     // Integrity
     checksum: string; // SHA256 hex string
@@ -246,6 +250,11 @@ export const TurnStateInputSchema = z.object({
     decisions: z.array(DecisionSchema),
     events: z.array(TriggeredEventSchema),
     portfolio: PortfolioByProductSchema,
+    // Using simple validation for complex nested generic types to avoid circular dependencies
+    delayed_effects: z.object({
+        pending: z.array(z.any()),
+        applied: z.array(z.any()),
+    }).optional(),
 });
 
 /**

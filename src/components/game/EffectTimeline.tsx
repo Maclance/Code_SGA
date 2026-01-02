@@ -269,7 +269,7 @@ export function EffectTimeline({
                     {locale === 'fr' ? 'Effets planifiés' : 'Scheduled Effects'}
                 </h3>
                 <span className={styles.totalCount}>
-                    {effects.length} {locale === 'fr' ? 'effet(s) en attente' : 'pending effect(s)'}
+                    {effects.filter(e => e.expectedTurn >= currentTurn).length} {locale === 'fr' ? 'effet(s) en attente' : 'pending effect(s)'}
                 </span>
             </div>
 

@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { TurnPhase, nextPhase, PHASE_CONFIGS } from '@/lib/game/turn-machine';
@@ -16,6 +16,11 @@ import { EventsPanel } from '@/components/game/EventsPanel';
 import { DecisionsPanel } from '@/components/game/DecisionsPanel';
 import { ResolutionScreen } from '@/components/game/ResolutionScreen';
 import { FeedbackScreen } from '@/components/game/FeedbackScreen';
+import { EffectTimeline } from '@/components/game/EffectTimeline';
+import { type GameSpeed, toFrenchSpeed } from '@/lib/engine/config/delay-config';
+import type { DelayedEffect, DelayedEffectDisplay } from '@/lib/engine/effects-types';
+import { toEffectDisplay } from '@/lib/services/delayed-effects.service';
+import { createDelayedEffect } from '@/lib/engine/delayed-effects';
 
 interface PageProps {
     params: Promise<{
@@ -33,6 +38,7 @@ interface TurnState {
         produits_financiers: number;
         resultat: number;
     };
+    delayedEffects?: DelayedEffect[];
 }
 
 interface PendingDecision {
@@ -67,12 +73,14 @@ export default function TurnPage({ params }: PageProps) {
     const [currentState, setCurrentState] = useState<TurnState | null>(null);
     const [previousState, setPreviousState] = useState<TurnState | null>(null);
     const [pendingDecisions, setPendingDecisions] = useState<PendingDecision[]>([]);
+    const [delayedEffectsDisplay, setDelayedEffectsDisplay] = useState<DelayedEffectDisplay[]>([]);
     const [feedback, setFeedback] = useState<Feedback | null>(null);
     const [loading, setLoading] = useState(true);
     const [resolving, setResolving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [maxTurns, setMaxTurns] = useState<number>(12);
     const [sessionName, setSessionName] = useState<string>('');
+    const [gameSpeed, setGameSpeed] = useState<GameSpeed>('medium');
 
     // Load params
     useEffect(() => {
@@ -95,6 +103,10 @@ export default function TurnPage({ params }: PageProps) {
                 if (data.session) {
                     setMaxTurns(data.session.maxTurns || 12);
                     setSessionName(data.session.name || 'Partie en cours');
+                    // Extract game speed from config if available
+                    if (data.session.config?.gameSpeed) {
+                        setGameSpeed(data.session.config.gameSpeed as GameSpeed);
+                    }
                 }
 
                 if (data.turnState) {
@@ -106,6 +118,14 @@ export default function TurnPage({ params }: PageProps) {
                         indices: data.turnState.indices,
                         pnl: data.turnState.pnl,
                     });
+
+                    if (data.turnState.delayedEffects) {
+                        const displays = (data.turnState.delayedEffects as DelayedEffect[])
+                            .map(e => toEffectDisplay(e, turnNumber));
+                        setDelayedEffectsDisplay(displays);
+                    } else {
+                        setDelayedEffectsDisplay([]);
+                    }
                 } else {
                     // Default initial state for turn 1
                     const defaultState: TurnState = {
@@ -146,6 +166,61 @@ export default function TurnPage({ params }: PageProps) {
     const handleDecisionChange = useCallback((decisions: PendingDecision[]) => {
         setPendingDecisions(decisions);
     }, []);
+
+    // Combine persistent and preview effects for display
+    const combinedEffectsDisplay = useMemo(() => {
+        if (!currentState) return delayedEffectsDisplay;
+
+        // Domain-to-index mappings based on indices.md documentation
+        const domainConfig: Record<string, {
+            targetIndex: string;
+            delay: number;
+            impact: { min: number; max: number };
+            description: string;
+        }> = {
+            rh: { targetIndex: 'IERH', delay: 2, impact: { min: 3, max: 8 }, description: 'Amélioration RH' },
+            it: { targetIndex: 'IMD', delay: 3, impact: { min: 2, max: 6 }, description: 'Maturité Data/IT' },
+            marketing: { targetIndex: 'IAC', delay: 1, impact: { min: 4, max: 10 }, description: 'Attractivité commerciale' },
+            tarif: { targetIndex: 'IPP', delay: 0, impact: { min: -8, max: 12 }, description: 'Impact P&L' },
+            reputation: { targetIndex: 'IAC', delay: 1, impact: { min: 2, max: 7 }, description: 'Image de marque' },
+            prevention: { targetIndex: 'IS', delay: 4, impact: { min: 1, max: 5 }, description: 'Sincérité/Conformité' },
+        };
+
+        // Create preview effects with stable IDs
+        const previewEffects: DelayedEffectDisplay[] = pendingDecisions
+            .map(d => {
+                let domain: string | null = null;
+                if (d.leverId.startsWith('LEV-RH')) domain = 'rh';
+                else if (d.leverId.startsWith('LEV-IT')) domain = 'it';
+                else if (d.leverId.startsWith('LEV-DIST')) domain = 'marketing';
+                else if (d.leverId.startsWith('LEV-TAR')) domain = 'tarif';
+                else if (d.leverId.startsWith('LEV-REP')) domain = 'reputation';
+                else if (d.leverId.startsWith('LEV-PREV')) domain = 'prevention';
+
+                if (!domain) return null;
+
+                const config = domainConfig[domain];
+                const expectedTurn = turnNumber + config.delay;
+                const decisionValue = typeof d.value === 'number' ? d.value : 50;
+                const intensity = decisionValue > 70 ? 'high' : decisionValue > 30 ? 'medium' : 'low';
+
+                const previewDisplay: DelayedEffectDisplay = {
+                    effectId: `preview-${d.leverId}`,
+                    description: config.description,
+                    domain: domain as any,
+                    targetIndex: config.targetIndex as any,
+                    expectedTurn: expectedTurn,
+                    turnsRemaining: config.delay,
+                    intensity: intensity as 'low' | 'medium' | 'high',
+                    estimatedImpact: config.impact,
+                };
+
+                return previewDisplay;
+            })
+            .filter((e): e is DelayedEffectDisplay => e !== null);
+
+        return [...delayedEffectsDisplay, ...previewEffects];
+    }, [delayedEffectsDisplay, pendingDecisions, turnNumber, currentState]);
 
     // Handle turn resolution
     const handleResolve = useCallback(async () => {
@@ -285,6 +360,8 @@ export default function TurnPage({ params }: PageProps) {
                         decisions={pendingDecisions}
                         onDecisionsChange={handleDecisionChange}
                         onValidate={handleResolve}
+                        gameSpeed={gameSpeed}
+                        currentTurn={turnNumber}
                     />
                 )}
 
@@ -304,6 +381,14 @@ export default function TurnPage({ params }: PageProps) {
                         onNextTurn={handleNextTurn}
                     />
                 )}
+                {/* Effect Timeline (Persistent) */}
+                <div style={{ marginTop: '2rem' }}>
+                    <EffectTimeline
+                        effects={combinedEffectsDisplay}
+                        currentTurn={turnNumber}
+                        locale="fr"
+                    />
+                </div>
             </main>
         </div>
     );

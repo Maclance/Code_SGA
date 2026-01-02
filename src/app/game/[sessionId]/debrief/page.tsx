@@ -37,6 +37,17 @@ export default async function DebriefPage({ params }: PageProps) {
         redirect('/dashboard/sessions');
     }
 
+    // Update session status to 'ended' if not already
+    if (session.status === 'running' || session.status === 'ready') {
+        await supabase
+            .from('sessions')
+            .update({ status: 'ended' })
+            .eq('id', sessionId);
+
+        // Update local session object for display
+        session.status = 'ended';
+    }
+
     // Get all game states for summary
     const { data: gameStates } = await supabase
         .from('game_states')
