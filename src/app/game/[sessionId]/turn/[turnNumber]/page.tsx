@@ -35,10 +35,10 @@ import { DecisionsPanel } from '@/components/game/DecisionsPanel';
 import { ResolutionScreen } from '@/components/game/ResolutionScreen';
 import { FeedbackScreen } from '@/components/game/FeedbackScreen';
 import { EffectTimeline } from '@/components/game/EffectTimeline';
-import { type GameSpeed, toFrenchSpeed } from '@/lib/engine/config/delay-config';
+import { type GameSpeed } from '@/lib/engine/config/delay-config';
 import type { DelayedEffect, DelayedEffectDisplay } from '@/lib/engine/effects-types';
 import { toEffectDisplay } from '@/lib/services/delayed-effects.service';
-import { createDelayedEffect } from '@/lib/engine/delayed-effects';
+import type { EffectDomain, IndexId } from '@/lib/engine/effects-types';
 
 interface PageProps {
     params: Promise<{
@@ -225,8 +225,8 @@ export default function TurnPage({ params }: PageProps) {
                 const previewDisplay: DelayedEffectDisplay = {
                     effectId: `preview-${d.leverId}`,
                     description: config.description,
-                    domain: domain as any,
-                    targetIndex: config.targetIndex as any,
+                    domain: domain as EffectDomain,
+                    targetIndex: config.targetIndex as IndexId,
                     expectedTurn: expectedTurn,
                     turnsRemaining: config.delay,
                     intensity: intensity as 'low' | 'medium' | 'high',
@@ -388,7 +388,7 @@ export default function TurnPage({ params }: PageProps) {
 
                     // Generate alerts
                     const alerts: DashboardAlert[] = generateAlerts(
-                        currentState.indices as any,
+                        currentState.indices as import('@/types/game-state').IndicesSnapshot,
                         3000,
                         3300,
                         DEFAULT_ALERT_THRESHOLDS

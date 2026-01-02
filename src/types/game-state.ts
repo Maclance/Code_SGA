@@ -147,10 +147,14 @@ export interface TurnState {
     decisions: Decision[];
     events: TriggeredEvent[];
     portfolio: PortfolioByProduct;
+    /**
+     * Delayed effects queue - uses unknown[] to avoid circular imports.
+     * Service layer should cast to DelayedEffect[] from effects-types.ts
+     */
     delayed_effects?: {
-        pending: any[];
-        applied: any[];
-    }; // using any[] to avoid import cycles, but ideally use DelayedEffectsQueue
+        pending: unknown[];
+        applied: unknown[];
+    };
 
     // Integrity
     checksum: string; // SHA256 hex string
@@ -250,10 +254,10 @@ export const TurnStateInputSchema = z.object({
     decisions: z.array(DecisionSchema),
     events: z.array(TriggeredEventSchema),
     portfolio: PortfolioByProductSchema,
-    // Using simple validation for complex nested generic types to avoid circular dependencies
+    // Using z.unknown() to avoid circular dependencies with effects-types
     delayed_effects: z.object({
-        pending: z.array(z.any()),
-        applied: z.array(z.any()),
+        pending: z.array(z.unknown()),
+        applied: z.array(z.unknown()),
     }).optional(),
 });
 

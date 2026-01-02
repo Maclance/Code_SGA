@@ -37,7 +37,7 @@ function formatNumber(value: number, locale: string = 'fr'): string {
     }).format(value);
 }
 
-function formatCurrency(value: number, locale: string = 'fr'): string {
+function formatCurrency(value: number): string {
     if (value >= 1_000_000) {
         return `${(value / 1_000_000).toFixed(1)}M€`;
     }
@@ -173,7 +173,7 @@ export function ProductGrid({
                         <div className={styles.metric}>
                             <span className={styles.metricLabel}>{labels.primesCollectees}</span>
                             <span className={styles.metricValue}>
-                                {formatCurrency(product.primesCollectees, locale)}
+                                {formatCurrency(product.primesCollectees)}
                             </span>
                         </div>
 
@@ -215,7 +215,7 @@ export function ProductGrid({
                                 <div className={styles.metric}>
                                     <span className={styles.metricLabel}>{labels.coutMoyen}</span>
                                     <span className={styles.metricValue}>
-                                        {formatCurrency(product.coutMoyen ?? 0, locale)}
+                                        {formatCurrency(product.coutMoyen ?? 0)}
                                     </span>
                                 </div>
                             </>
@@ -241,7 +241,7 @@ export function ProductGrid({
 
                     <div className={styles.metric}>
                         <span className={styles.metricLabel}>{labels.primesCollectees}</span>
-                        <span className={styles.metricValue}>{formatCurrency(totals.primesCollectees, locale)}</span>
+                        <span className={styles.metricValue}>{formatCurrency(totals.primesCollectees)}</span>
                     </div>
 
                     <div className={styles.metric}>
@@ -274,7 +274,7 @@ export function ProductGrid({
                             </div>
                             <div className={styles.metric}>
                                 <span className={styles.metricLabel}>{labels.coutMoyen}</span>
-                                <span className={styles.metricValue}>{formatCurrency(totals.coutMoyen ?? 0, locale)}</span>
+                                <span className={styles.metricValue}>{formatCurrency(totals.coutMoyen ?? 0)}</span>
                             </div>
                         </>
                     )}

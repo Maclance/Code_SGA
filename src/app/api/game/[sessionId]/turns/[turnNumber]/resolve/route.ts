@@ -7,9 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getLatestState, loadTurnState, saveTurnState, StateNotFoundError, StateAlreadyExistsError } from '@/lib/services/game-state.service';
+import { getLatestState, loadTurnState, saveTurnState, StateNotFoundError } from '@/lib/services/game-state.service';
 import { TurnStateInput } from '@/types/game-state';
-import { DelayedEffect, createEmptyEffectsQueue, GameSpeed } from '@/lib/engine/effects-types';
+import { createEmptyEffectsQueue, GameSpeed, type EffectDomain, type IndexId } from '@/lib/engine/effects-types';
 import { createDelayedEffect } from '@/lib/engine/delayed-effects';
 
 interface RouteParams {
@@ -237,8 +237,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                         // Create delayed effect for other domains
                         const newEffect = createDelayedEffect({
                             decisionId: decision.leverId,
-                            domain: domain as any,
-                            targetIndex: config.targetIndex as any,
+                            domain: domain as EffectDomain,
+                            targetIndex: config.targetIndex as IndexId,
                             value: effectValue,
                             currentTurn: turnNumber,
                             speed: gameSpeed,
@@ -254,8 +254,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                         if (config.secondaryIndex) {
                             const secondaryEffect = createDelayedEffect({
                                 decisionId: `${decision.leverId}-secondary`,
-                                domain: domain as any,
-                                targetIndex: config.secondaryIndex as any,
+                                domain: domain as EffectDomain,
+                                targetIndex: config.secondaryIndex as IndexId,
                                 value: effectValue * 0.4, // Secondary effect is 40% of primary
                                 currentTurn: turnNumber,
                                 speed: gameSpeed,
@@ -336,9 +336,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             session_id: sessionId,
             turn_number: nextTurnNumber,
             timestamp: new Date().toISOString(),
-            indices: nextIndices as any, // Cast to match schema strictness if needed
+            indices: nextIndices as import('@/types/game-state').IndicesSnapshot,
             pnl: nextPnl,
-            decisions: decisions.map((d: any) => ({
+            decisions: decisions.map((d: { leverId: string; value: number | string | boolean; productId?: string }) => ({
                 lever_id: d.leverId,
                 value: d.value,
                 product_id: d.productId === 'auto' || d.productId === 'mrh' ? d.productId : undefined,

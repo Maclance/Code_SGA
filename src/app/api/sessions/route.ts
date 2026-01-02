@@ -27,8 +27,9 @@ import { formatCodeForDisplay } from '@/lib/utils/session-code';
  * Get all sessions for the current user's tenant
  */
 export async function GET(
-    _request: NextRequest
+    request: NextRequest
 ): Promise<NextResponse> {
+    void request; // Required by Next.js but unused
     try {
         // Auth check
         const supabase = await createClient();

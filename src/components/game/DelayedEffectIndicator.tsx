@@ -70,7 +70,6 @@ export interface DelayedEffectIndicatorProps {
  */
 export function DelayedEffectIndicator({
     domain,
-    currentTurn,
     gameSpeed = 'medium',
     turnsRemaining,
     intensity = 'medium',

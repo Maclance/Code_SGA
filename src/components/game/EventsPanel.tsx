@@ -62,7 +62,7 @@ const SAMPLE_EVENTS: ActiveEvent[] = [
     },
 ];
 
-export function EventsPanel({ events, turnNumber: _turnNumber, onContinue }: EventsPanelProps) {
+export function EventsPanel({ events, onContinue }: EventsPanelProps) {
     // Use sample events if no events provided
     const displayEvents = events.length > 0 ? events : SAMPLE_EVENTS;
 

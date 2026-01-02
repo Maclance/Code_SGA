@@ -239,9 +239,7 @@ export async function deleteTenant(
     id: string
 ): Promise<TenantResponse> {
     // Check tenant exists (throws if not found)
-    const _existingTenant = await getTenantById(supabase, id);
-
-    let warning: string | undefined;
+    await getTenantById(supabase, id); let warning: string | undefined;
 
     // Check for active sessions (future: when game_sessions table exists)
     // For now, we'll add this check when the sessions are implemented

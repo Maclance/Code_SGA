@@ -69,7 +69,6 @@ function formatValue(value: number): string {
 
 export default function EffectHistoryPanel({
     entries,
-    currentTurn,
     compensationOptions = [],
     onCompensate,
     onEntryClick,
@@ -178,8 +177,8 @@ export default function EffectHistoryPanel({
                                 <div className={styles.values}>
                                     <span
                                         className={`${styles.currentValue} ${entry.currentEffect >= 0
-                                                ? styles.positive
-                                                : styles.negative
+                                            ? styles.positive
+                                            : styles.negative
                                             }`}
                                     >
                                         {formatValue(entry.currentEffect)}

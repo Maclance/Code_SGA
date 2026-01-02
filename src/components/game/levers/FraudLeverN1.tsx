@@ -18,7 +18,6 @@ import styles from './FraudLeverN1.module.css';
 import {
     FraudActionN1,
     FraudN1State,
-    FraudActivationResult,
     FRAUD_N1_ACTIONS,
     FRAUD_N1_CAP,
     FRAUD_N1_ACTION_IDS,

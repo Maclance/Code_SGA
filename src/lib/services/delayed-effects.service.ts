@@ -15,14 +15,11 @@ import {
     type DelayedEffectsQueue,
     type DelayedEffectDisplay,
     type EffectDomain,
-    type GameSpeed as GameSpeedFR,
 } from '@/lib/engine/effects-types';
 import {
     type GameSpeed,
     getDelayForDomain,
     getDelayRange,
-    getDecayRate,
-    toFrenchSpeed,
     DELAY_CONFIGS,
 } from '@/lib/engine/config/delay-config';
 import { applyDecay } from '@/lib/engine/delayed-effects';
