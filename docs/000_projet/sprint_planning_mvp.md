@@ -22,13 +22,16 @@
 | Sprint | Thème | Points | US clés | Dépendances |
 |:------:|-------|:------:|---------|-------------|
 | **S0** | Bootstrap | ~20 | US-000 | - |
-| **S1** | Foundations | ~26 | US-001-006 | S0 |
-| **S2** | Core Loop | ~26 | US-010-014, US-020-022 | S1 |
-| **S3** | Moteur | ~26 | US-023-025, US-030-033 | S2 |
-| **S4** | UI & Contenu | ~26 | US-034-037, US-040-044 | S3 |
-| **S5** | Polish & Export | ~26 | US-046-053, US-060-092, US-100 | S4 |
+| **S1** | Foundations | ~26 | US-001-004 | S0 |
+| **S2** | Core Loop | ~33 | US-005-006, US-010-013 | S1 |
+| **S3** | Moteur | ~37 | US-014, US-020-023 | S2 |
+| **S4** | UI & Contenu | ~29 | US-024-025, US-030 | S3 |
+| **S5** | Polish & Export | ~28 | US-032-037 | S4 |
+| **S6** | Contenu & Scoring | ~31 | US-040-046 | S5 |
+| **S7** | Debrief & Admin | ~30 | US-048-064 | S6 |
+| **S8** | Sécurité & QA | ~30 | US-070-100 | S7 |
 
-**Total estimé : ~150 points / 12 semaines**
+**Total estimé : ~265 points / 18 semaines**
 *(avec buffer de contingence)*
 
 ---
@@ -138,18 +141,18 @@
 | US | Titre | Taille | Points | Statut | Temps réel |
 |----|-------|:------:|:------:|:------:|:----------:|
 | US-020 | Calcul 7 indices + P&L | L | 8 | ✅ Done | **0h30** |
-| US-021 | Effets retard / Empilement / Caps | L | 8 | ✅ Done | **0h20** |
+| US-023 | Effets retard / Empilement / Caps | L | 8 | ✅ Done | **0h20** |
 | US-022 | Ressources communes | M | 5 | ✅ Done | **0h40** |
-| US-023 | Calculs par produit + Agrégation | L | 8 | ✅ Done | **0h35** |
+| US-021 | Calculs par produit + Agrégation | L | 8 | ✅ Done | **0h35** |
 | US-014 | Boucle de tour complète | L | 8 | ✅ Done | **1h15** |
 | **Total** | | | **37** | | **3h20** |
 
 **Livrables Sprint 3 :**
 - [x] Module `lib/engine/` avec calculs indices (US-020)
 - [x] Tests unitaires moteur (coverage 99%+)
-- [x] Système effets retard avec caps ±50% (US-021)
+- [x] Système effets retard avec caps ±50% (US-023)
 - [x] Agrégation multi-produits (US-022)
-- [x] Calculs par produit + types décisions (US-023)
+- [x] Calculs par produit + types décisions (US-021)
 - [x] Boucle dashboard→décisions→résolution→feedback (US-014)
 
 **Dépendances :** Sprint 2 ✓
@@ -190,18 +193,19 @@
 ### Sprint 5 — Polish & Export (2 sem)
 
 > **Objectif** : UI finitions, alertes, vue marché, explainability
+> **Statut** : 🔄 EN COURS
 
-| US | Titre | Taille | Points |
-|----|-------|:------:|:------:|
-| US-032 | Alertes | M | 5 |
-| US-033 | Écran événements | M | 5 |
-| US-034 | Écran décisions gating | L | 8 |
-| US-036 | Vue marché | M | 5 |
-| US-037 | Explainability top 3 | M | 5 |
-| **Total** | | | **28** |
+| US | Titre | Taille | Points | Statut | Temps réel |
+|----|-------|:------:|:------:|:------:|:----------:|
+| US-032 | Alertes | M | 5 | ✅ Done | **0h25** |
+| US-033 | Écran événements | M | 5 | | |
+| US-034 | Écran décisions gating | L | 8 | | |
+| US-036 | Vue marché | M | 5 | | |
+| US-037 | Explainability top 3 | M | 5 | | |
+| **Total** | | | **28** | | **0h25** |
 
 **Livrables Sprint 5 :**
-- [ ] Système d'alertes avec seuils
+- [x] Système d'alertes avec seuils (US-032)
 - [ ] News flash événements
 - [ ] Gating leviers par difficulté
 - [ ] Vue marché (parts + prix)

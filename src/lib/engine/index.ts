@@ -285,3 +285,37 @@ export {
     EFFECTIF_COLORS,
 } from './dashboard-types';
 
+// ============================================
+// ALERTS SYSTEM (US-032)
+// ============================================
+
+export type {
+    AlertSeverity,
+    AlertCategory,
+    Alert,
+    IndexAlertThreshold,
+    PercentageAlertThreshold,
+    AlertCategoryConfig,
+    AlertThresholdsByDifficulty,
+    AlertDetectionInput,
+    AlertDifficulty,
+} from './alerts';
+
+export {
+    ALERT_CATEGORIES,
+    SEVERITY_PRIORITY,
+    SEVERITY_ICONS,
+    RECOMMENDED_LEVERS,
+    ALERT_MESSAGES,
+    ALERT_THRESHOLDS,
+    getAlertConfig,
+    getAllAlertConfigs,
+    detectAlerts,
+    sortAlertsBySeverity,
+    isAlertResolved,
+    filterAlertsBySeverity,
+    filterAlertsByCategory,
+    getCriticalAlerts,
+    getWarningAlerts,
+    ALERT_SEVERITY_VALUES,
+} from './alerts';

@@ -1,0 +1,206 @@
+.panel {
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.5rem;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+}
+
+.empty {
+    text-align: center;
+    color: #6b7280;
+}
+
+.emptyMessage {
+    margin: 1rem 0 0 0;
+    font-size: 0.875rem;
+}
+
+/* Alert List */
+.alertList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.alertItem {
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.alertItem:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alertItem[onclick] {
+    cursor: pointer;
+}
+
+/* Severity variants */
+.critical {
+    background-color: #fef2f2;
+    border-left-color: #ef4444;
+}
+
+.warning {
+    background-color: #fffbeb;
+    border-left-color: #f59e0b;
+}
+
+.info {
+    background-color: #eff6ff;
+    border-left-color: #3b82f6;
+}
+
+/* Alert content */
+.alertHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.icon {
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.alertTitle {
+    font-weight: 600;
+    color: #111827;
+}
+
+.alertDescription {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.alertCause {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.8125rem;
+    color: #6b7280;
+}
+
+/* Recommendations */
+.recommendations {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #d1d5db;
+    font-size: 0.8125rem;
+}
+
+.leverList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin: 0.375rem 0 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.leverItem {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: #374151;
+}
+
+/* Index badge */
+.indexBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.threshold {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .panel {
+        background-color: #1f2937;
+        border-color: #374151;
+    }
+
+    .title {
+        color: #f9fafb;
+    }
+
+    .alertTitle {
+        color: #f9fafb;
+    }
+
+    .alertDescription {
+        color: #d1d5db;
+    }
+
+    .alertCause {
+        color: #9ca3af;
+    }
+
+    .critical {
+        background-color: rgba(239, 68, 68, 0.15);
+    }
+
+    .warning {
+        background-color: rgba(245, 158, 11, 0.15);
+    }
+
+    .info {
+        background-color: rgba(59, 130, 246, 0.15);
+    }
+
+    .leverItem {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #e5e7eb;
+    }
+
+    .indexBadge {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: #e5e7eb;
+    }
+}
