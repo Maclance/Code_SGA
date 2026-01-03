@@ -32,7 +32,7 @@ import {
 } from '@/lib/engine';
 import { EventsScreen } from '@/components/game/events';
 import type { GameEvent } from '@/lib/engine';
-import { DecisionsPanel } from '@/components/game/DecisionsPanel';
+import { DecisionsScreen, type SelectedDecision } from '@/components/game/decisions/DecisionsScreen';
 import { ResolutionScreen } from '@/components/game/ResolutionScreen';
 import { FeedbackScreen } from '@/components/game/FeedbackScreen';
 import { EffectTimeline } from '@/components/game/EffectTimeline';
@@ -60,9 +60,7 @@ interface TurnState {
     delayedEffects?: DelayedEffect[];
 }
 
-interface PendingDecision {
-    leverId: string;
-    value: number | string | boolean;
+interface PendingDecision extends SelectedDecision {
     productId?: string;
 }
 
@@ -250,11 +248,18 @@ export default function TurnPage({ params }: PageProps) {
         setError(null);
 
         try {
+            // Transform decisions to include default value if not provided
+            const decisionsWithValues = pendingDecisions.map(d => ({
+                leverId: d.leverId,
+                value: d.value ?? 50, // Default value for lever activation
+                productId: d.productId,
+            }));
+
             const response = await fetch(`/api/game/${sessionId}/turns/${turnNumber}/resolve`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    decisions: pendingDecisions,
+                    decisions: decisionsWithValues,
                     seed: Date.now(),
                 }),
             });
@@ -530,12 +535,14 @@ export default function TurnPage({ params }: PageProps) {
                 })()}
 
                 {phase === TurnPhase.DECISIONS && (
-                    <DecisionsPanel
-                        decisions={pendingDecisions}
-                        onDecisionsChange={handleDecisionChange}
-                        onValidate={handleResolve}
-                        gameSpeed={gameSpeed}
+                    <DecisionsScreen
+                        difficulty="novice"
+                        selectedDecisions={pendingDecisions}
+                        onDecisionsChange={(decisions) => handleDecisionChange(decisions.map(d => ({ ...d, productId: undefined })))}
+                        onConfirm={handleResolve}
+                        availableBudget={10}
                         currentTurn={turnNumber}
+                        locale="fr"
                     />
                 )}
 

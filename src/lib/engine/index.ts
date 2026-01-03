@@ -353,3 +353,40 @@ export {
     formatDuration,
     isEventActive,
 } from './events';
+
+// ============================================
+// LEVER GATING SYSTEM (US-034)
+// ============================================
+
+export type {
+    LeverCategory,
+    GatingDifficulty,
+    ImpactType,
+    ImpactPreview,
+    LeverCost,
+    LeverGatingConfig,
+} from './levers/lever-config';
+
+export {
+    LEVER_CATEGORY_CONFIG,
+    LEVER_GATING_CATALOG,
+    LEVER_IDS_BY_DIFFICULTY,
+    LEVER_COUNTS,
+} from './levers/lever-config';
+
+export type {
+    LeverWithGating,
+    LeversByCategory,
+} from './levers/lever-gating';
+
+export {
+    getAvailableLevers,
+    getAllLeversWithGating,
+    getLeversByCategory,
+    isLeverAvailable,
+    getLeverMinDifficulty,
+    getLeverConfig,
+    getAvailableLeverIds,
+    getGatingBadgeLabel,
+    getLeverCounts,
+} from './levers/lever-gating';

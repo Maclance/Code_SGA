@@ -27,11 +27,11 @@
 | **S3** | Moteur | ~37 | US-014, US-020-023 | S2 |
 | **S4** | UI & Contenu | ~29 | US-024-025, US-030 | S3 |
 | **S5** | Polish & Export | ~28 | US-032-037 | S4 |
-| **S6** | Contenu & Scoring | ~31 | US-040-046 | S5 |
+| **S6** | Contenu & Scoring | ~36 | US-035, US-040-046 | S5 |
 | **S7** | Debrief & Admin | ~30 | US-048-064 | S6 |
 | **S8** | Sécurité & QA | ~30 | US-070-100 | S7 |
 
-**Total estimé : ~265 points / 18 semaines**
+**Total estimé : ~270 points / 18 semaines**
 *(avec buffer de contingence)*
 
 ---
@@ -199,15 +199,15 @@
 |----|-------|:------:|:------:|:------:|:----------:|
 | US-032 | Alertes | M | 5 | ✅ Done | **0h25** |
 | US-033 | Écran événements | M | 5 | ✅ Done | **0h35** |
-| US-034 | Écran décisions gating | L | 8 | | |
+| US-034 | Écran décisions gating | L | 8 | ✅ Done | **0h45** |
 | US-036 | Vue marché | M | 5 | | |
 | US-037 | Explainability top 3 | M | 5 | | |
-| **Total** | | | **28** | | **1h00** |
+| **Total** | | | **28** | | **1h45** |
 
 **Livrables Sprint 5 :**
 - [x] Système d'alertes avec seuils (US-032)
 - [x] News flash événements avec narratifs + NewsFlashBanner (US-033)
-- [ ] Gating leviers par difficulté
+- [x] Gating leviers par difficulté (US-034)
 - [ ] Vue marché (parts + prix)
 - [ ] Top 3 drivers
 
@@ -221,14 +221,16 @@
 
 | US | Titre | Taille | Points |
 |----|-------|:------:|:------:|
+| US-035 | Sélection niveau/intensité leviers | M | 5 |
 | US-040 | 18 fiches compagnies | M | 5 |
 | US-041 | Produits Auto + MRH | L | 8 |
 | US-043 | Événements marché | L | 8 |
 | US-044 | Événements compagnie | M | 5 |
 | US-046 | Posture souscription | M | 5 |
-| **Total** | | | **31** |
+| **Total** | | | **36** |
 
 **Livrables Sprint 6 :**
+- [ ] Sélection intensité leviers (slider/options selon type)
 - [ ] 18 fiches avec ≥3 traits chacune
 - [ ] Métriques Auto + MRH
 - [ ] Catalogue événements marché
