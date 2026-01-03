@@ -198,15 +198,15 @@
 | US | Titre | Taille | Points | Statut | Temps réel |
 |----|-------|:------:|:------:|:------:|:----------:|
 | US-032 | Alertes | M | 5 | ✅ Done | **0h25** |
-| US-033 | Écran événements | M | 5 | | |
+| US-033 | Écran événements | M | 5 | ✅ Done | **0h35** |
 | US-034 | Écran décisions gating | L | 8 | | |
 | US-036 | Vue marché | M | 5 | | |
 | US-037 | Explainability top 3 | M | 5 | | |
-| **Total** | | | **28** | | **0h25** |
+| **Total** | | | **28** | | **1h00** |
 
 **Livrables Sprint 5 :**
 - [x] Système d'alertes avec seuils (US-032)
-- [ ] News flash événements
+- [x] News flash événements avec narratifs + NewsFlashBanner (US-033)
 - [ ] Gating leviers par difficulté
 - [ ] Vue marché (parts + prix)
 - [ ] Top 3 drivers

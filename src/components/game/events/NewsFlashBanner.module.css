@@ -1,0 +1,173 @@
+/**
+ * NewsFlashBanner Styles
+ * @module components/game/events/NewsFlashBanner.module.css
+ */
+
+/* Slide-in animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Pulse animation for flash label */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.banner {
+    background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #7f1d1d 100%);
+    border-radius: 12px;
+    border: 2px solid #dc2626;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    animation: slideDown 0.4s ease-out forwards;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(220, 38, 38, 0.4);
+}
+
+.banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* Flash header */
+.flashHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.flashIcon {
+    font-size: 1.25rem;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.flashLabel {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #fef2f2;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+}
+
+/* Content */
+.content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.typeIcon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.eventInfo {
+    flex: 1;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.narrative {
+    font-size: 0.95rem;
+    color: #fecaca;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Dismiss button */
+.dismissButton {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 50%;
+    color: #fecaca;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.dismissButton:hover {
+    background: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+}
+
+.dismissButton:focus {
+    outline: 2px solid #fef2f2;
+    outline-offset: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .banner {
+        padding: 0.875rem 1rem;
+    }
+
+    .content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .title {
+        font-size: 1.1rem;
+    }
+
+    .narrative {
+        font-size: 0.9rem;
+    }
+}

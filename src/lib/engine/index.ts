@@ -319,3 +319,37 @@ export {
     getWarningAlerts,
     ALERT_SEVERITY_VALUES,
 } from './alerts';
+
+// ============================================
+// EVENTS SYSTEM (US-033)
+// ============================================
+
+export type {
+    EventCategory,
+    EventType,
+    EventSeverity,
+    EventImpact,
+    GameEvent,
+    ImpactBadgeResult,
+} from './events';
+
+export {
+    EVENT_TYPE_CONFIG,
+    EVENT_SEVERITY_CONFIG,
+    EVENT_CATEGORY_CONFIG,
+    getEventTypeIcon,
+    getEventTypeLabel,
+    getSeverityColor,
+    isCriticalEvent,
+    sortEventsByTimestamp,
+    filterEventsByType,
+    getMostCriticalEvent,
+    EventTypeEnum,
+    formatEventNarrative,
+    formatImpactBadge,
+    formatSingleImpact,
+    getEventNarrative,
+    getRemainingDuration,
+    formatDuration,
+    isEventActive,
+} from './events';

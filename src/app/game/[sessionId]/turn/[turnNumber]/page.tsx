@@ -30,7 +30,8 @@ import {
     type ProductDisplayMetrics,
     type DashboardAlert,
 } from '@/lib/engine';
-import { EventsPanel } from '@/components/game/EventsPanel';
+import { EventsScreen } from '@/components/game/events';
+import type { GameEvent } from '@/lib/engine';
 import { DecisionsPanel } from '@/components/game/DecisionsPanel';
 import { ResolutionScreen } from '@/components/game/ResolutionScreen';
 import { FeedbackScreen } from '@/components/game/FeedbackScreen';
@@ -471,13 +472,62 @@ export default function TurnPage({ params }: PageProps) {
                     );
                 })()}
 
-                {phase === TurnPhase.EVENTS && (
-                    <EventsPanel
-                        events={[]} // Events would come from turn state
-                        turnNumber={turnNumber}
-                        onContinue={handleNextPhase}
-                    />
-                )}
+                {phase === TurnPhase.EVENTS && (() => {
+                    // Sample events with narratives (US-033)
+                    const events: GameEvent[] = [
+                        {
+                            id: 'EVT-CYB-01',
+                            type: 'company',
+                            category: 'CYBER',
+                            name: 'Cyberattaque Détectée',
+                            severity: 'critical',
+                            impacts: [
+                                { target: 'IPQO', value: -15, type: 'absolute' },
+                                { target: 'IMD', value: -10, type: 'absolute' },
+                            ],
+                            duration: 2,
+                            timestamp: new Date().toISOString(),
+                            turnTriggered: turnNumber,
+                        },
+                        {
+                            id: 'EVT-INF-01',
+                            type: 'market',
+                            category: 'ECONOMIQUE',
+                            name: 'Inflation Persistante',
+                            severity: 'medium',
+                            impacts: [
+                                { target: 'IPP', value: -3, type: 'absolute' },
+                                { target: 'IS', value: -2, type: 'absolute' },
+                            ],
+                            duration: 4,
+                            timestamp: new Date(Date.now() - 3600000).toISOString(),
+                            turnTriggered: turnNumber,
+                        },
+                        {
+                            id: 'EVT-CLI-01',
+                            type: 'market',
+                            category: 'CLIMAT',
+                            name: 'Épisode Climatique',
+                            severity: 'high',
+                            impacts: [
+                                { target: 'IPP', value: -5, type: 'absolute' },
+                                { target: 'IRF', value: -3, type: 'absolute' },
+                            ],
+                            duration: 2,
+                            timestamp: new Date(Date.now() - 7200000).toISOString(),
+                            turnTriggered: turnNumber,
+                        },
+                    ];
+
+                    return (
+                        <EventsScreen
+                            events={events}
+                            currentTurn={turnNumber}
+                            showFlash={true}
+                            onContinue={handleNextPhase}
+                        />
+                    );
+                })()}
 
                 {phase === TurnPhase.DECISIONS && (
                     <DecisionsPanel
