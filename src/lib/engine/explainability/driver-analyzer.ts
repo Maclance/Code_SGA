@@ -37,7 +37,7 @@ const LEVER_LABELS: Record<string, string> = {
     'LEV-SIN-02': 'Lutte fraude',
     'LEV-REA-01': 'Réassurance',
     'LEV-PROV-01': 'Politique provisions',
-    'LEV-GAR-01': 'Extension garanties',
+    'LEV-GAR-01': 'Niveau de franchise',
     'LEV-UND-01': 'Politique souscription',
 };
 

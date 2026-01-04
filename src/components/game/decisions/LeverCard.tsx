@@ -10,7 +10,15 @@
 import React, { useCallback, useMemo } from 'react';
 import styles from './LeverCard.module.css';
 import { LeverGatingBadge } from '../levers/LeverGatingBadge';
-import type { LeverGatingConfig, GatingDifficulty } from '@/lib/engine';
+import { LeverOptions } from '../levers/LeverOptions';
+import { ProgressiveLevel } from '../levers/ProgressiveLevel';
+import type {
+    LeverGatingConfig,
+    GatingDifficulty,
+    ActiveLeversState,
+    IndicesState
+} from '@/lib/engine';
+import { hasOptions, hasLevels } from '@/lib/engine';
 
 // ============================================
 // TYPES
@@ -31,6 +39,10 @@ export interface LeverCardProps {
     onSelect?: (leverId: string) => void;
     /** Callback when lever option changes */
     onValueChange?: (leverId: string, value: number | string) => void;
+    /** Current active levers (for progressive levels) */
+    activeLevers?: ActiveLeversState;
+    /** Current indices (for prerequisites) */
+    indices?: IndicesState;
     /** Locale for i18n */
     locale?: 'fr' | 'en';
     /** Read-only mode */
@@ -93,8 +105,11 @@ export function LeverCard({
     available,
     requiredDifficulty,
     selected = false,
+    selectedValue,
     onSelect,
     onValueChange: _onValueChange,
+    activeLevers,
+    indices,
     locale = 'fr',
     readOnly = false,
 }: LeverCardProps): React.ReactElement {
@@ -192,8 +207,37 @@ export function LeverCard({
                 </span>
             </div>
 
-            {/* Selection indicator */}
-            {selected && (
+            {/* Options Selection */}
+            {available && hasOptions(lever) && selected && (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <LeverOptions
+                        options={lever.options}
+                        selectedOptionId={selectedValue as string}
+                        onSelect={(optId) => _onValueChange?.(lever.id, optId)}
+                        locale={locale}
+                        readOnly={readOnly}
+                    />
+                </div>
+            )}
+
+            {/* Progressive Levels Selection */}
+            {available && hasLevels(lever) && activeLevers && selected && (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <ProgressiveLevel
+                        leverId={lever.id}
+                        levels={lever.levels}
+                        activeLevers={activeLevers}
+                        selectedLevelId={selectedValue as string}
+                        indices={indices}
+                        onSelectLevel={(levelId) => _onValueChange?.(lever.id, levelId)}
+                        locale={locale}
+                        readOnly={readOnly}
+                    />
+                </div>
+            )}
+
+            {/* Selection indicator only for simple ON/OFF levers */}
+            {selected && !hasOptions(lever) && !hasLevels(lever) && (
                 <div className={styles.selectedIndicator}>
                     ✓
                 </div>

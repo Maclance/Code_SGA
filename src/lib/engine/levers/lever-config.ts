@@ -1,3 +1,5 @@
+import { LeverEffectDefinition, LeverOption, LeverLevel } from './option-types';
+
 /**
  * Lever Gating Configuration
  *
@@ -76,6 +78,10 @@ export interface LeverGatingConfig {
     impactPreview: ImpactPreview;
     /** Optional delay in turns (for UI display) */
     delay?: number;
+    /** Options for mutually exclusive levers */
+    options?: LeverOption[];
+    /** Levels for progressive levers */
+    levels?: Record<string, LeverLevel>;
 }
 
 // ============================================
@@ -112,6 +118,33 @@ const NOVICE_LEVERS: LeverGatingConfig[] = [
         description: 'Ajuster le niveau tarifaire global par rapport au marché',
         impactPreview: { target: 'IAC', type: 'mixed', description: 'Impact IAC et IPP' },
         delay: 1,
+        options: [
+            {
+                id: 'aggressive',
+                label: 'Agressif (-15%)',
+                effects: [
+                    { target: 'IAC', type: 'absolute', value: 15, delay: 1 },
+                    { target: 'IPP', type: 'absolute', value: -8, delay: 2 }
+                ],
+                meta: { risk: 'Anti-sélection probable (60%)' }
+            },
+            {
+                id: 'market',
+                label: 'Marché (0%)',
+                effects: [
+                    { target: 'IAC', type: 'absolute', value: 0, delay: 0 }
+                ]
+            },
+            {
+                id: 'premium',
+                label: 'Premium (+10%)',
+                effects: [
+                    { target: 'IAC', type: 'absolute', value: -10, delay: 1 },
+                    { target: 'IPP', type: 'absolute', value: 8, delay: 2 }
+                ],
+                meta: { benefit: 'Meilleur profil risque' }
+            }
+        ]
     },
     {
         id: 'LEV-GAR-01',
@@ -122,6 +155,33 @@ const NOVICE_LEVERS: LeverGatingConfig[] = [
         description: 'Définir le niveau de franchise applicable aux sinistres',
         impactPreview: { target: 'IAC', type: 'mixed', description: 'Impact IAC et coûts sinistres' },
         delay: 1,
+        options: [
+            {
+                id: 'low',
+                label: 'Franchise basse',
+                effects: [
+                    { target: 'IAC', type: 'absolute', value: 8, delay: 0 },
+                    // IMPACT IPP negatif car coût sinistres augmente (target: sinistres_cost +10%)
+                    { target: 'IPP', type: 'absolute', value: -5, delay: 1 }
+                ]
+            },
+            {
+                id: 'standard',
+                label: 'Franchise standard',
+                effects: []
+            },
+            {
+                id: 'high',
+                label: 'Franchise élevée',
+                effects: [
+                    { target: 'IAC', type: 'absolute', value: -5, delay: 0 },
+                    // IMPACT IPP positif car coût sinistres baisse (target: sinistres_cost -15%)
+                    { target: 'IPP', type: 'absolute', value: 8, delay: 1 },
+                    // Satisfaction baisse -> IAC (target: satisfaction_sinistres -10)
+                    { target: 'IAC', type: 'absolute', value: -5, delay: 1 }
+                ]
+            }
+        ]
     },
     {
         id: 'LEV-DIS-01',
@@ -165,13 +225,48 @@ const NOVICE_LEVERS: LeverGatingConfig[] = [
     },
     {
         id: 'LEV-SIN-02',
-        name: 'Lutte anti-fraude N1',
+        name: 'Lutte anti-fraude',
         category: 'SINISTRES',
         minDifficulty: 'novice',
         cost: { budgetUnits: 1, recurring: false },
         description: 'Mettre en place des contrôles basiques de détection de fraude',
         impactPreview: { target: 'IPP', type: 'positive', description: 'Réduit S/P jusqu\'à 5%' },
         delay: 1,
+        levels: {
+            N1: {
+                id: 'N1',
+                cost: { budgetUnits: 1, recurring: false },
+                effects: [
+                    { target: 'IPP', type: 'absolute', value: 2, delay: 1 }
+                ],
+                description: 'Contrôles basiques, règles simples'
+            },
+            N2: {
+                id: 'N2',
+                cost: { budgetUnits: 2, recurring: false },
+                prerequisites: [
+                    { type: 'lever_level', target: 'LEV-SIN-02', value: 'N1' },
+                    { type: 'index_min', target: 'IMD', value: 40 }
+                ],
+                effects: [
+                    { target: 'IPP', type: 'absolute', value: 5, delay: 2 }
+                ],
+                description: 'Process outillés, formation équipes'
+            },
+            N3: {
+                id: 'N3',
+                cost: { budgetUnits: 4, recurring: false },
+                prerequisites: [
+                    { type: 'lever_level', target: 'LEV-SIN-02', value: 'N2' },
+                    { type: 'index_min', target: 'IMD', value: 60 },
+                    { type: 'lever_active', target: 'LEV-IT-05a', value: 'N1' }
+                ],
+                effects: [
+                    { target: 'IPP', type: 'absolute', value: 10, delay: 4 }
+                ],
+                description: 'IA prédictive intégrée'
+            }
+        }
     },
     {
         id: 'LEV-REA-01',
@@ -192,6 +287,32 @@ const NOVICE_LEVERS: LeverGatingConfig[] = [
         description: 'Choisir une politique de provisionnement (prudente, standard, agressive)',
         impactPreview: { target: 'IS', type: 'mixed', description: 'Impact IS, IPP et IRF' },
         delay: 0,
+        options: [
+            {
+                id: 'aggressive',
+                label: 'Agressive',
+                effects: [
+                    { target: 'IS', type: 'absolute', value: -15, delay: 0 },
+                    { target: 'IRF', type: 'absolute', value: -10, delay: 0 }
+                ],
+                meta: { risk: 'Risque de mali futur' }
+            },
+            {
+                id: 'standard',
+                label: 'Standard',
+                effects: []
+            },
+            {
+                id: 'prudent',
+                label: 'Prudente',
+                effects: [
+                    { target: 'IS', type: 'absolute', value: 5, delay: 0 },
+                    { target: 'IPP', type: 'absolute', value: -3, delay: 0 },
+                    { target: 'IRF', type: 'absolute', value: 5, delay: 0 }
+                ],
+                meta: { benefit: 'Sécurise le futur (Boni probable)' }
+            }
+        ]
     },
     {
         id: 'LEV-UND-01',
@@ -202,6 +323,39 @@ const NOVICE_LEVERS: LeverGatingConfig[] = [
         description: 'Définir la sélectivité de la souscription (permissive à très sélective)',
         impactPreview: { target: 'IAC', type: 'mixed', description: 'Arbitrage IAC vs risque anti-sélection' },
         delay: 0,
+        options: [
+            {
+                id: 'permissive',
+                label: 'Permissive (Tout accepter)',
+                effects: [
+                    { target: 'IAC', type: 'absolute', value: 10, delay: 0 },
+                    { target: 'IPP', type: 'absolute', value: -8, delay: 3 }
+                ],
+                meta: { risk: 'Anti-sélection massive' }
+            },
+            {
+                id: 'balanced',
+                label: 'Équilibrée',
+                effects: []
+            },
+            {
+                id: 'selective',
+                label: 'Sélective',
+                effects: [
+                    { target: 'IAC', type: 'absolute', value: -5, delay: 0 },
+                    { target: 'IPP', type: 'absolute', value: 5, delay: 3 }
+                ]
+            },
+            {
+                id: 'very_selective',
+                label: 'Très sélective',
+                effects: [
+                    { target: 'IAC', type: 'absolute', value: -12, delay: 0 },
+                    { target: 'IPP', type: 'absolute', value: 10, delay: 3 }
+                ],
+                meta: { warning: 'Forte chute production' }
+            }
+        ]
     },
 ];
 
@@ -279,6 +433,40 @@ const INTERMEDIATE_LEVERS: LeverGatingConfig[] = [
         description: 'Programme de prévention pour réduire la sinistralité MRH',
         impactPreview: { target: 'IPP', type: 'positive', description: 'Réduit fréquence sinistres' },
         delay: 4,
+        levels: {
+            N1: {
+                id: 'N1',
+                cost: { budgetUnits: 1, recurring: false },
+                effects: [
+                    { target: 'IAC', type: 'absolute', value: 3, delay: 0 }
+                    // Frequence MRH ignored for MVP index mapping, assuming IAC impact mainly
+                ],
+                description: 'Sensibilisation clients'
+            },
+            N2: {
+                id: 'N2',
+                cost: { budgetUnits: 2, recurring: false },
+                prerequisites: [
+                    { type: 'lever_level', target: 'LEV-PREV-01', value: 'N1' }
+                ],
+                effects: [
+                    { target: 'IPP', type: 'absolute', value: 2, delay: 6 } // Proxy for severity reduction
+                ],
+                description: 'Équipements (détecteurs)'
+            },
+            N3: {
+                id: 'N3',
+                cost: { budgetUnits: 4, recurring: false },
+                prerequisites: [
+                    { type: 'lever_level', target: 'LEV-PREV-01', value: 'N2' },
+                    { type: 'index_min', target: 'IMD', value: 50 }
+                ],
+                effects: [
+                    { target: 'IPP', type: 'absolute', value: 5, delay: 8 }
+                ],
+                description: 'Smart home, prédictif'
+            }
+        }
     },
     {
         id: 'LEV-CLI-01',
@@ -287,7 +475,7 @@ const INTERMEDIATE_LEVERS: LeverGatingConfig[] = [
         minDifficulty: 'intermediate',
         cost: { budgetUnits: 0, recurring: false },
         description: 'Définir la générosité des indemnisations (généreuse, standard, restrictive)',
-        impactPreview: { target: 'satisfaction', type: 'mixed', description: 'Arbitrage coûts/satisfaction' },
+        impactPreview: { target: 'IPC', type: 'mixed', description: 'Arbitrage coûts/satisfaction' },
         delay: 0,
     },
 ];
@@ -306,17 +494,41 @@ const EXPERT_LEVERS: LeverGatingConfig[] = [
         description: 'Déployer des modèles IA pour la détection de fraude avancée',
         impactPreview: { target: 'IPP', type: 'positive', description: 'Détection fraude +40%' },
         delay: 6,
+        levels: {
+            N1: {
+                id: 'N1',
+                cost: { budgetUnits: 1, recurring: false },
+                effects: [
+                    { target: 'IPP', type: 'absolute', value: 3, delay: 1 }
+                ],
+                description: 'Règles simples, scoring basique'
+            },
+            N2: {
+                id: 'N2',
+                cost: { budgetUnits: 3, recurring: true },
+                prerequisites: [
+                    { type: 'lever_level', target: 'LEV-IT-05a', value: 'N1' }
+                ],
+                effects: [
+                    { target: 'IPP', type: 'absolute', value: 8, delay: 3 }
+                ],
+                description: 'Outillage, formation, process'
+            },
+            N3: {
+                id: 'N3',
+                cost: { budgetUnits: 5, recurring: true },
+                prerequisites: [
+                    { type: 'lever_level', target: 'LEV-IT-05a', value: 'N2' },
+                    { type: 'index_min', target: 'IMD', value: 70 }
+                ],
+                effects: [
+                    { target: 'IPP', type: 'absolute', value: 15, delay: 6 }
+                ],
+                description: 'MLOps, modèles prédictifs, temps réel'
+            }
+        }
     },
-    {
-        id: 'LEV-SIN-02-N3',
-        name: 'Lutte anti-fraude N3',
-        category: 'SINISTRES',
-        minDifficulty: 'expert',
-        cost: { budgetUnits: 4, recurring: false },
-        description: 'IA prédictive intégrée pour la détection de fraude',
-        impactPreview: { target: 'IPP', type: 'positive', description: 'Fraude évitée +30%' },
-        delay: 4,
-    },
+    // LEV-SIN-02-N3 replaced by LEV-SIN-02 N3 level
     {
         id: 'LEV-CONF-03',
         name: 'Audit délégataires',
@@ -324,7 +536,7 @@ const EXPERT_LEVERS: LeverGatingConfig[] = [
         minDifficulty: 'expert',
         cost: { budgetUnits: 2, recurring: true },
         description: 'Audit continu des délégataires et affinitaires',
-        impactPreview: { target: 'CTRL_MATURITY', type: 'positive', description: 'Qualité réseau' },
+        impactPreview: { target: 'IS', type: 'positive', description: 'Qualité réseau (proxy IS)' },
         delay: 4,
     },
     {

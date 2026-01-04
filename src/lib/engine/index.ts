@@ -407,3 +407,23 @@ export {
     getGatingBadgeLabel,
     getLeverCounts,
 } from './levers/lever-gating';
+
+export type {
+    LeverOption,
+    LeverLevel,
+    LeverPrerequisite,
+    LeverWithOptions,
+    LeverWithLevels,
+    LeverAction,
+    LevelStatus,
+    ActiveLeversState,
+} from './levers/option-types';
+
+export {
+    hasOptions,
+    hasLevels,
+    checkLevelPrerequisites,
+    getLevelMissingPrerequisites,
+    getLevelStatus,
+    resolveLeverEffects,
+} from './levers/levers-helper';

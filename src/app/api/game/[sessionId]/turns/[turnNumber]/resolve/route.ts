@@ -88,6 +88,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                 events: turnState.events,
                 portfolio: turnState.portfolio,
                 delayedEffects: turnState.delayed_effects?.pending || [],
+                activeLevers: turnState.active_levers || {},
             } : null,
         });
     } catch (error) {
@@ -330,6 +331,35 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             resultat: currentPnl.resultat + pnlChange * 0.05,
         };
 
+        // Initialize active levers from previous state
+        const currentActiveLevers = (previousState?.active_levers || {}) as Record<string, any>;
+        const nextActiveLevers: Record<string, string | number | boolean> = {};
+
+        // Migrate old format and copy valid values
+        Object.entries(currentActiveLevers).forEach(([leverId, value]) => {
+            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+                nextActiveLevers[leverId] = value;
+            } else if (typeof value === 'object' && value !== null && 'acquiredLevel' in value) {
+                // Migrate old format { acquiredLevel: 'N1' } to 'N1'
+                nextActiveLevers[leverId] = value.acquiredLevel;
+            }
+            // Skip invalid values (undefined, null, other objects)
+        });
+
+        // Update active levers based on new decisions
+        decisions.forEach((d: any) => {
+            // For progressive levers, track the acquired level directly
+            if (typeof d.value === 'string' && ['N1', 'N2', 'N3'].includes(d.value)) {
+                nextActiveLevers[d.leverId] = d.value;
+            } else if (typeof d.value === 'string' || typeof d.value === 'number' || typeof d.value === 'boolean') {
+                // For simple levers or options - only save primitive values
+                nextActiveLevers[d.leverId] = d.value;
+            }
+            // Skip undefined/null/object values
+        });
+
+        console.log('[API] Active levers to save:', JSON.stringify(nextActiveLevers, null, 2));
+
         // Prepare new state
         const nextTurnNumber = turnNumber + 1;
         const nextStateInput: TurnStateInput = {
@@ -347,6 +377,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             events: [], // No events in this simple sim
             portfolio: {}, // Empty for now
             delayed_effects: nextEffectsQueue,
+            active_levers: nextActiveLevers,
         };
 
         // SAVE STATE
@@ -388,6 +419,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                 indices: nextIndices,
                 pnl: nextPnl,
                 delayedEffects: nextEffectsQueue.pending,
+                activeLevers: nextActiveLevers as any, // Return updated active levers
             },
             feedback: {
                 majorVariations,

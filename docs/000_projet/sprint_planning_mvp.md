@@ -219,16 +219,16 @@
 
 > **Objectif** : Compagnies, produits, événements, scoring
 
-| US | Titre | Taille | Points |
-|----|-------|:------:|:------:|
-| US-035 | Sélection niveau/intensité leviers | M | 5 |
-| US-040 | 18 fiches compagnies | M | 5 |
-| US-041 | Produits Auto + MRH | L | 8 |
-| US-043 | Événements marché | L | 8 |
-| US-044 | Événements compagnie | M | 5 |
-| US-046 | Posture souscription | M | 5 |
-| US-037b| Finalisation Top 3 Drivers | S | 3 |
-| **Total** | | | **39** |
+| US | Titre | Taille | Points | Statut | Temps réel |
+|----|-------|:------:|:------:|:------:|:----------:|
+| US-035 | Sélection niveau/intensité leviers | M | 5 | ✅ Done | **4h00** |
+| US-040 | 18 fiches compagnies | M | 5 | | |
+| US-041 | Produits Auto + MRH | L | 8 | | |
+| US-043 | Événements marché | L | 8 | | |
+| US-044 | Événements compagnie | M | 5 | | |
+| US-046 | Posture souscription | M | 5 | | |
+| US-037b| Finalisation Top 3 Drivers | S | 3 | | |
+| **Total** | | | **39** | | **4h00** |
 
 **Livrables Sprint 6 :**
 - [ ] Sélection intensité leviers (slider/options selon type)

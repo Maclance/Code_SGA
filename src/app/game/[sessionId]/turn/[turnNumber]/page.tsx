@@ -29,6 +29,11 @@ import {
     PRODUCT_NAMES,
     type ProductDisplayMetrics,
     type DashboardAlert,
+    getLeverConfig,
+    hasLevels,
+    type LeverGatingConfig,
+    type LeverWithLevels,
+    type GatingDifficulty,
 } from '@/lib/engine';
 import { EventsScreen } from '@/components/game/events';
 import type { GameEvent } from '@/lib/engine';
@@ -49,6 +54,8 @@ interface PageProps {
     }>;
 }
 
+import type { ActiveLeversState } from '@/lib/engine';
+
 interface TurnState {
     indices: Record<string, number>;
     pnl: {
@@ -59,6 +66,7 @@ interface TurnState {
         resultat: number;
     };
     delayedEffects?: DelayedEffect[];
+    activeLevers?: ActiveLeversState;
 }
 
 interface PendingDecision extends SelectedDecision {
@@ -100,6 +108,7 @@ export default function TurnPage({ params }: PageProps) {
     const [maxTurns, setMaxTurns] = useState<number>(12);
     const [sessionName, setSessionName] = useState<string>('');
     const [_gameSpeed, setGameSpeed] = useState<GameSpeed>('medium');
+    const [difficulty, setDifficulty] = useState<GatingDifficulty>('novice');
     const [dashboardView, setDashboardView] = useState<'overview' | 'market'>('overview');
 
     // Load params
@@ -127,16 +136,27 @@ export default function TurnPage({ params }: PageProps) {
                     if (data.session.config?.gameSpeed) {
                         setGameSpeed(data.session.config.gameSpeed as GameSpeed);
                     }
+                    if (data.session.config?.difficulty) {
+                        const rawDiff = data.session.config.difficulty;
+                        // Map specific French values to English engine types (SessionConfig vs GatingDifficulty)
+                        const mappedDiff: GatingDifficulty =
+                            rawDiff === 'intermediaire' ? 'intermediate' :
+                                rawDiff === 'survie' ? 'expert' :
+                                    (rawDiff === 'expert' || rawDiff === 'novice' ? rawDiff : 'novice');
+                        setDifficulty(mappedDiff);
+                    }
                 }
 
                 if (data.turnState) {
                     setCurrentState({
                         indices: data.turnState.indices,
                         pnl: data.turnState.pnl,
+                        activeLevers: data.turnState.activeLevers,
                     });
                     setPreviousState({
                         indices: data.turnState.indices,
                         pnl: data.turnState.pnl,
+                        activeLevers: data.turnState.activeLevers,
                     });
 
                     if (data.turnState.delayedEffects) {
@@ -159,6 +179,7 @@ export default function TurnPage({ params }: PageProps) {
                             produits_financiers: 1_500_000,
                             resultat: 6_500_000,
                         },
+                        activeLevers: {},
                     };
                     setCurrentState(defaultState);
                     setPreviousState(null);
@@ -242,6 +263,34 @@ export default function TurnPage({ params }: PageProps) {
         return [...delayedEffectsDisplay, ...previewEffects];
     }, [delayedEffectsDisplay, pendingDecisions, turnNumber, currentState]);
 
+    // Calculate remaining budget based on current selections
+    const remainingBudget = useMemo(() => {
+        const TOTAL_BUDGET = 10; // Fixed budget per turn for MVP
+        let used = 0;
+
+        pendingDecisions.forEach((decision) => {
+            const config = getLeverConfig(decision.leverId);
+            if (!config) return;
+
+            // Case 1: Progressive Levels (specific cost per level)
+            if (hasLevels(config) && typeof decision.value === 'string') {
+                const levelsConfig = config as LeverGatingConfig & LeverWithLevels;
+                const level = levelsConfig.levels[decision.value];
+                if (level) {
+                    used += level.cost.budgetUnits;
+                }
+            }
+            // Case 2: Simple Levers & Options (use base cost)
+            else if (config.cost) {
+                // For options, we assume the base cost applies to any selection
+                // TODO: Differentiate option costs if needed in future US
+                used += config.cost.budgetUnits;
+            }
+        });
+
+        return Math.max(0, TOTAL_BUDGET - used);
+    }, [pendingDecisions]);
+
     // Handle turn resolution
     const handleResolve = useCallback(async () => {
         if (phase !== TurnPhase.DECISIONS) return;
@@ -278,6 +327,7 @@ export default function TurnPage({ params }: PageProps) {
             setCurrentState({
                 indices: data.nextState.indices,
                 pnl: data.nextState.pnl,
+                activeLevers: data.nextState.activeLevers,
             });
             setFeedback(data.feedback);
             setPhase(TurnPhase.FEEDBACK);
@@ -567,13 +617,15 @@ export default function TurnPage({ params }: PageProps) {
                 {
                     phase === TurnPhase.DECISIONS && (
                         <DecisionsScreen
-                            difficulty="novice"
+                            difficulty={difficulty}
                             selectedDecisions={pendingDecisions}
                             onDecisionsChange={(decisions) => handleDecisionChange(decisions.map(d => ({ ...d, productId: undefined })))}
                             onConfirm={handleResolve}
-                            availableBudget={10}
+                            availableBudget={remainingBudget}
                             currentTurn={turnNumber}
                             locale="fr"
+                            indices={currentState?.indices as unknown as import('@/lib/engine').IndicesState}
+                            activeLevers={currentState?.activeLevers}
                         />
                     )
                 }
@@ -657,15 +709,42 @@ export default function TurnPage({ params }: PageProps) {
                         const context = {
                             currentDecisions: pendingDecisions.map(d => {
                                 const details = retrieveLeverDetails(d.leverId);
+                                let value = 0;
+                                let effectType: 'absolute' | 'relative' = 'absolute';
+
+                                if (typeof d.value === 'number') {
+                                    value = Number(d.value) * 0.05;
+                                } else if (typeof d.value === 'string') {
+                                    const config = getLeverConfig(d.leverId);
+                                    if (config) {
+                                        let effects: any[] = [];
+                                        if (config.options) {
+                                            const opt = config.options.find(o => o.id === d.value);
+                                            // @ts-ignore - Effects are mandatory in types but might be inferred strictly
+                                            if (opt) effects = opt.effects || [];
+                                        } else if (hasLevels(config)) {
+                                            const lConfig = config as LeverGatingConfig & LeverWithLevels;
+                                            const level = lConfig.levels[d.value];
+                                            // @ts-ignore
+                                            if (level) effects = level.effects || [];
+                                        }
+
+                                        const impact = effects.find(e => e.target === details.targetIndex);
+                                        if (impact) {
+                                            value = impact.value;
+                                            effectType = impact.type;
+                                        }
+                                    }
+                                }
+
                                 return {
                                     id: d.leverId,
-                                    // Scale raw lever value (0-100) to a realistic impact (e.g. 0-5 pts) for analysis
-                                    value: Number(d.value ?? 50) * 0.05,
+                                    value: value,
                                     targetIndex: details.targetIndex,
                                     domain: details.domain,
                                     delay: details.delay,
-                                    targetProduct: (d.productId as 'auto' | 'mrh' | undefined) ?? null, // Cast to ProductId or null
-                                    effectType: 'absolute' as const,
+                                    targetProduct: (d.productId as 'auto' | 'mrh' | undefined) ?? null,
+                                    effectType: effectType,
                                     turn: turnNumber
                                 };
                             }),

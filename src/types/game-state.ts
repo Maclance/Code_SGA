@@ -157,6 +157,7 @@ export interface TurnState {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         applied: any[];
     };
+    active_levers?: Record<string, string | number | boolean>;
 
     // Integrity
     checksum: string; // SHA256 hex string
@@ -261,6 +262,7 @@ export const TurnStateInputSchema = z.object({
         pending: z.array(z.unknown()),
         applied: z.array(z.unknown()),
     }).optional(),
+    active_levers: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
 /**

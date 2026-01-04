@@ -14,6 +14,8 @@ import {
     getLeversByCategory,
     type GatingDifficulty,
     type LeverCategory,
+    type IndicesState,
+    type ActiveLeversState,
 } from '@/lib/engine';
 
 // ============================================
@@ -42,6 +44,10 @@ export interface DecisionsScreenProps {
     locale?: 'fr' | 'en';
     /** Read-only mode (viewing history) */
     readOnly?: boolean;
+    /** Current indices (for prerequisites) */
+    indices?: IndicesState;
+    /** Active levers (for prerequisites) */
+    activeLevers?: ActiveLeversState;
 }
 
 // ============================================
@@ -90,6 +96,8 @@ export function DecisionsScreen({
     currentTurn: _currentTurn = 1,
     locale = 'fr',
     readOnly = false,
+    indices,
+    activeLevers,
 }: DecisionsScreenProps): React.ReactElement {
     const t = translations[locale];
 
@@ -136,7 +144,26 @@ export function DecisionsScreen({
         return selectedDecisions.some(d => d.leverId === leverId);
     }, [selectedDecisions]);
 
-    // Handle lever selection toggle
+    // Handle lever choice/value change
+    const handleValueChange = useCallback((leverId: string, value: number | string) => {
+        if (readOnly) return;
+
+        const existingIndex = selectedDecisions.findIndex(d => d.leverId === leverId);
+        let newDecisions: SelectedDecision[];
+
+        if (existingIndex >= 0) {
+            // Update existing decision
+            newDecisions = [...selectedDecisions];
+            newDecisions[existingIndex] = { ...newDecisions[existingIndex], value };
+        } else {
+            // Add new decision with value
+            newDecisions = [...selectedDecisions, { leverId, value }];
+        }
+
+        onDecisionsChange?.(newDecisions);
+    }, [selectedDecisions, onDecisionsChange, readOnly]);
+
+    // Handle lever selection toggle (legacy support for simple click)
     const handleLeverSelect = useCallback((leverId: string) => {
         if (readOnly) return;
 
@@ -147,7 +174,7 @@ export function DecisionsScreen({
             // Deselect
             newDecisions = selectedDecisions.filter(d => d.leverId !== leverId);
         } else {
-            // Select
+            // Select (without value initially)
             newDecisions = [...selectedDecisions, { leverId }];
         }
 
@@ -226,7 +253,11 @@ export function DecisionsScreen({
                             available={lwg.available}
                             requiredDifficulty={lwg.requiredDifficulty}
                             selected={isSelected(lwg.lever.id)}
+                            selectedValue={selectedDecisions.find(d => d.leverId === lwg.lever.id)?.value}
                             onSelect={handleLeverSelect}
+                            onValueChange={handleValueChange}
+                            activeLevers={activeLevers}
+                            indices={indices}
                             locale={locale}
                             readOnly={readOnly}
                         />
