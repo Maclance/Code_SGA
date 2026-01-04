@@ -351,6 +351,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
         // SAVE STATE
         console.log('[API] Saving turn state:', nextTurnNumber);
+        console.log('[API] Decisions to save:', JSON.stringify(nextStateInput.decisions, null, 2));
+        console.log('[API] Indices to save:', JSON.stringify(nextStateInput.indices, null, 2));
         await saveTurnState(supabase, sessionId, nextTurnNumber, nextStateInput);
         console.log('[API] State saved successfully');
 

@@ -9,8 +9,11 @@
 
 import React from 'react';
 import styles from './FeedbackScreen.module.css';
+import { DriversPanel } from './explainability/DriversPanel';
+import { analyzeDrivers, type GameEvent, type DelayedEffect } from '@/lib/engine';
+import { type ProductDecision } from '@/lib/engine/product-types';
 
-interface MajorVariation {
+export interface MajorVariation {
     index: string;
     delta: number;
     previousValue: number;
@@ -18,7 +21,7 @@ interface MajorVariation {
     drivers: string[];
 }
 
-interface Feedback {
+export interface Feedback {
     majorVariations: MajorVariation[];
     summary: {
         decisionsApplied: number;
@@ -45,6 +48,12 @@ interface FeedbackScreenProps {
     previousState: TurnState | null;
     isFinalTurn: boolean;
     onNextTurn: () => void;
+    // US-037: Analysis context
+    context?: {
+        currentDecisions: ProductDecision[];
+        activeEvents: GameEvent[];
+        appliedEffects: DelayedEffect[];
+    };
 }
 
 const INDEX_LABELS: Record<string, string> = {
@@ -70,8 +79,11 @@ function formatCurrency(value: number): string {
 
 export function FeedbackScreen({
     feedback,
+    currentState,
+    previousState,
     isFinalTurn,
     onNextTurn,
+    context
 }: FeedbackScreenProps) {
     const { majorVariations, summary } = feedback;
 
@@ -104,38 +116,34 @@ export function FeedbackScreen({
             {/* Major Variations */}
             {majorVariations.length > 0 && (
                 <section className={styles.variationsSection}>
-                    <h3 className={styles.sectionTitle}>📊 Variations Majeures</h3>
-                    <div className={styles.variationsList}>
-                        {majorVariations.map((variation) => (
-                            <div
-                                key={variation.index}
-                                className={`${styles.variationCard} ${variation.delta >= 0 ? styles.positive : styles.negative}`}
-                            >
-                                <div className={styles.variationHeader}>
-                                    <span className={styles.indexName}>
-                                        {INDEX_LABELS[variation.index] || variation.index}
-                                    </span>
-                                    <span className={styles.delta}>
-                                        {variation.delta >= 0 ? '+' : ''}{variation.delta.toFixed(1)}
-                                    </span>
+                    <h3 className={styles.sectionTitle}>📊 Variations Majeures (US-037)</h3>
+                    <div className={styles.variationsGrid} style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gap: '1.5rem',
+                        marginTop: '1.5rem'
+                    }}>
+                        {majorVariations.map((variation) => {
+                            // Calculate drivers dynamically if context is provided
+                            const drivers = (context && previousState)
+                                ? analyzeDrivers(
+                                    variation.index as any,
+                                    previousState.indices[variation.index] || variation.previousValue,
+                                    currentState.indices[variation.index] || variation.newValue,
+                                    context
+                                ).drivers
+                                : [];
+
+                            return (
+                                <div key={variation.index} style={{ width: '100%' }}>
+                                    <DriversPanel
+                                        indexName={INDEX_LABELS[variation.index] || variation.index}
+                                        variation={variation.delta}
+                                        drivers={drivers}
+                                    />
                                 </div>
-                                <div className={styles.valueChange}>
-                                    <span className={styles.oldValue}>{variation.previousValue.toFixed(0)}</span>
-                                    <span className={styles.arrow}>→</span>
-                                    <span className={styles.newValue}>{variation.newValue.toFixed(0)}</span>
-                                </div>
-                                {variation.drivers.length > 0 && (
-                                    <div className={styles.drivers}>
-                                        <span className={styles.driversLabel}>Drivers :</span>
-                                        {variation.drivers.map((driver) => (
-                                            <span key={driver} className={styles.driverTag}>
-                                                {driver}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </section>
             )}

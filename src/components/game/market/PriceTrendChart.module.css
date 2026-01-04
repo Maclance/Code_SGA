@@ -1,0 +1,134 @@
+.chartContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 300px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.gapBadge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid;
+}
+
+.gapPositive {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.gapNegative {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.gapNeutral {
+    background-color: rgba(100, 116, 139, 0.1);
+    color: #94a3b8;
+    border-color: rgba(100, 116, 139, 0.2);
+}
+
+.chartArea {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    border-left: 1px solid #334155;
+    border-bottom: 1px solid #334155;
+    margin-top: 0.5rem;
+    min-height: 200px;
+}
+
+.gridLine {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: #1e293b;
+    pointer-events: none;
+}
+
+.turnLabel {
+    position: absolute;
+    bottom: -1.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    transform: translateX(-50%);
+}
+
+.priceLabel {
+    position: absolute;
+    left: -2rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    transform: translateY(-50%);
+}
+
+.lineSvg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.trendLine {
+    fill: none;
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.linePlayer {
+    stroke: #3b82f6;
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
+}
+
+.lineMarket {
+    stroke: #64748b;
+    stroke-width: 1px;
+    stroke-dasharray: 4 4;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.legendLine {
+    width: 1rem;
+    height: 0.125rem;
+    margin-right: 0.5rem;
+    border-radius: 9999px;
+}

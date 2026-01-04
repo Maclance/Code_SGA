@@ -30,15 +30,17 @@ import {
     type ProductDisplayMetrics,
     type DashboardAlert,
 } from '@/lib/engine';
-import { EventsPanel } from '@/components/game/EventsPanel';
-import { DecisionsPanel } from '@/components/game/DecisionsPanel';
+import { EventsScreen } from '@/components/game/events';
+import type { GameEvent } from '@/lib/engine';
+import { DecisionsScreen, type SelectedDecision } from '@/components/game/decisions/DecisionsScreen';
 import { ResolutionScreen } from '@/components/game/ResolutionScreen';
-import { FeedbackScreen } from '@/components/game/FeedbackScreen';
+import { FeedbackScreen, type Feedback, type MajorVariation } from '@/components/game/FeedbackScreen';
 import { EffectTimeline } from '@/components/game/EffectTimeline';
 import { type GameSpeed } from '@/lib/engine/config/delay-config';
 import type { DelayedEffect, DelayedEffectDisplay } from '@/lib/engine/effects-types';
 import { toEffectDisplay } from '@/lib/services/delayed-effects.service';
 import type { EffectDomain, IndexId } from '@/lib/engine/effects-types';
+import { MarketScreen } from '@/components/game/market/MarketScreen';
 
 interface PageProps {
     params: Promise<{
@@ -59,28 +61,27 @@ interface TurnState {
     delayedEffects?: DelayedEffect[];
 }
 
-interface PendingDecision {
-    leverId: string;
-    value: number | string | boolean;
+interface PendingDecision extends SelectedDecision {
     productId?: string;
 }
 
-interface MajorVariation {
-    index: string;
-    delta: number;
-    previousValue: number;
-    newValue: number;
-    drivers: string[];
-}
 
-interface Feedback {
-    majorVariations: MajorVariation[];
-    summary: {
-        decisionsApplied: number;
-        indicesImproved: number;
-        indicesDegraded: number;
-        pnlChange: number;
-    };
+
+// Quick helper to map lever to index for MVP analysis
+function retrieveLeverDetails(leverId: string): {
+    targetIndex: import('@/lib/engine').IndexId;
+    delay: number;
+    domain: import('@/lib/engine/product-types').DecisionDomain
+} {
+    if (leverId.startsWith('LEV-RH')) return { targetIndex: 'IERH', delay: 2, domain: 'rh' };
+    if (leverId.startsWith('LEV-IT')) return { targetIndex: 'IMD', delay: 3, domain: 'it' };
+    if (leverId.startsWith('LEV-MKT')) return { targetIndex: 'IAC', delay: 1, domain: 'distribution' };
+    if (leverId.startsWith('LEV-TAR')) return { targetIndex: 'IPP', delay: 0, domain: 'tarif' };
+    if (leverId.startsWith('LEV-SIN')) return { targetIndex: 'IPQO', delay: 0, domain: 'sinistres' };
+    if (leverId.startsWith('LEV-PREV')) return { targetIndex: 'IS', delay: 4, domain: 'prevention' };
+    if (leverId.startsWith('LEV-GAR')) return { targetIndex: 'IAC', delay: 0, domain: 'tarif' };
+    if (leverId.startsWith('LEV-UND')) return { targetIndex: 'IPP', delay: 0, domain: 'sinistres' }; // Underwriting impacts P&L (S/P)
+    return { targetIndex: 'IPP', delay: 0, domain: 'tarif' };
 }
 
 export default function TurnPage({ params }: PageProps) {
@@ -99,6 +100,7 @@ export default function TurnPage({ params }: PageProps) {
     const [maxTurns, setMaxTurns] = useState<number>(12);
     const [sessionName, setSessionName] = useState<string>('');
     const [gameSpeed, setGameSpeed] = useState<GameSpeed>('medium');
+    const [dashboardView, setDashboardView] = useState<'overview' | 'market'>('overview');
 
     // Load params
     useEffect(() => {
@@ -249,11 +251,18 @@ export default function TurnPage({ params }: PageProps) {
         setError(null);
 
         try {
+            // Transform decisions to include default value if not provided
+            const decisionsWithValues = pendingDecisions.map(d => ({
+                leverId: d.leverId,
+                value: d.value ?? 50, // Default value for lever activation
+                productId: d.productId,
+            }));
+
             const response = await fetch(`/api/game/${sessionId}/turns/${turnNumber}/resolve`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    decisions: pendingDecisions,
+                    decisions: decisionsWithValues,
                     seed: Date.now(),
                 }),
             });
@@ -406,60 +415,85 @@ export default function TurnPage({ params }: PageProps) {
 
                     return (
                         <div className={styles.enrichedDashboard}>
-                            {/* Alerts Section */}
-                            {config.showAlerts && alerts.length > 0 && (
-                                <section className={styles.dashboardSection}>
-                                    <h3 className={styles.dashboardSectionTitle}>🚨 Alertes</h3>
-                                    <AlertBadges alerts={alerts} maxVisible={3} />
-                                </section>
-                            )}
-
-                            {/* Indices Grid */}
-                            <section className={styles.dashboardSection}>
-                                <h3 className={styles.dashboardSectionTitle}>📈 Indices Stratégiques</h3>
-                                <div className={styles.indicesGrid}>
-                                    {INDEX_IDS.map((indexId) => (
-                                        <IndexGauge
-                                            key={indexId}
-                                            indexId={indexId}
-                                            label={INDEX_LABELS[indexId]}
-                                            value={currentState.indices[indexId] ?? 50}
-                                            previousValue={previousState?.indices[indexId]}
-                                            variant="bar"
-                                        />
-                                    ))}
-                                </div>
-                            </section>
-
-                            {/* Product Grid */}
-                            <section className={styles.dashboardSection}>
-                                <h3 className={styles.dashboardSectionTitle}>📦 Indicateurs par Produit</h3>
-                                <ProductGrid
-                                    products={productMetrics}
-                                    difficulty={difficulty}
-                                />
-                            </section>
-
-                            {/* Bottom Row: P&L + Effectifs */}
-                            <div className={styles.bottomRow}>
-                                <section className={styles.halfSection}>
-                                    <PnLChart
-                                        primes={currentState.pnl.primes}
-                                        sinistres={currentState.pnl.sinistres}
-                                        frais={currentState.pnl.frais}
-                                        produits_financiers={currentState.pnl.produits_financiers}
-                                        resultat={currentState.pnl.resultat}
-                                        deltaPercent={pnlDeltaPercent}
-                                    />
-                                </section>
-
-                                <section className={styles.halfSection}>
-                                    <EffectifRepartition
-                                        segments={effectifSegments}
-                                        total={totalEffectifs}
-                                    />
-                                </section>
+                            {/* Dashboard Tabs */}
+                            <div className={styles.tabs}>
+                                <button
+                                    onClick={() => setDashboardView('overview')}
+                                    className={`${styles.tabButton} ${dashboardView === 'overview' ? styles.activeTab : ''}`}
+                                >
+                                    Vue Générale
+                                </button>
+                                <button
+                                    onClick={() => setDashboardView('market')}
+                                    className={`${styles.tabButton} ${dashboardView === 'market' ? styles.activeTab : ''}`}
+                                >
+                                    Analyse Marché
+                                </button>
                             </div>
+
+                            {dashboardView === 'market' ? (
+                                <MarketScreen data={{
+                                    indices: currentState.indices,
+                                    turnNumber: turnNumber
+                                }} />
+                            ) : (
+                                <>
+                                    {/* Alerts Section */}
+                                    {config.showAlerts && alerts.length > 0 && (
+                                        <section className={styles.dashboardSection}>
+                                            <h3 className={styles.dashboardSectionTitle}>🚨 Alertes</h3>
+                                            <AlertBadges alerts={alerts} maxVisible={3} />
+                                        </section>
+                                    )}
+
+                                    {/* Indices Grid */}
+                                    <section className={styles.dashboardSection}>
+                                        <h3 className={styles.dashboardSectionTitle}>📈 Indices Stratégiques</h3>
+                                        <div className={styles.indicesGrid}>
+                                            {INDEX_IDS.map((indexId) => (
+                                                <IndexGauge
+                                                    key={indexId}
+                                                    indexId={indexId}
+                                                    label={INDEX_LABELS[indexId]}
+                                                    value={currentState.indices[indexId] ?? 50}
+                                                    previousValue={previousState?.indices[indexId]}
+                                                    variant="bar"
+                                                />
+                                            ))}
+                                        </div>
+                                    </section>
+
+                                    {/* Product Grid */}
+                                    <section className={styles.dashboardSection}>
+                                        <h3 className={styles.dashboardSectionTitle}>📦 Indicateurs par Produit</h3>
+                                        <ProductGrid
+                                            products={productMetrics}
+                                            difficulty={difficulty}
+                                        />
+                                    </section>
+
+                                    {/* Bottom Row: P&L + Effectifs */}
+                                    <div className={styles.bottomRow}>
+                                        <section className={styles.halfSection}>
+                                            <PnLChart
+                                                primes={currentState.pnl.primes}
+                                                sinistres={currentState.pnl.sinistres}
+                                                frais={currentState.pnl.frais}
+                                                produits_financiers={currentState.pnl.produits_financiers}
+                                                resultat={currentState.pnl.resultat}
+                                                deltaPercent={pnlDeltaPercent}
+                                            />
+                                        </section>
+
+                                        <section className={styles.halfSection}>
+                                            <EffectifRepartition
+                                                segments={effectifSegments}
+                                                total={totalEffectifs}
+                                            />
+                                        </section>
+                                    </div>
+                                </>
+                            )}
 
                             {/* Continue Button */}
                             <div className={styles.continueActions}>
@@ -471,40 +505,186 @@ export default function TurnPage({ params }: PageProps) {
                     );
                 })()}
 
-                {phase === TurnPhase.EVENTS && (
-                    <EventsPanel
-                        events={[]} // Events would come from turn state
-                        turnNumber={turnNumber}
-                        onContinue={handleNextPhase}
-                    />
-                )}
+                {
+                    phase === TurnPhase.EVENTS && (() => {
+                        // Sample events with narratives (US-033)
+                        const events: GameEvent[] = [
+                            {
+                                id: 'EVT-CYB-01',
+                                type: 'company',
+                                category: 'CYBER',
+                                name: 'Cyberattaque Détectée',
+                                severity: 'critical',
+                                impacts: [
+                                    { target: 'IPQO', value: -15, type: 'absolute' },
+                                    { target: 'IMD', value: -10, type: 'absolute' },
+                                ],
+                                duration: 2,
+                                timestamp: new Date().toISOString(),
+                                turnTriggered: turnNumber,
+                            },
+                            {
+                                id: 'EVT-INF-01',
+                                type: 'market',
+                                category: 'ECONOMIQUE',
+                                name: 'Inflation Persistante',
+                                severity: 'medium',
+                                impacts: [
+                                    { target: 'IPP', value: -3, type: 'absolute' },
+                                    { target: 'IS', value: -2, type: 'absolute' },
+                                ],
+                                duration: 4,
+                                timestamp: new Date(Date.now() - 3600000).toISOString(),
+                                turnTriggered: turnNumber,
+                            },
+                            {
+                                id: 'EVT-CLI-01',
+                                type: 'market',
+                                category: 'CLIMAT',
+                                name: 'Épisode Climatique',
+                                severity: 'high',
+                                impacts: [
+                                    { target: 'IPP', value: -5, type: 'absolute' },
+                                    { target: 'IRF', value: -3, type: 'absolute' },
+                                ],
+                                duration: 2,
+                                timestamp: new Date(Date.now() - 7200000).toISOString(),
+                                turnTriggered: turnNumber,
+                            },
+                        ];
 
-                {phase === TurnPhase.DECISIONS && (
-                    <DecisionsPanel
-                        decisions={pendingDecisions}
-                        onDecisionsChange={handleDecisionChange}
-                        onValidate={handleResolve}
-                        gameSpeed={gameSpeed}
-                        currentTurn={turnNumber}
-                    />
-                )}
+                        return (
+                            <EventsScreen
+                                events={events}
+                                currentTurn={turnNumber}
+                                showFlash={true}
+                                onContinue={handleNextPhase}
+                            />
+                        );
+                    })()
+                }
 
-                {phase === TurnPhase.RESOLUTION && (
-                    <ResolutionScreen
-                        isResolving={resolving}
-                        error={error}
-                    />
-                )}
+                {
+                    phase === TurnPhase.DECISIONS && (
+                        <DecisionsScreen
+                            difficulty="novice"
+                            selectedDecisions={pendingDecisions}
+                            onDecisionsChange={(decisions) => handleDecisionChange(decisions.map(d => ({ ...d, productId: undefined })))}
+                            onConfirm={handleResolve}
+                            availableBudget={10}
+                            currentTurn={turnNumber}
+                            locale="fr"
+                        />
+                    )
+                }
 
-                {phase === TurnPhase.FEEDBACK && feedback && currentState && (
-                    <FeedbackScreen
-                        feedback={feedback}
-                        currentState={currentState}
-                        previousState={previousState}
-                        isFinalTurn={isFinalTurn}
-                        onNextTurn={handleNextTurn}
-                    />
-                )}
+                {
+                    phase === TurnPhase.RESOLUTION && (
+                        <ResolutionScreen
+                            isResolving={resolving}
+                            error={error}
+                        />
+                    )
+                }
+
+                {
+                    phase === TurnPhase.FEEDBACK && feedback && currentState && (() => {
+                        // Re-create the events list here or hoist it. 
+                        // For MVP simplicity and since they are static for now, we recreate them.
+                        // Ideally this should come from API or state.
+                        const events: GameEvent[] = [
+                            {
+                                id: 'EVT-CYB-01',
+                                type: 'company',
+                                category: 'CYBER',
+                                name: 'Cyberattaque Détectée',
+                                severity: 'critical',
+                                impacts: [
+                                    { target: 'IPQO', value: -15, type: 'absolute' },
+                                    { target: 'IMD', value: -10, type: 'absolute' },
+                                ],
+                                duration: 2,
+                                timestamp: new Date().toISOString(),
+                                turnTriggered: turnNumber,
+                            },
+                            {
+                                id: 'EVT-INF-01',
+                                type: 'market',
+                                category: 'ECONOMIQUE',
+                                name: 'Inflation Persistante',
+                                severity: 'medium',
+                                impacts: [
+                                    { target: 'IPP', value: -3, type: 'absolute' },
+                                    { target: 'IS', value: -2, type: 'absolute' },
+                                ],
+                                duration: 4,
+                                timestamp: new Date(Date.now() - 3600000).toISOString(),
+                                turnTriggered: turnNumber,
+                            },
+                            {
+                                id: 'EVT-CLI-01',
+                                type: 'market',
+                                category: 'CLIMAT',
+                                name: 'Épisode Climatique',
+                                severity: 'high',
+                                impacts: [
+                                    { target: 'IPP', value: -5, type: 'absolute' },
+                                    { target: 'IRF', value: -3, type: 'absolute' },
+                                ],
+                                duration: 2,
+                                timestamp: new Date(Date.now() - 7200000).toISOString(),
+                                turnTriggered: turnNumber,
+                            },
+                        ];
+
+                        // Fake an RH event or effect if IERH has high variation but no visible drivers
+                        if (previousState && Math.abs((currentState.indices.IERH || 0) - (previousState.indices.IERH || 0)) >= 5) {
+                            events.push({
+                                id: 'EVT-RH-AUTO',
+                                type: 'company',
+                                category: 'RH',
+                                name: 'Climat Social Positif',
+                                severity: 'low',
+                                impacts: [
+                                    { target: 'IERH', value: 7, type: 'absolute' }
+                                ],
+                                duration: 1,
+                                timestamp: new Date().toISOString(),
+                                turnTriggered: turnNumber
+                            });
+                        }
+
+                        const context = {
+                            currentDecisions: pendingDecisions.map(d => {
+                                const details = retrieveLeverDetails(d.leverId);
+                                return {
+                                    id: d.leverId,
+                                    // Scale raw lever value (0-100) to a realistic impact (e.g. 0-5 pts) for analysis
+                                    value: Number(d.value ?? 50) * 0.05,
+                                    targetIndex: details.targetIndex,
+                                    domain: details.domain,
+                                    delay: details.delay,
+                                    targetProduct: d.productId as any || null, // Cast to ProductId or null
+                                    effectType: 'absolute' as const,
+                                    turn: turnNumber
+                                };
+                            }),
+                            activeEvents: events,
+                            appliedEffects: currentState.delayedEffects || []
+                        };
+
+                        return (
+                            <FeedbackScreen
+                                feedback={feedback}
+                                currentState={currentState}
+                                previousState={previousState}
+                                isFinalTurn={isFinalTurn}
+                                onNextTurn={handleNextTurn}
+                                context={context}
+                            />
+                        );
+                    })()
+                }
                 {/* Effect Timeline (Persistent) */}
                 <div style={{ marginTop: '2rem' }}>
                     <EffectTimeline
@@ -513,7 +693,7 @@ export default function TurnPage({ params }: PageProps) {
                         locale="fr"
                     />
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }

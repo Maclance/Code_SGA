@@ -285,3 +285,125 @@ export {
     EFFECTIF_COLORS,
 } from './dashboard-types';
 
+// ============================================
+// ALERTS SYSTEM (US-032)
+// ============================================
+
+export type {
+    AlertSeverity,
+    AlertCategory,
+    Alert,
+    IndexAlertThreshold,
+    PercentageAlertThreshold,
+    AlertCategoryConfig,
+    AlertThresholdsByDifficulty,
+    AlertDetectionInput,
+    AlertDifficulty,
+} from './alerts';
+
+export {
+    ALERT_CATEGORIES,
+    SEVERITY_PRIORITY,
+    SEVERITY_ICONS,
+    RECOMMENDED_LEVERS,
+    ALERT_MESSAGES,
+    ALERT_THRESHOLDS,
+    getAlertConfig,
+    getAllAlertConfigs,
+    detectAlerts,
+    sortAlertsBySeverity,
+    isAlertResolved,
+    filterAlertsBySeverity,
+    filterAlertsByCategory,
+    getCriticalAlerts,
+    getWarningAlerts,
+    ALERT_SEVERITY_VALUES,
+} from './alerts';
+
+// ============================================
+// EXPLAINABILITY (US-037)
+// ============================================
+
+export type {
+    Driver,
+    FormattedDriver,
+    AnalysisContext,
+    AnalysisResult,
+    ContributionDirection,
+} from './explainability/driver-types';
+
+export { DriverType } from './explainability/driver-types';
+
+export { analyzeDrivers } from './explainability/driver-analyzer';
+export { formatDriver, getDriverIcon, formatContribution, getDriverDirectionArrow } from './explainability/driver-formatter';
+
+// ============================================
+// EVENTS SYSTEM (US-033)
+// ============================================
+
+export type {
+    EventCategory,
+    EventType,
+    EventSeverity,
+    EventImpact,
+    GameEvent,
+    ImpactBadgeResult,
+} from './events';
+
+export {
+    EVENT_TYPE_CONFIG,
+    EVENT_SEVERITY_CONFIG,
+    EVENT_CATEGORY_CONFIG,
+    getEventTypeIcon,
+    getEventTypeLabel,
+    getSeverityColor,
+    isCriticalEvent,
+    sortEventsByTimestamp,
+    filterEventsByType,
+    getMostCriticalEvent,
+    EventTypeEnum,
+    formatEventNarrative,
+    formatImpactBadge,
+    formatSingleImpact,
+    getEventNarrative,
+    getRemainingDuration,
+    formatDuration,
+    isEventActive,
+} from './events';
+
+// ============================================
+// LEVER GATING SYSTEM (US-034)
+// ============================================
+
+export type {
+    LeverCategory,
+    GatingDifficulty,
+    ImpactType,
+    ImpactPreview,
+    LeverCost,
+    LeverGatingConfig,
+} from './levers/lever-config';
+
+export {
+    LEVER_CATEGORY_CONFIG,
+    LEVER_GATING_CATALOG,
+    LEVER_IDS_BY_DIFFICULTY,
+    LEVER_COUNTS,
+} from './levers/lever-config';
+
+export type {
+    LeverWithGating,
+    LeversByCategory,
+} from './levers/lever-gating';
+
+export {
+    getAvailableLevers,
+    getAllLeversWithGating,
+    getLeversByCategory,
+    isLeverAvailable,
+    getLeverMinDifficulty,
+    getLeverConfig,
+    getAvailableLeverIds,
+    getGatingBadgeLabel,
+    getLeverCounts,
+} from './levers/lever-gating';

@@ -157,8 +157,9 @@ export async function saveTurnState(
     // Validate input
     const validation = TurnStateInputSchema.safeParse(stateInput);
     if (!validation.success) {
+        console.error('[GameState] Validation errors:', JSON.stringify(validation.error.issues, null, 2));
         throw new ValidationError(
-            validation.error.issues.map(e => e.message).join(', ')
+            validation.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
         );
     }
 
