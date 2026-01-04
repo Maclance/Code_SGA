@@ -1,0 +1,58 @@
+.chartContainer {
+    @apply w-full h-full flex flex-col items-center justify-center p-4 bg-white/5 rounded-xl border border-white/10 relative;
+    min-height: 300px;
+}
+
+.title {
+    @apply text-sm font-medium text-slate-400 mb-4 uppercase tracking-wider self-start;
+}
+
+.chartContent {
+    @apply flex flex-col md:flex-row items-center gap-8 w-full h-full;
+}
+
+/* For MVP we use simple CSS bars/circles if chart library not available but plan implies custom */
+.chartPlaceholder {
+    @apply w-48 h-48 rounded-full border-8 border-slate-700 relative flex items-center justify-center;
+    background: conic-gradient(var(--gradient-stops));
+}
+
+.centerValue {
+    @apply absolute inset-0 flex flex-col items-center justify-center pointer-events-none;
+}
+
+.centerLabel {
+    @apply text-xs text-slate-400;
+}
+
+.centerNumber {
+    @apply text-2xl font-bold text-white;
+}
+
+.legend {
+    @apply flex flex-col gap-2 flex-1 w-full max-w-xs;
+}
+
+.legendItem {
+    @apply flex items-center justify-between p-2 rounded-lg transition-colors;
+}
+
+.legendItem:hover {
+    @apply bg-white/5;
+}
+
+.legendPlayer {
+    @apply bg-blue-500/10 border border-blue-500/20;
+}
+
+.colorDot {
+    @apply w-3 h-3 rounded-full mr-3;
+}
+
+.name {
+    @apply text-sm font-medium text-slate-300 flex-1;
+}
+
+.share {
+    @apply text-sm font-bold text-white;
+}

@@ -200,7 +200,7 @@
 | US-032 | Alertes | M | 5 | ✅ Done | **0h25** |
 | US-033 | Écran événements | M | 5 | ✅ Done | **0h35** |
 | US-034 | Écran décisions gating | L | 8 | ✅ Done | **0h45** |
-| US-036 | Vue marché | M | 5 | | |
+| US-036 | Vue marché | M | 5 | ✅ Done | **0h30** |
 | US-037 | Explainability top 3 | M | 5 | | |
 | **Total** | | | **28** | | **1h45** |
 
@@ -208,7 +208,7 @@
 - [x] Système d'alertes avec seuils (US-032)
 - [x] News flash événements avec narratifs + NewsFlashBanner (US-033)
 - [x] Gating leviers par difficulté (US-034)
-- [ ] Vue marché (parts + prix)
+- [x] Vue marché (parts + prix)
 - [ ] Top 3 drivers
 
 **Dépendances :** Sprint 4 ✓
