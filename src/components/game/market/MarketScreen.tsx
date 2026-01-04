@@ -5,9 +5,14 @@ import { PriceTrendChart } from './PriceTrendChart';
 import { ProductType, PRODUCT_TYPES } from '@/lib/engine/market/market-types';
 import styles from './MarketScreen.module.css';
 
-// Mock types for props - in real integration this will come from TurnState
+// Props type - structured data for market screen
+interface MarketScreenData {
+    indices?: { IAC?: number };
+    turnNumber?: number;
+}
+
 interface MarketScreenProps {
-    data?: any; // Replace with proper GameState/TurnState type
+    data?: MarketScreenData;
     className?: string;
 }
 
@@ -16,6 +21,7 @@ export const MarketScreen: React.FC<MarketScreenProps> = ({ data, className }) =
 
     // Simulate data derivation from props (or use real calculators if data available)
     // For MVP View, we use the calculator with a mock global IAC if data is missing
+    // Note: selectedProduct is used for UI state but market data calculation doesn't vary by product yet
     const marketData = useMemo(() => {
         // Safe access to IAC (default 60 if missing)
         const playerIAC = data?.indices?.IAC ?? 60;
@@ -37,7 +43,7 @@ export const MarketScreen: React.FC<MarketScreenProps> = ({ data, className }) =
             trends,
             gap
         };
-    }, [data, selectedProduct]);
+    }, [data]);
 
     return (
         <div className={`${styles.container} ${className || ''}`} data-testid="market-screen">

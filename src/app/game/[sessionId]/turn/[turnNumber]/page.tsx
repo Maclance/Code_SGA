@@ -34,7 +34,7 @@ import { EventsScreen } from '@/components/game/events';
 import type { GameEvent } from '@/lib/engine';
 import { DecisionsScreen, type SelectedDecision } from '@/components/game/decisions/DecisionsScreen';
 import { ResolutionScreen } from '@/components/game/ResolutionScreen';
-import { FeedbackScreen, type Feedback, type MajorVariation } from '@/components/game/FeedbackScreen';
+import { FeedbackScreen, type Feedback } from '@/components/game/FeedbackScreen';
 import { EffectTimeline } from '@/components/game/EffectTimeline';
 import { type GameSpeed } from '@/lib/engine/config/delay-config';
 import type { DelayedEffect, DelayedEffectDisplay } from '@/lib/engine/effects-types';
@@ -99,7 +99,7 @@ export default function TurnPage({ params }: PageProps) {
     const [error, setError] = useState<string | null>(null);
     const [maxTurns, setMaxTurns] = useState<number>(12);
     const [sessionName, setSessionName] = useState<string>('');
-    const [gameSpeed, setGameSpeed] = useState<GameSpeed>('medium');
+    const [_gameSpeed, setGameSpeed] = useState<GameSpeed>('medium');
     const [dashboardView, setDashboardView] = useState<'overview' | 'market'>('overview');
 
     // Load params
@@ -664,7 +664,7 @@ export default function TurnPage({ params }: PageProps) {
                                     targetIndex: details.targetIndex,
                                     domain: details.domain,
                                     delay: details.delay,
-                                    targetProduct: d.productId as any || null, // Cast to ProductId or null
+                                    targetProduct: (d.productId as 'auto' | 'mrh' | undefined) ?? null, // Cast to ProductId or null
                                     effectType: 'absolute' as const,
                                     turn: turnNumber
                                 };

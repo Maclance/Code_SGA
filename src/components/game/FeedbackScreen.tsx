@@ -10,7 +10,7 @@
 import React from 'react';
 import styles from './FeedbackScreen.module.css';
 import { DriversPanel } from './explainability/DriversPanel';
-import { analyzeDrivers, type GameEvent, type DelayedEffect } from '@/lib/engine';
+import { analyzeDrivers, type GameEvent, type DelayedEffect, type IndexId } from '@/lib/engine';
 import { type ProductDecision } from '@/lib/engine/product-types';
 
 export interface MajorVariation {
@@ -127,7 +127,7 @@ export function FeedbackScreen({
                             // Calculate drivers dynamically if context is provided
                             const drivers = (context && previousState)
                                 ? analyzeDrivers(
-                                    variation.index as any,
+                                    variation.index as IndexId,
                                     previousState.indices[variation.index] || variation.previousValue,
                                     currentState.indices[variation.index] || variation.newValue,
                                     context

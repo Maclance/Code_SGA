@@ -7,12 +7,10 @@
 
 import {
     Competitor,
-    MarketData,
     MarketShareEntry,
     PriceTrendPoint,
     COMPETITOR_NAMES,
     MARKET_CONSTANTS,
-    ProductType
 } from './market-types';
 
 // ============================================
@@ -51,7 +49,7 @@ export function calculateMarketShares(playerIAC: number): MarketShareEntry[] {
     const rawPlayerShare = Math.max(5, Math.min(35, (playerIAC / 100) * 30));
 
     // Round to 1 decimal
-    let playerShare = Math.round(rawPlayerShare * 10) / 10;
+    const playerShare = Math.round(rawPlayerShare * 10) / 10;
 
     // 2. Generate Competitors
     // We deterministically generate 4 competitors for stability
