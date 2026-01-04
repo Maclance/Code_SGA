@@ -33,6 +33,21 @@ Le cœur du calcul de la simulation. Ces fichiers contiennent les formules méti
 | `src/lib/engine/delayed-effects.ts` | Gestion des effets retard |
 | `src/lib/engine/effect-stacking.ts` | Agrégation et caps des effets |
 
+### Module Marché (US-036)
+
+| Fichier | Fonction |
+|---------|----------|
+| `src/lib/engine/market/market-types.ts` | Types et constantes marché |
+| `src/lib/engine/market/market-calculator.ts` | Calcul parts de marché et tendances prix |
+
+### Module Explicabilité (US-037)
+
+| Fichier | Fonction |
+|---------|----------|
+| `src/lib/engine/explainability/driver-types.ts` | Types pour l'analyse des drivers |
+| `src/lib/engine/explainability/driver-analyzer.ts` | Analyse causale des variations d'indices |
+| `src/lib/engine/explainability/driver-formatter.ts` | Formatage des drivers pour l'affichage |
+
 ---
 
 ## Services
