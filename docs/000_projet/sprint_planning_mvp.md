@@ -209,7 +209,7 @@
 - [x] News flash événements avec narratifs + NewsFlashBanner (US-033)
 - [x] Gating leviers par difficulté (US-034)
 - [x] Vue marché (parts + prix)
-- [ ] Top 3 drivers
+- [x] ~Top 3 drivers~ *(Reporté S6: Finalisation data)*
 
 **Dépendances :** Sprint 4 ✓
 
@@ -227,7 +227,8 @@
 | US-043 | Événements marché | L | 8 |
 | US-044 | Événements compagnie | M | 5 |
 | US-046 | Posture souscription | M | 5 |
-| **Total** | | | **36** |
+| US-037b| Finalisation Top 3 Drivers | S | 3 |
+| **Total** | | | **39** |
 
 **Livrables Sprint 6 :**
 - [ ] Sélection intensité leviers (slider/options selon type)
