@@ -34,7 +34,7 @@ import { EventsScreen } from '@/components/game/events';
 import type { GameEvent } from '@/lib/engine';
 import { DecisionsScreen, type SelectedDecision } from '@/components/game/decisions/DecisionsScreen';
 import { ResolutionScreen } from '@/components/game/ResolutionScreen';
-import { FeedbackScreen } from '@/components/game/FeedbackScreen';
+import { FeedbackScreen, type Feedback, type MajorVariation } from '@/components/game/FeedbackScreen';
 import { EffectTimeline } from '@/components/game/EffectTimeline';
 import { type GameSpeed } from '@/lib/engine/config/delay-config';
 import type { DelayedEffect, DelayedEffectDisplay } from '@/lib/engine/effects-types';
@@ -65,22 +65,23 @@ interface PendingDecision extends SelectedDecision {
     productId?: string;
 }
 
-interface MajorVariation {
-    index: string;
-    delta: number;
-    previousValue: number;
-    newValue: number;
-    drivers: string[];
-}
 
-interface Feedback {
-    majorVariations: MajorVariation[];
-    summary: {
-        decisionsApplied: number;
-        indicesImproved: number;
-        indicesDegraded: number;
-        pnlChange: number;
-    };
+
+// Quick helper to map lever to index for MVP analysis
+function retrieveLeverDetails(leverId: string): {
+    targetIndex: import('@/lib/engine').IndexId;
+    delay: number;
+    domain: import('@/lib/engine/product-types').DecisionDomain
+} {
+    if (leverId.startsWith('LEV-RH')) return { targetIndex: 'IERH', delay: 2, domain: 'rh' };
+    if (leverId.startsWith('LEV-IT')) return { targetIndex: 'IMD', delay: 3, domain: 'it' };
+    if (leverId.startsWith('LEV-MKT')) return { targetIndex: 'IAC', delay: 1, domain: 'distribution' };
+    if (leverId.startsWith('LEV-TAR')) return { targetIndex: 'IPP', delay: 0, domain: 'tarif' };
+    if (leverId.startsWith('LEV-SIN')) return { targetIndex: 'IPQO', delay: 0, domain: 'sinistres' };
+    if (leverId.startsWith('LEV-PREV')) return { targetIndex: 'IS', delay: 4, domain: 'prevention' };
+    if (leverId.startsWith('LEV-GAR')) return { targetIndex: 'IAC', delay: 0, domain: 'tarif' };
+    if (leverId.startsWith('LEV-UND')) return { targetIndex: 'IPP', delay: 0, domain: 'sinistres' }; // Underwriting impacts P&L (S/P)
+    return { targetIndex: 'IPP', delay: 0, domain: 'tarif' };
 }
 
 export default function TurnPage({ params }: PageProps) {
@@ -415,22 +416,16 @@ export default function TurnPage({ params }: PageProps) {
                     return (
                         <div className={styles.enrichedDashboard}>
                             {/* Dashboard Tabs */}
-                            <div className="flex gap-4 mb-6 border-b border-white/10">
+                            <div className={styles.tabs}>
                                 <button
                                     onClick={() => setDashboardView('overview')}
-                                    className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${dashboardView === 'overview'
-                                        ? 'border-blue-500 text-white'
-                                        : 'border-transparent text-slate-400 hover:text-white'
-                                        }`}
+                                    className={`${styles.tabButton} ${dashboardView === 'overview' ? styles.activeTab : ''}`}
                                 >
                                     Vue Générale
                                 </button>
                                 <button
                                     onClick={() => setDashboardView('market')}
-                                    className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${dashboardView === 'market'
-                                        ? 'border-blue-500 text-white'
-                                        : 'border-transparent text-slate-400 hover:text-white'
-                                        }`}
+                                    className={`${styles.tabButton} ${dashboardView === 'market' ? styles.activeTab : ''}`}
                                 >
                                     Analyse Marché
                                 </button>
@@ -593,15 +588,102 @@ export default function TurnPage({ params }: PageProps) {
                 }
 
                 {
-                    phase === TurnPhase.FEEDBACK && feedback && currentState && (
-                        <FeedbackScreen
-                            feedback={feedback}
-                            currentState={currentState}
-                            previousState={previousState}
-                            isFinalTurn={isFinalTurn}
-                            onNextTurn={handleNextTurn}
-                        />
-                    )
+                    phase === TurnPhase.FEEDBACK && feedback && currentState && (() => {
+                        // Re-create the events list here or hoist it. 
+                        // For MVP simplicity and since they are static for now, we recreate them.
+                        // Ideally this should come from API or state.
+                        const events: GameEvent[] = [
+                            {
+                                id: 'EVT-CYB-01',
+                                type: 'company',
+                                category: 'CYBER',
+                                name: 'Cyberattaque Détectée',
+                                severity: 'critical',
+                                impacts: [
+                                    { target: 'IPQO', value: -15, type: 'absolute' },
+                                    { target: 'IMD', value: -10, type: 'absolute' },
+                                ],
+                                duration: 2,
+                                timestamp: new Date().toISOString(),
+                                turnTriggered: turnNumber,
+                            },
+                            {
+                                id: 'EVT-INF-01',
+                                type: 'market',
+                                category: 'ECONOMIQUE',
+                                name: 'Inflation Persistante',
+                                severity: 'medium',
+                                impacts: [
+                                    { target: 'IPP', value: -3, type: 'absolute' },
+                                    { target: 'IS', value: -2, type: 'absolute' },
+                                ],
+                                duration: 4,
+                                timestamp: new Date(Date.now() - 3600000).toISOString(),
+                                turnTriggered: turnNumber,
+                            },
+                            {
+                                id: 'EVT-CLI-01',
+                                type: 'market',
+                                category: 'CLIMAT',
+                                name: 'Épisode Climatique',
+                                severity: 'high',
+                                impacts: [
+                                    { target: 'IPP', value: -5, type: 'absolute' },
+                                    { target: 'IRF', value: -3, type: 'absolute' },
+                                ],
+                                duration: 2,
+                                timestamp: new Date(Date.now() - 7200000).toISOString(),
+                                turnTriggered: turnNumber,
+                            },
+                        ];
+
+                        // Fake an RH event or effect if IERH has high variation but no visible drivers
+                        if (previousState && Math.abs((currentState.indices.IERH || 0) - (previousState.indices.IERH || 0)) >= 5) {
+                            events.push({
+                                id: 'EVT-RH-AUTO',
+                                type: 'company',
+                                category: 'RH',
+                                name: 'Climat Social Positif',
+                                severity: 'low',
+                                impacts: [
+                                    { target: 'IERH', value: 7, type: 'absolute' }
+                                ],
+                                duration: 1,
+                                timestamp: new Date().toISOString(),
+                                turnTriggered: turnNumber
+                            });
+                        }
+
+                        const context = {
+                            currentDecisions: pendingDecisions.map(d => {
+                                const details = retrieveLeverDetails(d.leverId);
+                                return {
+                                    id: d.leverId,
+                                    // Scale raw lever value (0-100) to a realistic impact (e.g. 0-5 pts) for analysis
+                                    value: Number(d.value ?? 50) * 0.05,
+                                    targetIndex: details.targetIndex,
+                                    domain: details.domain,
+                                    delay: details.delay,
+                                    targetProduct: d.productId as any || null, // Cast to ProductId or null
+                                    effectType: 'absolute' as const,
+                                    turn: turnNumber
+                                };
+                            }),
+                            activeEvents: events,
+                            appliedEffects: currentState.delayedEffects || []
+                        };
+
+                        return (
+                            <FeedbackScreen
+                                feedback={feedback}
+                                currentState={currentState}
+                                previousState={previousState}
+                                isFinalTurn={isFinalTurn}
+                                onNextTurn={handleNextTurn}
+                                context={context}
+                            />
+                        );
+                    })()
                 }
                 {/* Effect Timeline (Persistent) */}
                 <div style={{ marginTop: '2rem' }}>

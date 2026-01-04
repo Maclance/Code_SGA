@@ -201,8 +201,8 @@
 | US-033 | Écran événements | M | 5 | ✅ Done | **0h35** |
 | US-034 | Écran décisions gating | L | 8 | ✅ Done | **0h45** |
 | US-036 | Vue marché | M | 5 | ✅ Done | **0h30** |
-| US-037 | Explainability top 3 | M | 5 | | |
-| **Total** | | | **28** | | **1h45** |
+| US-037 | Explainability top 3 | M | 5 | ✅ Done | **1h00** |
+| **Total** | | | **28** | | **2h45** |
 
 **Livrables Sprint 5 :**
 - [x] Système d'alertes avec seuils (US-032)

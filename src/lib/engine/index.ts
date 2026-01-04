@@ -321,6 +321,23 @@ export {
 } from './alerts';
 
 // ============================================
+// EXPLAINABILITY (US-037)
+// ============================================
+
+export type {
+    Driver,
+    FormattedDriver,
+    AnalysisContext,
+    AnalysisResult,
+    ContributionDirection,
+} from './explainability/driver-types';
+
+export { DriverType } from './explainability/driver-types';
+
+export { analyzeDrivers } from './explainability/driver-analyzer';
+export { formatDriver, getDriverIcon, formatContribution, getDriverDirectionArrow } from './explainability/driver-formatter';
+
+// ============================================
 // EVENTS SYSTEM (US-033)
 // ============================================
 

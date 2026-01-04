@@ -1,78 +1,134 @@
 .chartContainer {
-    @apply w-full h-full flex flex-col p-4 bg-white/5 rounded-xl border border-white/10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     min-height: 300px;
 }
 
 .header {
-    @apply flex items-center justify-between mb-6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
 }
 
 .title {
-    @apply text-sm font-medium text-slate-400 uppercase tracking-wider;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .gapBadge {
-    @apply px-2 py-1 rounded text-xs font-bold border;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid;
 }
 
 .gapPositive {
-    @apply bg-red-500/10 text-red-400 border-red-500/20;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.2);
 }
 
 .gapNegative {
-    @apply bg-emerald-500/10 text-emerald-400 border-emerald-500/20;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.2);
 }
 
 .gapNeutral {
-    @apply bg-slate-500/10 text-slate-400 border-slate-500/20;
+    background-color: rgba(100, 116, 139, 0.1);
+    color: #94a3b8;
+    border-color: rgba(100, 116, 139, 0.2);
 }
 
 .chartArea {
-    @apply relative flex-1 w-full border-l border-b border-slate-700 mt-2;
+    position: relative;
+    flex: 1;
+    width: 100%;
+    border-left: 1px solid #334155;
+    border-bottom: 1px solid #334155;
+    margin-top: 0.5rem;
     min-height: 200px;
 }
 
 .gridLine {
-    @apply absolute w-full h-px bg-slate-800 pointer-events-none;
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: #1e293b;
+    pointer-events: none;
 }
 
 .turnLabel {
-    @apply absolute -bottom-6 text-xs text-slate-500 transform -translate-x-1/2;
+    position: absolute;
+    bottom: -1.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    transform: translateX(-50%);
 }
 
 .priceLabel {
-    @apply absolute -left-8 text-xs text-slate-500 transform -translate-y-1/2;
+    position: absolute;
+    left: -2rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    transform: translateY(-50%);
 }
 
 .lineSvg {
-    @apply absolute inset-0 w-full h-full overflow-visible;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
 }
 
 .trendLine {
-    @apply fill-none stroke-2;
+    fill: none;
+    stroke-width: 2px;
     stroke-linecap: round;
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
 }
 
 .linePlayer {
-    @apply stroke-blue-500;
+    stroke: #3b82f6;
     filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
 }
 
 .lineMarket {
-    @apply stroke-slate-500 stroke-1 stroke-dashed;
+    stroke: #64748b;
+    stroke-width: 1px;
     stroke-dasharray: 4 4;
 }
 
 .legend {
-    @apply flex justify-center gap-6 mt-6;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
 }
 
 .legendItem {
-    @apply flex items-center text-xs text-slate-400;
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #94a3b8;
 }
 
 .legendLine {
-    @apply w-4 h-0.5 mr-2 rounded-full;
+    width: 1rem;
+    height: 0.125rem;
+    margin-right: 0.5rem;
+    border-radius: 9999px;
 }
